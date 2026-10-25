@@ -1,0 +1,256 @@
+{
+  "schema": "folderwing-dependency-review-evidence/v1",
+  "files": [
+    {
+      "path": "docs/dependency-reviews/20261025/sources/pdfium.gni",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/pdfium.gni?format=TEXT",
+      "sha256": "1a6480c12f020cb911e20617465fa40c7d1c1c38b05709776ce19df8250eb717"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/third_party.BUILD.gn",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/BUILD.gn?format=TEXT",
+      "sha256": "38a9ed2a7f7c0c8bab8ab27398d610583ee3608bcd968c27e222d236f50900e2"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/chromium.c++.gni",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/config/c++/c++.gni?format=TEXT",
+      "sha256": "6a9886993440ffd914447d539542314fc06c3bed8b77e64a947e6b322467b2bd"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/chromium.libc++.BUILD.gn",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/config/c++/BUILD.gn?format=TEXT",
+      "sha256": "cb4a178040bb3066962cda1dbc390a4b0243c6a80d9545d3faf49b139dbf1a6e"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/packager-build.yml",
+      "url": "https://raw.githubusercontent.com/bblanchon/pdfium-binaries/5325fa6d0d9379329f10f98fdc4839b4e40f2e79/.github/workflows/build.yml",
+      "sha256": "cb05c65c906724ca8728fa4840f92c2d6b77ce4a211bd20748096208dfa0896e"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/agg23.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/agg23/README.pdfium?format=TEXT",
+      "sha256": "cb0ea5d7c244ee7d96dd225021ce5d12244254e4be6f69389f70d783966488bc"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/lcms.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/lcms/README.pdfium?format=TEXT",
+      "sha256": "e6d759e896be2f3921f4c1df356cd595f759a28b52e24045f658b160bd1b4bfd"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libopenjpeg.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/libopenjpeg/README.pdfium?format=TEXT",
+      "sha256": "96d68c13710238916d2a506309e27b476465451cb8ada7a55b08a6df3a88871a"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/freetype.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/freetype/README.pdfium?format=TEXT",
+      "sha256": "eb4da325b0b874733826885bf60619fe16e8fc2367cc48b4c13bf03d33bf5b8f"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/fast_float.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/fast_float/README.pdfium?format=TEXT",
+      "sha256": "2876adadf52aae6bc5ceb8980fe99aa967ed365f2f3e5ac92fbf23f7e29aa961"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/dragonbox.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/dragonbox/README.pdfium?format=TEXT",
+      "sha256": "259b68442688da79b3ef7f80833d8cb4f9697a5fbce14fadaddc6f818eab0460"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/llvm-libc.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/llvm-libc/README.pdfium?format=TEXT",
+      "sha256": "e2f02e1dfc08737ebc7e2f48a4da3c9ca413f54bb52015dcab139d1f3d505723"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/harfbuzz.README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/harfbuzz/README.pdfium?format=TEXT",
+      "sha256": "0160e9b522302c1647aed81ea22191d114a550e30f16602bda94426e8c6e2122"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/build_overrides_pdfium.gni",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/build_overrides/pdfium.gni?format=TEXT",
+      "sha256": "4c53cfca158da6a45185291a05d9cc319d13c143372b6dd1607b5cd1d436a5b9"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/build_overrides_build.gni",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/build_overrides/build.gni?format=TEXT",
+      "sha256": "bb53a55bd61aff0e1370a910c815f60326c3800f3081ca13db401ab214b2c47b"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/build_overrides_partition_alloc.gni",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/build_overrides/partition_alloc.gni?format=TEXT",
+      "sha256": "64be570c930dd6faf0ac5f886d68ccf9c4e58bc3ae50f18e10fe3fc0a801f799"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/third_party_libopenjpeg_ht_dec.c",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/libopenjpeg/ht_dec.c?format=TEXT",
+      "sha256": "7a5c66ddd5c9c159368230397c9e762d75bff399df6d59022b1a30ea9671c4e1"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/third_party_libopenjpeg_README.pdfium",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/libopenjpeg/README.pdfium?format=TEXT",
+      "sha256": "96d68c13710238916d2a506309e27b476465451cb8ada7a55b08a6df3a88871a"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/third_party_agg23_copying",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/third_party/agg23/copying?format=TEXT",
+      "sha256": "0e16f9c2285583269242e94c6f502de0c9910dfcbbc7b386e236cdf29ecd4333"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/abseil-cpp.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp.git/+/a00d74bb55b38f213a3c6110b4bcab5bb565bd56/README.chromium?format=TEXT",
+      "sha256": "fcc10dba0db14dd98bdf50f2efe655a20bcf4d2bee8f3c7e97312c38739571da"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/abseil-cpp.LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp.git/+/a00d74bb55b38f213a3c6110b4bcab5bb565bd56/LICENSE?format=TEXT",
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libjpeg_turbo.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/640f254ad0fa03f6b1f29f89b7dd9366f2f6e533/README.chromium?format=TEXT",
+      "sha256": "9d416e9eceed5b01f665622113e681d707e86e6433ec4c9235a4b7e958acbfc5"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libpng.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/libpng.git/+/0179a807421cf96731cdfa10008bba04fda243c1/README.chromium?format=TEXT",
+      "sha256": "ac97ba35cb1204363eda05779878e6dc8829b694c4df0fa0fbe0566a4e23ab44"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libpng.LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/libpng.git/+/0179a807421cf96731cdfa10008bba04fda243c1/LICENSE?format=TEXT",
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/zlib.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib.git/+/456ae730017b9b4bd3371927abc82627fd51feef/README.chromium?format=TEXT",
+      "sha256": "18f3b809738eb94ac818546ca8a67563691697aecaa77f052610264dee8ba5b7"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/zlib.LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/zlib.git/+/456ae730017b9b4bd3371927abc82627fd51feef/LICENSE?format=TEXT",
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/icu.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/deps/icu.git/+/5aa526207171ecadf31597f0980a7b7ad8872f33/README.chromium?format=TEXT",
+      "sha256": "21d455d66fae4e62f883bbbb7725708ee4b26e364c321daa44b9b5154b35bf5e"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/icu.LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/deps/icu.git/+/5aa526207171ecadf31597f0980a7b7ad8872f33/LICENSE?format=TEXT",
+      "sha256": "e55522d81edc687a341a4411e0776e54ca654e90147f354a90458aaced4116af"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/simdutf.README.chromium",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/simdutf/+/f7356eed293f8208c40b3c1b344a50bd70971983/README.chromium?format=TEXT",
+      "sha256": "6473dd8c53339fc113f3c5de62a3a74b3b25fc222e986a1fe43daa49ccb2bb80"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/simdutf.LICENSE",
+      "url": "https://chromium.googlesource.com/chromium/src/third_party/simdutf/+/f7356eed293f8208c40b3c1b344a50bd70971983/LICENSE?format=TEXT",
+      "sha256": "fc8dbc04e03ad4efc08a647ffe7f995b811a95bc04c0e85a56d5277c6593fa5f"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libc++.LICENSE.TXT",
+      "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxx.git/+/97b436da4c33663581d394f4ee0a5977fc38c2f4/LICENSE.TXT?format=TEXT",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libc++abi.LICENSE.TXT",
+      "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi.git/+/09351f6ec00c2b65f2d03585ae6da07098b024dc/LICENSE.TXT?format=TEXT",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libunwind.LICENSE.TXT",
+      "url": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libunwind.git/+/eb1ca4993b534b7d565daee144bbc7f9072b967b/LICENSE.TXT?format=TEXT",
+      "sha256": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libjpeg-turbo-license",
+      "url": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/640f254ad0fa03f6b1f29f89b7dd9366f2f6e533/LICENSE.md?format=TEXT",
+      "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/libjpeg-turbo-ijg",
+      "url": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git/+/640f254ad0fa03f6b1f29f89b7dd9366f2f6e533/README.ijg?format=TEXT",
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/LGPL-2.1.txt",
+      "url": "https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/buildtools-libcxx-BUILD.gn",
+      "url": "https://chromium.googlesource.com/chromium/src/buildtools/+/64e87f9fbdaf6f53f6cff8f15e4b06f17cead514/third_party/libc++/BUILD.gn?format=TEXT",
+      "sha256": "1fd4eb0d6866de38b75d2f59a4d6ae74205d76b4e7781f7101f56262412d263d"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/config_win_BUILD.gn",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/config/win/BUILD.gn?format=TEXT",
+      "sha256": "d43aacb1186a29b3ed2ae193c8b1b5b705395289a965dfeb51b1f1c51264aaac"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/config_win_visual_studio_version.gni",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/config/win/visual_studio_version.gni?format=TEXT",
+      "sha256": "7d096a03d6d860046523b52cb7cc33fa788c2feb33fef9f6abdcd169fd25fcb3"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/vs_toolchain.py",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/vs_toolchain.py?format=TEXT",
+      "sha256": "1411047252167b429297aa694380ebbcd0103a4b4d0532bd6b79d17b4c10aa72"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/config_clang_clang.gni",
+      "url": "https://chromium.googlesource.com/chromium/src/build/+/ebdaeefa62db7c40f27cacb0eb034db3a5cdb849/config/clang/clang.gni?format=TEXT",
+      "sha256": "d1a225de54a707a933a9bf9556d8191ca5049b6fc306980d80b8628b7624452d"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/PDFium-DEPS",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/DEPS",
+      "sha256": "b2f6a3b47a60da97745aef8b754e528a6254227df24f0c996b3c31ce1f6915d5"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/PDFium-BUILD.gn",
+      "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/BUILD.gn",
+      "sha256": "737bf7becc5b5933fa32b156a8a2e58e289e66cbcbe05d9fe8f718330f5c3008"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/packager-02-checkout.sh",
+      "url": "https://github.com/bblanchon/pdfium-binaries/blob/5325fa6d0d9379329f10f98fdc4839b4e40f2e79/steps/02-checkout.sh",
+      "sha256": "75eafb141796de6e37a076cb920c305d2aca46d6408c4bc13f64cc65ac7b91a9"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/packager-05-configure.sh",
+      "url": "https://github.com/bblanchon/pdfium-binaries/blob/5325fa6d0d9379329f10f98fdc4839b4e40f2e79/steps/05-configure.sh",
+      "sha256": "68c83ed42a18d39ef2846b45f8d162ebd07a919139555d9ca4e90c3fe4511833"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/packager-07-stage.sh",
+      "url": "https://github.com/bblanchon/pdfium-binaries/blob/5325fa6d0d9379329f10f98fdc4839b4e40f2e79/steps/07-stage.sh",
+      "sha256": "1d98cd66666ce08b0aac73dcfb8a519948803ef53220c5ff6a0427b381e8708c"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/packager-08-licenses.sh",
+      "url": "https://github.com/bblanchon/pdfium-binaries/blob/5325fa6d0d9379329f10f98fdc4839b4e40f2e79/steps/08-licenses.sh",
+      "sha256": "850deb7c8705f6ef4c8c096aeb2b18b97113aaf5fdf6896d63edb8c8e4bd23bf"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/runner-Windows2022-Readme.md",
+      "url": "https://github.com/actions/runner-images/blob/win22/20260927.320/images/windows/Windows2022-Readme.md",
+      "sha256": "b89a217595e8687638fb59dd22e2e31a010068f9252efe23271e0b8d8645cc81"
+    },
+    {
+      "path": "docs/dependency-reviews/20261025/sources/LLVM-LICENSE.TXT",
+      "url": "https://github.com/llvm/llvm-project/blob/llvmorg-22.1.8/LICENSE.TXT",
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+    }
+  ],
+  "notice_comparison": "pdfium-notice-comparison.json",
+  "crt_resource_comparison": {
+    "files_checked": 1842,
+    "mismatches": [],
+    "all_compiler_resource_files_match_reviewed_source": true
+  }
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "path": "licenses/LLVM-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/LICENSE.TXT",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+  },
+  {
+    "path": "licenses/compiler-rt-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/compiler-rt/LICENSE.TXT",
+    "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+  },
+  {
+    "path": "licenses/libcxx-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/libcxx/LICENSE.TXT",
+    "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+  },
+  {
+    "path": "licenses/libcxxabi-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/libcxxabi/LICENSE.TXT",
+    "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+  },
+  {
+    "path": "licenses/libunwind-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/7a941dfb2877a0b8cf30323fefa85ad019e0b0f5/libunwind/LICENSE.TXT",
+    "sha256": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d"
+  },
+  {
+    "path": "licenses/COPYING",
+    "archive_path": "x86_64-w64-mingw32/share/mingw32/COPYING",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+    "url": "https://raw.githubusercontent.com/mingw-w64/mingw-w64/0d6dfbc348dfad714761c0a7151615767f96bcb5/COPYING"
+  },
+  {
+    "path": "licenses/COPYING.MinGW-w64.txt",
+    "archive_path": "x86_64-w64-mingw32/share/mingw32/COPYING.MinGW-w64.txt",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "sha256": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+    "url": "https://raw.githubusercontent.com/mingw-w64/mingw-w64/0d6dfbc348dfad714761c0a7151615767f96bcb5/COPYING.MinGW-w64/COPYING.MinGW-w64.txt"
+  },
+  {
+    "path": "licenses/COPYING.MinGW-w64-runtime.txt",
+    "archive_path": "x86_64-w64-mingw32/share/mingw32/COPYING.MinGW-w64-runtime.txt",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "sha256": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+    "url": "https://raw.githubusercontent.com/mingw-w64/mingw-w64/0d6dfbc348dfad714761c0a7151615767f96bcb5/COPYING.MinGW-w64-runtime/COPYING.MinGW-w64-runtime.txt"
+  },
+  {
+    "path": "licenses/COPYING.winpthreads.txt",
+    "archive_path": "x86_64-w64-mingw32/share/mingw32/COPYING.winpthreads.txt",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "sha256": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+    "url": "https://raw.githubusercontent.com/mingw-w64/mingw-w64/0d6dfbc348dfad714761c0a7151615767f96bcb5/mingw-w64-libraries/winpthreads/COPYING"
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "schema": "folderwing-controlled-pdfium-inputs/v1",
+  "product": "chromium/8086",
+  "version": "157.0.8086.0",
+  "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+  "depot_tools_commit": "36a8df4ad006eaa0572fb446edb8145fe5403592",
+  "platform": "windows-x64",
+  "msvc_version": "14.44.35207",
+  "sdk_version": "10.0.26100.0",
+  "build_python": {
+    "url": "https://www.nuget.org/api/v2/package/python/3.12.10",
+    "sha256": "0eb85c2dfccccf1b17352de4c397f69194035b7d37149eacc16f1147d93de3b8",
+    "bytes": 14515433,
+    "version": "3.12.10"
+  },
+  "installer": {
+    "repository": "https://github.com/tgbender/portablemsvc",
+    "commit": "92554c094a1d00abef1cfb610877edcb1eb325f3"
+  },
+  "installer_source_sha256": "d2d5ba4b66722ff3d2d52b786f000930414fbf26f320e55a055269c9ed97e2b9",
+  "compiler_archive": {
+    "url": "https://commondatastorage.googleapis.com/chromium-browser-clang/Win/clang-llvmorg-24-init-7747-g62397f8b-57.tar.xz",
+    "sha256": "86ac9f61c4350f17d7571e402d5fa5f2367015d72ea8efbc4e1e52e843c74fb0",
+    "bytes": 51822620
+  },
+  "source_graph_sha256": "47fccf27dc049868db99b9aea9e2a133d400349ef8d42b8d49d7cb9f1c997edf",
+  "toolchain_lock_sha256": "7f9aebf308fc0a9d49b149c07c396fef80bcedd54ae7d0e6c726fcdf840ea526",
+  "patches": {
+    "chromium-build.patch": "faf1cec5e5a1b5ff720d2908d26818d04c58f27982cce7217cf540500bf53edf",
+    "pdfium.patch": "d07eeda5344074997dee3ce12e3454f0f3596744a813ab326a54db5406b1c8f0"
+  },
+  "tools": {
+    "buildtools/win/gn.exe": "7982c5cc8ba0d7620f93d51543ecbe8b19807cdc4f476141d663df2289a27127",
+    "third_party/ninja/ninja.exe": "48f6f1b2653e37a846db3faddd1c713c697b74c79318510e573d8ef53db751ac",
+    "third_party/llvm-build/Release+Asserts/bin/clang-cl.exe": "a6dc449bc1a94745ac024c365243a69111804f9cc44c585dd26d4d65afa5cba3",
+    "third_party/llvm-build/Release+Asserts/bin/lld-link.exe": "5abf01d09ef434a921bb9bfdbcfcedab220aaef70c310cba6209838df96df1ef"
+  },
+  "microsoft_tools": [
+    {
+      "path": "VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\cl.exe",
+      "thumbprint": "1D77A9B9E8FE2075D9AD15123257FB90DB0DA4A1",
+      "status": "Valid",
+      "sha256": "fe251ef50a1545b1b0835ee17b1e785459712b38d79e45b5c1d3d28970a36619",
+      "version": "19.44.35229.0",
+      "subject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    {
+      "path": "VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\link.exe",
+      "thumbprint": "1D77A9B9E8FE2075D9AD15123257FB90DB0DA4A1",
+      "status": "Valid",
+      "sha256": "a364af801a8539e4324d9489313dbf001d959128451fc99a27b24676bbac058f",
+      "version": "14.44.35229.0",
+      "subject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    {
+      "path": "Windows Kits\\10\\bin\\10.0.26100.0\\x64\\rc.exe",
+      "thumbprint": "6ACE61BAE3F09F4DD2697806D73E022CBFE70EB4",
+      "status": "Valid",
+      "sha256": "43da1503c262c30894c851589bf0155f8365d77e63a5f7bc13982320e3a6b42d",
+      "version": "10.0.26100.7705 (WinBuild.160101.0800)",
+      "subject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    },
+    {
+      "path": "Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+      "thumbprint": "F6EECCC7FF116889C2D5466AE7243D7AA7698689",
+      "status": "Valid",
+      "sha256": "1b8a272d586a9ab53ac2ccd457a88bd0210d7d7ac3daea5b34743cc2afe73b26",
+      "version": "10.0.26100.7705 (WinBuild.160101.0800)",
+      "subject": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+    }
+  ],
+  "runtime_policy": {
+    "compiler_crt": "/MD",
+    "is_component_build": false,
+    "copy_runtime_dlls": false,
+    "allow_static_microsoft_implementation": false,
+    "startup_and_header_code_requires_final_link_review": true
+  },
+  "public_release_ready": false,
+  "build_python_executable_sha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a",
+  "portable_setup_sha256": "d164e1539527565251f110a985d62f39ea89732a11dd1aa24381d95734f28b9f"
+}

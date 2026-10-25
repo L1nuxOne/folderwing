@@ -1,0 +1,90 @@
+{
+  "schema": "folderwing-release-inputs/v1",
+  "platform": "windows-x64",
+  "zig": {
+    "version": "0.17.0",
+    "url": "https://ziglang.org/download/0.17.0/zig-x86_64-windows-0.17.0.zip",
+    "sha256": "b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428",
+    "bytes": 100268137,
+    "root": "zig-x86_64-windows-0.17.0",
+    "executable_sha256": "f54b14f02a4d7d8ac62a94a0663486eb166bba3745d85b466238c1b93e723d46",
+    "source": {
+      "url": "https://ziglang.org/download/0.17.0/zig-0.17.0.tar.xz",
+      "sha256": "b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+      "bytes": 23049960,
+      "root": "zig-0.17.0"
+    }
+  },
+  "dependencies": {
+    "pdfium": {
+      "version": "chromium/8086-folderwing-gnu-20261025",
+      "archive_name": "folderwing-pdfium-gnu-8086-win-x64.zip",
+      "sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+      "bytes": 4284026,
+      "root": "",
+      "required": [
+        "bin/pdfium.dll",
+        "include/fpdfview.h",
+        "lib/pdfium.dll.a",
+        "BUILDINFO.json",
+        "THIRD-PARTY-NOTICES.txt",
+        "RUNTIME.md",
+        "lib/pdfium.dll.lib"
+      ],
+      "stamp": "VERSION.folderwing",
+      "source_sha256": {
+        "bin/pdfium.dll": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+        "lib/pdfium.dll.a": "8842b071d21e96861bd5bd2960c143d8079bce1d7215905e7c4506016ab1fcdd",
+        "lib/pdfium.dll.lib": "8842b071d21e96861bd5bd2960c143d8079bce1d7215905e7c4506016ab1fcdd"
+      },
+      "url": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025/folderwing-pdfium-gnu-8086-win-x64.zip",
+      "base_url_environment": "FOLDERWING_PDFIUM_BASE_URL",
+      "aliases": {
+        "lib/pdfium.dll.lib": "lib/pdfium.dll.a"
+      },
+      "recipe_bundle": {
+        "filename": "folderwing-pdfium-gnu-8086-recipe.zip",
+        "sha256": "74678cc9f7e2e7f37ee5075eab76c5db2e309c1a24f610ff225d0f2f9e59b59f",
+        "bytes": 435470
+      }
+    },
+    "libvterm": {
+      "version": "0.3.3",
+      "url": "https://www.leonerd.org.uk/code/libvterm/libvterm-0.3.3.tar.gz",
+      "sha256": "09156f43dd2128bd347cbeebe50d9a571d32c64e0cf18d211197946aff7226e0",
+      "root": "libvterm-0.3.3",
+      "required": [
+        "include/vterm.h",
+        "src/vterm.c",
+        "LICENSE"
+      ],
+      "stamp": "VERSION.openpilot"
+    },
+    "libwebp": {
+      "version": "1.6.0",
+      "url": "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz",
+      "sha256": "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564",
+      "root": "libwebp-1.6.0",
+      "required": [
+        "src/webp/decode.h",
+        "COPYING",
+        "PATENTS"
+      ],
+      "stamp": "VERSION.openpilot"
+    },
+    "sqlite": {
+      "version": "3.54.0",
+      "url": "https://sqlite.org/2026/sqlite-amalgamation-3540000.zip",
+      "sha256": "68e913b0fe8ec6b4e5f391c594a28872884e80d6cd042a1e50c957be46b5aa4d",
+      "root": "sqlite-amalgamation-3540000",
+      "required": [
+        "sqlite3.c",
+        "sqlite3.h"
+      ],
+      "source_sha256": {
+        "sqlite3.c": "2da161e310ef0aba3465f22a4d12b8a43723236f0942fa76e8aac523c3317243",
+        "sqlite3.h": "cd20a2877bc82b94e36c1093b727dd87cfa3c1d581aac6e240925535cbd90166"
+      }
+    }
+  }
+}

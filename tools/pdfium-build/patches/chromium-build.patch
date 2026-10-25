@@ -1,0 +1,117 @@
+diff --git a/config/win/BUILD.gn b/config/win/BUILD.gn
+index 1edf10346da4406a7ffb64fd9bca30f30117b66b..cfb9d00a633489b73fc2d39fb45b42339341d6a7 100644
+--- a/config/win/BUILD.gn
++++ b/config/win/BUILD.gn
+@@ -305,7 +305,7 @@ config("runtime_library") {
+ # manually override this config for their compiles.
+ config("winver") {
+   defines = [
+-    "NTDDI_VERSION=NTDDI_WIN11_BR",
++    "NTDDI_VERSION=NTDDI_WIN11_GE",
+ 
+     # We can't say `=_WIN32_WINNT_WIN10` here because some files do
+     # `#if WINVER < 0x0600` without including windows.h before,
+@@ -529,23 +529,11 @@ if (build_with_chromium && current_cpu == target_cpu && host_os == "win") {
+ # Configures how the runtime library (CRT) is going to be used.
+ # See https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx for a reference of
+ # what each value does.
++# Folderwing controlled PDFium build: keep the CRT external for all objects.
++# is_component_build remains false: this produces one PDFium DLL, not a set of
++# Chromium component DLLs. Static Microsoft startup objects are audited separately.
+ config("default_crt") {
+-  if (is_component_build) {
+-    # Component mode: dynamic CRT. Since the library is shared, it requires
+-    # exceptions or will give errors about things not matching, so keep
+-    # exceptions on.
+-    configs = [ ":dynamic_crt" ]
+-  } else {
+-    if (current_os == "winuwp") {
+-      # https://blogs.msdn.microsoft.com/vcblog/2014/06/10/the-great-c-runtime-crt-refactoring/
+-      # contains a details explanation of what is happening with the Windows
+-      # CRT in Visual Studio releases related to Windows store applications.
+-      configs = [ ":dynamic_crt" ]
+-    } else {
+-      # Desktop Windows: static CRT.
+-      configs = [ ":static_crt" ]
+-    }
+-  }
++  configs = [ ":dynamic_crt" ]
+ }
+ 
+ # Use this to force use of the release CRT when building perf-critical build
+diff --git a/config/win/visual_studio_version.gni b/config/win/visual_studio_version.gni
+index bd411669389525e8f03eb329a4cf700ad89b62f3..bec11deaadab2e601f71a9b0330f589b45b78f94 100644
+--- a/config/win/visual_studio_version.gni
++++ b/config/win/visual_studio_version.gni
+@@ -40,7 +40,7 @@ if (visual_studio_path == "") {
+          "You must set the windows_sdk_version if you set the path")
+   assert(wdk_path != "",
+          "You must set the wdk_path if you set the visual studio path")
+-  visual_studio_runtime_dirs = []
++  visual_studio_runtime_dirs = "C:/Windows/System32"
+ }
+ 
+ visual_studio_version_logs = [ "windows_sdk_version=${windows_sdk_version}" ]
+diff --git a/toolchain/win/BUILD.gn b/toolchain/win/BUILD.gn
+index 860b6af8079509febc6e6cc1fb73b8890ed4af6f..c74ec8d5b31728bf0529fe8557741a7b9ebeb892 100644
+--- a/toolchain/win/BUILD.gn
++++ b/toolchain/win/BUILD.gn
+@@ -15,7 +15,11 @@ assert(is_win, "Should only be running on Windows")
+ 
+ # Copy the VS runtime DLL for the default toolchain to the root build directory
+ # so things will run.
+-if (current_toolchain == default_toolchain) {
++# Folderwing uses externally installed runtime prerequisites; do not stage CRT DLLs.
++declare_args() {
++  folderwing_copy_runtime_dlls = false
++}
++if (current_toolchain == default_toolchain && folderwing_copy_runtime_dlls) {
+   if (is_debug) {
+     configuration_name = "Debug"
+   } else {
+@@ -31,9 +35,11 @@ if (current_toolchain == default_toolchain) {
+ }
+ 
+ if (target_cpu == "x86" || target_cpu == "x64") {
++  if (target_cpu == "x86") {
+   win_toolchains("x86") {
+     toolchain_arch = "x86"
+   }
++  }
+ 
+   win_toolchains("x64") {
+     toolchain_arch = "x64"
+diff --git a/toolchain/win/setup_toolchain.py b/toolchain/win/setup_toolchain.py
+index 34be00a458a4d52808c6df3b6267c530ec82183c..bf574af74281dbded051551583b289f4eb552c2a 100644
+--- a/toolchain/win/setup_toolchain.py
++++ b/toolchain/win/setup_toolchain.py
+@@ -21,7 +21,7 @@ import action_helpers
+ import gn_helpers
+ 
+ SCRIPT_DIR = os.path.dirname(__file__)
+-SDK_VERSION = '10.0.28000.0'
++SDK_VERSION = '10.0.26100.0'
+ MSVC_DIR = re.compile('^.*/VC/Tools/MSVC/[^/]+/include$')
+ WINDOWS_KITS_DIR = re.compile(r'^(.*/Windows Kits/\d+/Include/[^/]+)/.*')
+ 
+diff --git a/toolchain/win/win_toolchain_data.gni b/toolchain/win/win_toolchain_data.gni
+index bcd7a5f4150a62790a2c62268e2adcc215e4fa65..c74f2a2d9d4e344eb8971ae8e9b0dd32f8c40c73 100644
+--- a/toolchain/win/win_toolchain_data.gni
++++ b/toolchain/win/win_toolchain_data.gni
+@@ -5,6 +5,7 @@
+ import("//build/config/win/visual_studio_version.gni")
+ 
+ declare_args() {
++  if (target_cpu == "x86" || host_cpu == "x86") {
+   win_toolchain_data_x86 =
+       exec_script("//build/toolchain/win/setup_toolchain.py",
+                   [
+@@ -17,6 +18,8 @@ declare_args() {
+                   ],
+                   "scope")
+ 
++  }
++
+   win_toolchain_data_x64 =
+       exec_script("//build/toolchain/win/setup_toolchain.py",
+                   [

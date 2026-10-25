@@ -1,0 +1,56 @@
+{
+  "schema": "folderwing-dependency-hosting/v1",
+  "repository_url": "https://github.com/L1nuxOne/folderwing",
+  "repository_main_commit": "8301d23ee59e7b195d4f99b9d09979c39d46e386",
+  "repository_public": true,
+  "release_url": "https://github.com/L1nuxOne/folderwing/releases/tag/dependencies-20261025",
+  "release_id": 423595023,
+  "release_tag": "dependencies-20261025",
+  "published_at": "2026-10-25T18:54:13Z",
+  "release_immutable": false,
+  "versioned_base_url": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025",
+  "github_variables": {
+    "FOLDERWING_MEDIA_BASE_URL": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025",
+    "FOLDERWING_PDFIUM_BASE_URL": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025"
+  },
+  "assets": {
+    "DEPENDENCY-RELEASE.json": {
+      "sha256": "c2718be8cde93863687f864b6c9d2bcf7eca9da41d4c33515fae1fe389d00cc1",
+      "bytes": 836
+    },
+    "folderwing-media-lgpl-20261025.zip": {
+      "sha256": "8fc1435bc46bd42dc79024625a6cbafee52f1f2c56ee295522dfeaab465c572d",
+      "bytes": 18980781
+    },
+    "folderwing-media-lgpl-sources-20261025.tar.gz": {
+      "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+      "bytes": 101050019
+    },
+    "folderwing-pdfium-gnu-8086-recipe.zip": {
+      "sha256": "74678cc9f7e2e7f37ee5075eab76c5db2e309c1a24f610ff225d0f2f9e59b59f",
+      "bytes": 435470
+    },
+    "folderwing-pdfium-gnu-8086-win-x64.zip": {
+      "sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+      "bytes": 4284026
+    },
+    "SHA256SUMS": {
+      "sha256": "10440950defe61bfbb1cef5a180ff79b7a76df50c9b937abf6781fecf7c13382",
+      "bytes": 512
+    }
+  },
+  "uploaded_api_digests_verified": true,
+  "unauthenticated_public_downloads_verified": true,
+  "download_receipt_id": "d37bd59263864c2d00196f3b173ab8846dcf8806b8cf87da9f468a1fe5a10cfb",
+  "default_pdfium_hosted_install_verified": true,
+  "installer_receipt_id": "5fb92a9c3129c594c4f32b21c9fe334bb0cb6060f33b8442010eedb5fe212def",
+  "application_source_published": false,
+  "application_release_published": false,
+  "hosted_application_ci_run": false,
+  "prehosting_application_candidate_relabelled": false,
+  "dependency_distribution_review_gate_complete": true,
+  "review": "docs/DEPENDENCY_HOSTING.md",
+  "evidence_directory": "build/dependency-hosting/20261025",
+  "wsl_stopped": false,
+  "repository_tree_sha": "8301d23ee59e7b195d4f99b9d09979c39d46e386"
+}

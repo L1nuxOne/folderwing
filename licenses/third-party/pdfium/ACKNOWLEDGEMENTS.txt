@@ -1,0 +1,9 @@
+PDFium uses FreeType, copyright its authors and contributors.
+Portions of this software are copyright (c) The FreeType Project (www.freetype.org). All rights reserved.
+
+This software is based in part on the work of the Independent JPEG Group.
+
+PDFium includes code originally copyright Foxit Software Inc.; see source-file-notices.txt.
+
+Dragonbox: Boost Software License 1.0 selected; both upstream alternative texts retained.
+fast_float: MIT selected. FreeType: FreeType License (FTL) selected.

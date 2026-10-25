@@ -1,0 +1,5 @@
+The pinned upstream pdfium.dll uses Microsoft static CRT code (/MT).
+These embedded portions are not licensed under Folderwing MIT or PDFium BSD.
+Public redistribution of this candidate has not been cleared.
+Microsoft license directory: https://visualstudio.microsoft.com/license-terms/
+See docs/DEPENDENCY_REVIEW_20261025.md in the source repository.

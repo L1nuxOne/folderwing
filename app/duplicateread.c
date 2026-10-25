@@ -1,0 +1,56 @@
+/* Worker-only rooted readers. Linux hashes locally; exact comparisons stream
+ * over the same persistent native channel. No data is written. */
+#include "duplicateread.h"
+#include "termutil.h"
+#include "../src/namecodec.h"
+#include "../linux/fpsha256.h"
+#include <winternl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+static HANDLE child_open(HANDLE parent,const wchar_t *name,ACCESS_MASK access){
+ typedef NTSTATUS (NTAPI *open_fn)(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,ULONG,ULONG,ULONG,ULONG,PVOID,ULONG);
+ typedef ULONG (WINAPI *error_fn)(NTSTATUS);
+ open_fn open=(open_fn)(void*)GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"NtCreateFile");error_fn error=(error_fn)(void*)GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"RtlNtStatusToDosError");
+ if(!open||!error){SetLastError(ERROR_NOT_SUPPORTED);return INVALID_HANDLE_VALUE;}
+ size_t n=wcslen(name)*2;if(!n||n>65534||wcschr(name,L'\\')||wcschr(name,L'/')){SetLastError(ERROR_INVALID_NAME);return INVALID_HANDLE_VALUE;}
+ UNICODE_STRING u={(USHORT)n,(USHORT)n,(PWSTR)name};OBJECT_ATTRIBUTES a={.Length=sizeof a,.RootDirectory=parent,.ObjectName=&u};IO_STATUS_BLOCK io;HANDLE h=NULL;
+ NTSTATUS status=open(&h,access|SYNCHRONIZE,&a,&io,NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,1,0x204020,NULL,0);
+ if(status<0){SetLastError(error(status));return INVALID_HANDLE_VALUE;}return h;
+}
+
+static int cancelled(du_reader *r){return r->cancel&&WaitForSingleObject(r->cancel,0)==WAIT_OBJECT_0;}
+static DWORD pull(du_reader *r,void *data,DWORD n){uint64_t until=GetTickCount64()+60000;while(n){if(cancelled(r))return ERROR_CANCELLED;DWORD have=0,got=0;if(!PeekNamedPipe(r->from,NULL,0,NULL,&have,NULL))return ERROR_BROKEN_PIPE;if(!have){if(GetTickCount64()>=until)return ERROR_TIMEOUT;if(WaitForSingleObject(r->process,0)==WAIT_OBJECT_0)return ERROR_BROKEN_PIPE;if(r->cancel)WaitForSingleObject(r->cancel,5);else Sleep(5);continue;}DWORD take=have<n?have:n;if(!ReadFile(r->from,data,take,&got,NULL)||!got)return ERROR_BROKEN_PIPE;data=(char*)data+got;n-=got;until=GetTickCount64()+60000;}return 0;}
+static DWORD push(du_reader *r,const void *data,DWORD n){while(n){if(cancelled(r))return ERROR_CANCELLED;DWORD wrote=0;if(!WriteFile(r->to,data,n,&wrote,NULL)||!wrote)return ERROR_BROKEN_PIPE;data=(const char*)data+wrote;n-=wrote;}return 0;}
+static DWORD response(du_reader *r,du_reply *p){DWORD e=pull(r,p,sizeof *p);return e?e:p->error?ERROR_FILE_INVALID:0;}
+void duplicate_reader_free(du_reader *r){if(r->file&&r->file!=INVALID_HANDLE_VALUE)CloseHandle(r->file);if(r->root&&r->root!=INVALID_HANDLE_VALUE)CloseHandle(r->root);if(r->to)CloseHandle(r->to);if(r->job)CloseHandle(r->job);if(r->from)CloseHandle(r->from);if(r->process)CloseHandle(r->process);free(r->relative);memset(r,0,sizeof *r);}
+static DWORD native_start(du_reader *r,const wchar_t *root,int as_root){
+ wchar_t distro[128],path[32768],exe[MAX_PATH],dir[MAX_PATH],cmd[4*MAX_PATH];if(!term_wsl_split(root,distro,128,path,32768))return ERROR_INVALID_NAME;
+ uint8_t raw[131072];size_t len=0;/* term_wsl_split returns a literal Linux path. */
+ for(size_t i=0;path[i];){uint32_t c=(uint16_t)path[i++];if(c>=0xd800&&c<=0xdbff){uint32_t low=(uint16_t)path[i++];if(low<0xdc00||low>0xdfff)return ERROR_INVALID_NAME;c=0x10000+((c-0xd800)<<10)+low-0xdc00;}
+  if(c>=0xdc80&&c<=0xdcff)raw[len++]=(uint8_t)(c-0xdc00);else if(c<128)raw[len++]=(uint8_t)c;else if(c<2048){raw[len++]=0xc0|(c>>6);raw[len++]=0x80|(c&63);}else if(c<65536){raw[len++]=0xe0|(c>>12);raw[len++]=0x80|((c>>6)&63);raw[len++]=0x80|(c&63);}else{raw[len++]=0xf0|(c>>18);raw[len++]=0x80|((c>>12)&63);raw[len++]=0x80|((c>>6)&63);raw[len++]=0x80|(c&63);}}
+ if(!len||len>32768)return ERROR_FILENAME_EXCED_RANGE;GetModuleFileNameW(NULL,dir,MAX_PATH);wchar_t *slash=wcsrchr(dir,L'\\');if(!slash)return ERROR_INVALID_NAME;*slash=0;
+ DWORD n=GetSystemDirectoryW(exe,MAX_PATH-10);if(!n||n>=MAX_PATH-10)return ERROR_NOT_SUPPORTED;wcscat(exe,L"\\wsl.exe");
+ swprintf(cmd,4*MAX_PATH,L"\"%ls\" --distribution %ls%ls --cd \"%ls\" --exec ./folderwing-wsl --duplicate-read",exe,distro,as_root?L" --user root":L"",dir);
+ SECURITY_ATTRIBUTES sa={sizeof sa,NULL,TRUE};HANDLE in=NULL,to=NULL,from=NULL,out=NULL,nul=NULL,job=NULL;PROCESS_INFORMATION pi={0};LPPROC_THREAD_ATTRIBUTE_LIST attrs=NULL;int initialized=0;DWORD error=ERROR_NOT_ENOUGH_MEMORY;
+ if(!CreatePipe(&in,&to,&sa,65536)||!CreatePipe(&from,&out,&sa,65536))goto done;SetHandleInformation(to,HANDLE_FLAG_INHERIT,0);SetHandleInformation(from,HANDLE_FLAG_INHERIT,0);
+ nul=CreateFileW(L"NUL",GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,&sa,OPEN_EXISTING,0,NULL);if(nul==INVALID_HANDLE_VALUE){nul=NULL;goto done;}
+ SIZE_T need=0;InitializeProcThreadAttributeList(NULL,1,0,&need);attrs=malloc(need);if(!attrs||!InitializeProcThreadAttributeList(attrs,1,0,&need))goto done;initialized=1;
+ HANDLE inherit[]={in,out,nul};if(!UpdateProcThreadAttribute(attrs,0,PROC_THREAD_ATTRIBUTE_HANDLE_LIST,inherit,sizeof inherit,NULL,NULL))goto done;
+ STARTUPINFOEXW si={{sizeof si}};si.StartupInfo.dwFlags=STARTF_USESTDHANDLES;si.StartupInfo.hStdInput=in;si.StartupInfo.hStdOutput=out;si.StartupInfo.hStdError=nul;si.lpAttributeList=attrs;
+ job=CreateJobObjectW(NULL,NULL);JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits={0};limits.BasicLimitInformation.LimitFlags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;if(!job||!SetInformationJobObject(job,JobObjectExtendedLimitInformation,&limits,sizeof limits))goto done;
+ if(!CreateProcessW(exe,cmd,NULL,NULL,TRUE,CREATE_SUSPENDED|CREATE_NO_WINDOW|EXTENDED_STARTUPINFO_PRESENT,NULL,NULL,&si.StartupInfo,&pi)){error=GetLastError();goto done;}
+ if(!AssignProcessToJobObject(job,pi.hProcess)){error=GetLastError();TerminateProcess(pi.hProcess,1);goto done;}ResumeThread(pi.hThread);CloseHandle(in);in=NULL;CloseHandle(out);out=NULL;
+
+ r->job=job;job=NULL;r->process=pi.hProcess;pi.hProcess=NULL;r->to=to;to=NULL;r->from=from;from=NULL;
+ uint32_t hello[]={DU_MAGIC,DU_VERSION,(uint32_t)len};error=push(r,hello,sizeof hello);if(!error)error=push(r,raw,(DWORD)len);du_reply reply;if(!error)error=response(r,&reply);
+ done:if(initialized)DeleteProcThreadAttributeList(attrs);free(attrs);if(job)CloseHandle(job);HANDLE handles[]={in,to,from,out,nul,pi.hThread,pi.hProcess};for(size_t i=0;i<sizeof handles/sizeof *handles;i++)if(handles[i])CloseHandle(handles[i]);return error;
+}
+
+static DWORD win_stamp(HANDLE h,du_stamp *out){BY_HANDLE_FILE_INFORMATION i;FILE_BASIC_INFO b;if(!GetFileInformationByHandle(h,&i)||!GetFileInformationByHandleEx(h,FileBasicInfo,&b,sizeof b))return GetLastError();if(i.dwFileAttributes&(FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_REPARSE_POINT|FILE_ATTRIBUTE_DEVICE|FILE_ATTRIBUTE_OFFLINE))return ERROR_CANT_ACCESS_FILE;*out=(du_stamp){((uint64_t)i.nFileSizeHigh<<32)|i.nFileSizeLow,i.dwVolumeSerialNumber,((uint64_t)i.nFileIndexHigh<<32)|i.nFileIndexLow,(uint64_t)b.LastWriteTime.QuadPart,(uint64_t)b.ChangeTime.QuadPart};return 0;}
+static HANDLE win_path(du_reader *r,const wchar_t *relative){wchar_t *copy=_wcsdup(relative);if(!copy)return INVALID_HANDLE_VALUE;HANDLE parent=r->root,result=INVALID_HANDLE_VALUE;wchar_t *at=copy;for(;;){wchar_t *end=wcschr(at,L'\\');if(end)*end=0;if(!*at||!wcscmp(at,L".")||!wcscmp(at,L"..")||wcschr(at,L':')||wcschr(at,L'/')){SetLastError(ERROR_INVALID_NAME);break;}HANDLE child=child_open(parent,at,end?FILE_LIST_DIRECTORY|FILE_READ_ATTRIBUTES:FILE_READ_DATA|FILE_READ_ATTRIBUTES);if(parent!=r->root)CloseHandle(parent);parent=r->root;if(child==INVALID_HANDLE_VALUE)break;BY_HANDLE_FILE_INFORMATION i;if(!GetFileInformationByHandle(child,&i)||(i.dwFileAttributes&(FILE_ATTRIBUTE_REPARSE_POINT|FILE_ATTRIBUTE_DEVICE|FILE_ATTRIBUTE_OFFLINE))||(!!(i.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)!=!!end)){CloseHandle(child);SetLastError(ERROR_CANT_ACCESS_FILE);break;}if(!end){result=child;break;}parent=child;at=end+1;}if(parent!=r->root)CloseHandle(parent);free(copy);return result;}
+static DWORD win_check(du_reader *r){du_stamp a,b;DWORD e=win_stamp(r->file,&a);if(e)return e;HANDLE now=win_path(r,r->relative);if(now==INVALID_HANDLE_VALUE)return GetLastError();e=win_stamp(now,&b);CloseHandle(now);return e?e:memcmp(&a,&r->stamp,sizeof a)||memcmp(&b,&r->stamp,sizeof b)?ERROR_FILE_INVALID:0;}
+DWORD duplicate_reader_init(du_reader *r,const wchar_t *root,int wsl,int as_root,HANDLE cancel){memset(r,0,sizeof *r);r->cancel=cancel;wchar_t d[128],p[32768];r->native=term_wsl_split(root,d,128,p,32768);if(r->native){if(!wsl)return ERROR_NOT_SUPPORTED;return native_start(r,root,as_root);}if(!_wcsnicmp(root,L"\\\\wsl",5))return ERROR_NOT_SUPPORTED;size_t n=wcslen(root);wchar_t *path=calloc(n+8,2);if(!path)return ERROR_NOT_ENOUGH_MEMORY;if(root[1]==L':')swprintf(path,n+8,L"\\\\?\\%ls",root);else wcscpy(path,root);r->root=CreateFileW(path,FILE_LIST_DIRECTORY|FILE_READ_ATTRIBUTES,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,NULL);free(path);if(r->root==INVALID_HANDLE_VALUE)return GetLastError();BY_HANDLE_FILE_INFORMATION i;if(!GetFileInformationByHandle(r->root,&i))return GetLastError();if(!(i.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)||i.dwFileAttributes&FILE_ATTRIBUTE_REPARSE_POINT)return ERROR_CANT_ACCESS_FILE;return 0;}
+DWORD duplicate_reader_open(du_reader *r,const wchar_t *relative,const du_stamp *expected){if(cancelled(r))return ERROR_CANCELLED;free(r->relative);r->relative=_wcsdup(relative);if(!r->relative)return ERROR_NOT_ENOUGH_MEMORY;if(r->native){uint8_t bytes[131072];size_t n;if(!fpe_lx_to_bytes(relative,bytes,sizeof bytes,1,&n)||!n||n>32768)return ERROR_INVALID_NAME;du_request request={.op=DU_OPEN,.chars=(uint32_t)n,.expected=*expected};DWORD e=push(r,&request,sizeof request);if(!e)e=push(r,bytes,(DWORD)n);du_reply reply;if(!e)e=response(r,&reply);if(!e)r->stamp=reply.stamp;return e;}if(r->file&&r->file!=INVALID_HANDLE_VALUE)CloseHandle(r->file);r->file=win_path(r,relative);if(r->file==INVALID_HANDLE_VALUE)return GetLastError();DWORD e=win_stamp(r->file,&r->stamp);return e?e:r->stamp.size!=expected->size||r->stamp.device!=expected->device||r->stamp.identity!=expected->identity?ERROR_FILE_INVALID:0;}
+DWORD duplicate_reader_read(du_reader *r,void *buffer,DWORD *count){*count=0;if(cancelled(r))return ERROR_CANCELLED;if(r->native){du_request request={.op=DU_READ};DWORD e=push(r,&request,sizeof request);du_reply reply;if(!e)e=response(r,&reply);if(e)return e;if(reply.count>DU_BLOCK)return ERROR_INVALID_DATA;*count=reply.count;return pull(r,buffer,*count);}while(*count<DU_BLOCK){if(cancelled(r))return ERROR_CANCELLED;DWORD n;if(!ReadFile(r->file,(char*)buffer+*count,DU_BLOCK-*count,&n,NULL))return GetLastError();if(!n)return win_check(r);*count+=n;}return 0;}
+DWORD duplicate_reader_hash(du_reader *r,uint8_t hash[32]){if(r->native){du_request request={.op=DU_HASH};DWORD e=push(r,&request,sizeof request);du_reply reply;do{if(e)return e;e=response(r,&reply);}while(!e&&reply.count==DU_PROGRESS);if(!e)memcpy(hash,reply.hash,32);return e;}uint8_t buffer[DU_BLOCK];fp_sha256 sha;fp_sha_init(&sha);uint64_t bytes=0;for(;;){DWORD n,e=duplicate_reader_read(r,buffer,&n);if(e)return e;if(!n)break;bytes+=n;fp_sha_update(&sha,buffer,n);}if(bytes!=r->stamp.size)return ERROR_FILE_INVALID;fp_sha_final(&sha,hash);return 0;}

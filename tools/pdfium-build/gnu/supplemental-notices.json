@@ -1,0 +1,16 @@
+[
+  {
+    "path": "licenses/MinGW-DISCLAIMER.txt",
+    "sha256": "039ed6b4f31bb7fb97e733170b58cc435335352e4745734fcfd113877fdaf340",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "source_archive_sha256": "03f717ddb9005d6519e38434359af281d0819d5d468a42578e28bd0fd8e31d0c",
+    "basis": "Selected runtime source member notices and conservative runtime/header notice superset; no inference that unused code is incorporated"
+  },
+  {
+    "path": "licenses/MinGW-source-notices.txt",
+    "sha256": "deccf97c5be359fcc89efb32ca89c1ca91cb97cac8e7c8a00b0ce487e41c1e88",
+    "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "source_archive_sha256": "03f717ddb9005d6519e38434359af281d0819d5d468a42578e28bd0fd8e31d0c",
+    "basis": "Selected runtime source member notices and conservative runtime/header notice superset; no inference that unused code is incorporated"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "schema": "folderwing-brand-assets/v1",
+  "name": "Folderwing",
+  "palette": {
+    "coral": "#FF6655",
+    "plum": "#30213C",
+    "cream": "#FFF7EF"
+  },
+  "icon_sizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    96,
+    128,
+    256
+  ],
+  "icon_master": "folderwing-icon.svg",
+  "wordmark_origin": "Built-in image_gen, edited from the chosen Folderwing concept",
+  "files": {
+    "folderwing-icon.svg": "0675bde854fcbfc8e3653b3e8d7c85bd3dcdecf4c4e10ce451984c26b6d370e0",
+    "folderwing-icon.png": "85eadae3d302612784033119bc614168b368c815fb493b5adffc8129aee64326",
+    "folderwing.ico": "f273a19df818961ce51833d1b391d3b87c9f221bf8d0e42d2c1b2ab8ba448429",
+    "folderwing-wordmark.png": "9173bc4fd560375f42114f67cec4a91a72401cef42c88eb71f244d97b24d436f"
+  }
+}

@@ -1,0 +1,105 @@
+name: Build and package Folderwing
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: folderwing-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 60
+    outputs:
+      public_ready: ${{ steps.artifact_policy.outputs.public_ready }}
+    env:
+      FOLDERWING_MEDIA_BASE_URL: ${{ vars.FOLDERWING_MEDIA_BASE_URL }}
+      FOLDERWING_PDFIUM_BASE_URL: ${{ vars.FOLDERWING_PDFIUM_BASE_URL }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14.7'
+      - name: Require accepted media hosting
+        run: |
+          if (-not $env:FOLDERWING_MEDIA_BASE_URL) { throw 'Configure FOLDERWING_MEDIA_BASE_URL with the accepted runtime ZIP and matching source archive. See docs/RELEASING.md.' }
+          if (-not $env:FOLDERWING_PDFIUM_BASE_URL) { throw 'Configure FOLDERWING_PDFIUM_BASE_URL with the accepted GNU runtime ZIP and recipe ZIP. See docs/RELEASING.md.' }
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: build/downloads
+          key: folderwing-downloads-${{ runner.os }}-${{ hashFiles('tools/release-inputs.json', 'tools/media-dependencies.json') }}
+      - name: Restore pinned inputs
+        run: python tools/bootstrap-release.py --with-toolchain-source
+      - name: Audit native test registry
+        run: |
+          python tools/native-impact.py audit
+          if ($LASTEXITCODE) { throw 'Native registry audit failed' }
+          python tools/native-impact.py self-check
+          if ($LASTEXITCODE) { throw 'Native registry self-check failed' }
+      - name: Build full feature set, run smoke and package
+        run: ./tools/build-release.ps1 -SkipBootstrap
+      - name: Verify package boundaries and extracted app
+        run: ./tests/release_packaging.ps1 -BuildDirectory build/release-candidate -DistributionDirectory build/distribution -ResultDirectory build/package-acceptance
+      - name: Verify release artifact checksums
+        run: python tools/check-release.py --directory build/distribution
+      - name: Record public artifact policy
+        id: artifact_policy
+        run: |
+          $manifest=Get-Content build/distribution/RELEASE-MANIFEST.json -Raw | ConvertFrom-Json
+          $ready=$manifest.public_release_ready.ToString().ToLowerInvariant()
+          "public_ready=$ready" >> $env:GITHUB_OUTPUT
+          if ($ready -ne 'true') { Write-Output 'Dependency review remains open: binary uploads and draft release creation are held. Text diagnostics remain available.' }
+      - if: steps.artifact_policy.outputs.public_ready == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: folderwing-windows-x64
+          path: build/distribution/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: folderwing-build-evidence
+          path: |
+            build/bootstrap-receipt.json
+            build/release-candidate/BUILD-RECEIPT.json
+            build/release-candidate/smoke-*/**/*.json
+            build/release-candidate/smoke-*/**/*.txt
+            build/package-acceptance/*.json
+          if-no-files-found: ignore
+          retention-days: 7
+  draft-release:
+    if: startsWith(github.ref, 'refs/tags/v') && needs.windows.outputs.public_ready == 'true'
+    needs: windows
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14.7'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: folderwing-windows-x64
+          path: artifacts
+      - name: Verify tagged inputs and public release readiness
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REVISION: ${{ github.sha }}
+        run: python tools/check-release.py --directory artifacts --tag "$RELEASE_TAG" --revision "$RELEASE_REVISION" --require-public-ready
+      - name: Create reviewed draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_REVISION: ${{ github.sha }}
+        run: gh release create "$RELEASE_TAG" artifacts/* --verify-tag --target "$RELEASE_REVISION" --draft --title "Folderwing $RELEASE_TAG" --generate-notes

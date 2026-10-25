@@ -1,0 +1,481 @@
+{
+  "schema": "folderwing-gnu-runtime-member-sources/v1",
+  "source_revision": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+  "source_archive": {
+    "url": "https://codeload.github.com/mingw-w64/mingw-w64/tar.gz/0d6dfbc348dfad714761c0a7151615767f96bcb5",
+    "sha256": "03f717ddb9005d6519e38434359af281d0819d5d468a42578e28bd0fd8e31d0c",
+    "bytes": 15831149
+  },
+  "members": {
+    "libmingw32.a(lib64_libmingw32_a-mingw_helpers.o)": [
+      {
+        "path": "mingw-w64-crt/crt/mingw_helpers.c",
+        "sha256": "a5639b68c3176c4c6a358c48f869c2a081434c07d7a0e435013f44909a2003c5"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-mingw_dll_ctors_dtors.o)": [
+      {
+        "path": "mingw-w64-crt/crt/mingw_dll_ctors_dtors.c",
+        "sha256": "682be7d58c77d70fdf116ad53168c893dbeaa0c85b8a9b86300493e66d3eeaae"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-natstart.o)": [
+      {
+        "path": "mingw-w64-crt/crt/natstart.c",
+        "sha256": "c65fb9a3cb70536b8f757e07df8febb0b1a5fd72889bcff4fee924add1078d14"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-cinitexe.o)": [
+      {
+        "path": "mingw-w64-crt/crt/cinitexe.c",
+        "sha256": "98c9238561c0ed1b3d7edfd1e32423dfda93c3ae285807873f637d03406bdcc9"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-pseudo-reloc.o)": [
+      {
+        "path": "mingw-w64-crt/crt/pseudo-reloc.c",
+        "sha256": "24d57d7fec056a84268fcb3fa43dc7fc726c3c3f4c2ff4796652ca3dba33314a"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-tlssup.o)": [
+      {
+        "path": "mingw-w64-crt/crt/tlssup.c",
+        "sha256": "3f330e9f97d39637245c74d8cd940b2e0238b50c56aee2ff579cff9314e48e9c"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-crtdll_atexit_register.o)": [
+      {
+        "path": "mingw-w64-crt/crt/crtdll_atexit_register.c",
+        "sha256": "53268a62ba7b80f6bda1bca04a5a43affddb8799c8db512b2051696af1192e08"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-pseudo-reloc-list.o)": [
+      {
+        "path": "mingw-w64-crt/crt/pseudo-reloc-list.c",
+        "sha256": "853116d1ba135ea499714152be5705c72678a86fbd9bd5b90469b0ad51ab8acc"
+      }
+    ],
+    "libmingw32.a(lib64_libmingw32_a-CRT_fp10.o)": [
+      {
+        "path": "mingw-w64-crt/crt/CRT_fp10.c",
+        "sha256": "fa9af6a9c58207fc596b3babe8f0b91ebbd75a9cf73e15aa849289e7eb300643"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-dllmain.o)": [
+      {
+        "path": "mingw-w64-crt/misc/dllmain.c",
+        "sha256": "ad3eb745bc2e614de38f43700c274cae2b7edec7ee40950cc918d8b98d3d9505"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_cfguard_support.o)": [
+      {
+        "path": "mingw-w64-crt/cfguard/mingw_cfguard_support.c",
+        "sha256": "a05b0eb6e9d6553ae934f81324fced9c3a6dc89f71ad073dad8ef174d424d693"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_snprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_snprintf.c",
+        "sha256": "c88243e00668ad3b1f47786dff02677708a9ac0748c190737836236f4bf15195"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_vsnprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_vsnprintf.c",
+        "sha256": "3406d989e951ced6a40fe3591b47a36e4994b5b6db92806de4a947a2cc4a835a"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-stack_chk_fail.o)": [
+      {
+        "path": "mingw-w64-crt/ssp/stack_chk_fail.c",
+        "sha256": "e2191ed9168fac197756c435d0157a3e0b6b8e3c34aa6c33d2c6d556e8855449"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-stack_chk_guard.o)": [
+      {
+        "path": "mingw-w64-crt/ssp/stack_chk_guard.c",
+        "sha256": "0139b733231528f91131850639c8ee575b195fecfedd8e1fc455af476d285020"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-frexpl.o)": [
+      {
+        "path": "mingw-w64-crt/math/frexpl.c",
+        "sha256": "06110b5e7e0a595355f7632c88db5a0d0245faa24a3ceb9ffa8bb58cc37dae6c"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-hypotf.o)": [
+      {
+        "path": "mingw-w64-crt/math/hypotf.c",
+        "sha256": "5dc40a3547d20457205448de7714f16b77d4b7b66a22acae730ae2c7cdbe59cd"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-ldexp.o)": [
+      {
+        "path": "mingw-w64-crt/math/x86/ldexp.c",
+        "sha256": "0bc05c6660ed185de7e11a60e8158efd827278b987ee37769b7fc08fae7093e2"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-fp_consts.o)": [
+      {
+        "path": "mingw-w64-crt/math/fp_consts.c",
+        "sha256": "4cf550c156538e6e9e4fbeb7b46d38b401d01d1560e7d6d82daecd0ff173afff"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-fp_constsf.o)": [
+      {
+        "path": "mingw-w64-crt/math/fp_constsf.c",
+        "sha256": "690bf26672be9ca1baabdd223e0314909abeb31e237769432eedb9489c07e096"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-fesetenv.o)": [
+      {
+        "path": "mingw-w64-crt/misc/fesetenv.c",
+        "sha256": "fed15c778c5e63f41aa767ff55a60aee98e43e16b06ec0221d20d1974d669f93"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-fegetenv.o)": [
+      {
+        "path": "mingw-w64-crt/misc/fegetenv.c",
+        "sha256": "4f39a51eee0c2140f1ad5150be219ce0c77282a76ef1d3f9da8c858a7a25b61e"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_sscanf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_sscanf.c",
+        "sha256": "f9879610106540b33cd5503bd47b47b47d20cc739c7c346e3396092fde181111"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-strtof.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/strtof.c",
+        "sha256": "dd13fce1c569b0f6eba0f39600129efa1b3f20e30fa56037feb71fa085483b39"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-strtodnrp.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/strtodnrp.c",
+        "sha256": "92edcb192f5addca4eb91007179c58609200d4e984cd6e0d7b6eaf4384ddfc93"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-strtopx.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/strtopx.c",
+        "sha256": "f20619ead1e7714d6b363fa065e284ee155f2a0e8bfba050b788db2c58153e3d"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-wcstof.o)": [
+      {
+        "path": "mingw-w64-crt/misc/wcstof.c",
+        "sha256": "39199eab3dcc03f25a76013173c3d23495ad013bf5cd97816df8b016667b2f8e"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-wcstold.o)": [
+      {
+        "path": "mingw-w64-crt/misc/wcstold.c",
+        "sha256": "635f07b857bd5134fba50ea10d6453e9590e983532bdeef20e4e241ecbbd12bb"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_swprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_swprintf.c",
+        "sha256": "1f497df90a6f8f9e90372271617c6218c815df316f4ad74f9e99936e125f90d8"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_vfprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_vfprintf.c",
+        "sha256": "e1aad22ed6191e55596c4b06316f5d3396f0a8ef2551fd9bb5f04e07ee5b8846"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_fprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_fprintf.c",
+        "sha256": "c19ffaac9e0ee6056bf4cd0316d021596b37ac800d04dd187b01db01533d839e"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-guard_dispatch.o)": [
+      {
+        "path": "mingw-w64-crt/cfguard/guard_dispatch.S",
+        "sha256": "a479e2319b9a2789afd6f91aedb3e6c640ed16b746df6babffbb17f810432811"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_pformat.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_pformat.c",
+        "sha256": "8ad4e2a80cb56291deb8ab42238c5084fa256a65dbf08412109f08c3ced85225"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_setfp.o)": [
+      {
+        "path": "mingw-w64-crt/misc/mingw_setfp.c",
+        "sha256": "3ef12a088be5d15998efb8032d49d9da0bc7401aa24c94b950f3a8136389bfa7"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_controlfp.o)": [
+      {
+        "path": "mingw-w64-crt/misc/mingw_controlfp.c",
+        "sha256": "500445bb6570a297431ce285cf31e9f933f656b2ca6d6d3cea64123be524d7f2"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-btowc.o)": [
+      {
+        "path": "mingw-w64-crt/misc/btowc.c",
+        "sha256": "d16872690bc5fb24d3f7c1bc706e7cc16d6cdb49b56ed4d8c1fa310ca3041b29"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-wctob.o)": [
+      {
+        "path": "mingw-w64-crt/misc/wctob.c",
+        "sha256": "96103e98c5ccab018c72327bf70fcfdb42727cf68f62ec33f857c4126ff51c5a"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_vsscanf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_vsscanf.c",
+        "sha256": "845b01237cf2a1b7a03d9e45d5f694609e934d1e1e8ae0f0531059373fe9fa20"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-strtodg.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/strtodg.c",
+        "sha256": "8d2b5adcd5460558f2e1e8ab559322b7426beef13a39feb1c6527357a8f2f0e7"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-g__fmt.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/g__fmt.c",
+        "sha256": "b454af8493c1ed9e4747943bcede41a7e042c156923753584c2f383f8f5d2968"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_wcstold.o)": [
+      {
+        "path": "mingw-w64-crt/misc/mingw_wcstold.c",
+        "sha256": "07a73f1a744497b56b61dca2ebcdd18611c959d7a1998fcf4d957de3e1329f0c"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_vswprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_vswprintf.c",
+        "sha256": "fb821076439d8da5337e0c94fc368688b0253badc99ef5ce7ced6d58a02819de"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-dmisc.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/dmisc.c",
+        "sha256": "e73637f5fe5e171d13ab4ce51671f20af98c2707fe6c3ba4f25c7bcd108e0f85"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-gdtoa.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/gdtoa.c",
+        "sha256": "09ea9686def889450b16910562c5a884e87eee161c52e6c127d373688aac8559"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_sformat.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_sformat.c",
+        "sha256": "201c8a3f865757e68def9cb35328ce45cce7995f0359f33e969fbca6ce0cd137"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-misc.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/misc.c",
+        "sha256": "02486c21b11fe4538bde37d4c740b486a5eef76c8fdeec8e74a9c409c8acb6dc"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-gethex.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/gethex.c",
+        "sha256": "5a0ad56f9131cc773064e22f149759eab64b71b78dc32e5757a6017ef2b37201"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-smisc.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/smisc.c",
+        "sha256": "6a7a15fd39207db7d47552da093a9b9b6dc012995bbf9cd2a8be03010972cbbb"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-gmisc.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/gmisc.c",
+        "sha256": "7b4327dfc978aacfb950bd4c6970696ccc76ddb7159800a244ef2a0bb593dc5c"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-sum.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/sum.c",
+        "sha256": "31850a02ddf36e48f7e33e0b4b822061b3759f9bf2bc5371dc360f4526d46e34"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-hexnan.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/hexnan.c",
+        "sha256": "96090e5b971c4d2f102513c4b73c3d381c6ae5c2b7df5b0f0fa8582c72cc4c49"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-mingw_wpformat.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/mingw_wpformat.c",
+        "sha256": "d103b17604d016e726e7b46eee5199d814b469d10b9dc66af38fdbedb08d1414"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-hd_init.o)": [
+      {
+        "path": "mingw-w64-crt/gdtoa/hd_init.c",
+        "sha256": "57eea9b04616eaf2d50cc1171e645b389b43791762c54baf88180cd927e42d0a"
+      }
+    ],
+    "libmingwex.a(lib64_libmingwex_a-loadcfg.o)": [
+      {
+        "path": "mingw-w64-crt/crt/loadcfg.S",
+        "sha256": "ea3b2928757e53d5f68edbacfc271f4b6070f8a118bf44e50f6a4dd44baba545"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-thread.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/thread.c",
+        "sha256": "2eade0ec5405f42c96e8a4d7c60f157e74f2ae5e820807b940953981213de973"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-mutex.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/mutex.c",
+        "sha256": "15f11879f6ff0748bf865c47faf0eb5474dc93c170b90cede827c6591c32b116"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-spinlock.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/spinlock.c",
+        "sha256": "ac82c387ec78932eb1b1f8ebf6494a0264fa1d964d58a7fc8ba8a31197c05129"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-time.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/time.c",
+        "sha256": "9640a3a9fcfe41739ed5c411572653630bdd90d06e94578dea24b573a0043628"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-misc.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/misc.c",
+        "sha256": "3b0964994a9fa29685529d3017a246d21cd3eb212cff60c2650c940382134bf4"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-rwlock.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/rwlock.c",
+        "sha256": "3410bc1626aea891c8690eedb2442c81600f9634e2f7a465e10baef8077dfcc1"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-cond.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/cond.c",
+        "sha256": "4689421301e59cfcf7eb1899e067c1477a3e5b816db048b25c66d4bad48e7534"
+      }
+    ],
+    "libwinpthread.a(libwinpthread_la-sched.o)": [
+      {
+        "path": "mingw-w64-libraries/winpthreads/src/sched.c",
+        "sha256": "21b5569cfce648dd2c75fea05cffab92d8aa2abca64ab091e15fb8a0bf1a6cd7"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_tzset.o)": [
+      {
+        "path": "mingw-w64-crt/misc/ucrt_tzset.c",
+        "sha256": "171fdbd2d323de2e852776793d41d1a698a5d1ec6efc843e61030237521d4dbb"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_fprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_fprintf.c",
+        "sha256": "080d99fcea70a61cde96b5347e8a381c28778928584227cb6b70a543c3b0933c"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-sincos.o)": [
+      {
+        "path": "mingw-w64-crt/math/sincos.c",
+        "sha256": "ee53d8e1ed0bb01c77fb98a77cd0ad0e2cb0142ae651c2469fa3a660e1d30dca"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-sincosf.o)": [
+      {
+        "path": "mingw-w64-crt/math/sincosf.c",
+        "sha256": "37b93fabed1cd05e9aec08ea4ea8be8bc748ae123d0a8e9d346a623e9d6e437c"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_snprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_snprintf.c",
+        "sha256": "b56140978418c08398206288697bd9bc4eafff21c02a9be963089fe9632167bd"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_sscanf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_sscanf.c",
+        "sha256": "5eab010e25086ea29a637dfef780ffb395f3b0cf588126fd64aeee83114a5043"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_swprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_swprintf.c",
+        "sha256": "4854af091e92119594935aa5752ededf9077d979401a97a826a9b256d0e153e4"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_vsnprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_vsnprintf.c",
+        "sha256": "33a7b63ac2762e4576db93fc92db8426cdd9d957dd160b648125791d7231f50b"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_vswprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_vswprintf.c",
+        "sha256": "745ec22793f154bb58a5783bedfceec1698e8d86667763ca44d70522e44588df"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_vfprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_vfprintf.c",
+        "sha256": "682fc042d9007afcfa6c022373178d22591af8c9cb93de9ab5525b3d17cd5b75"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt___local_stdio_printf_options.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt___local_stdio_printf_options.c",
+        "sha256": "0c8ab6443db6f80930f95ee4f380faf7e0bd7a04ecafa0fcba8016bd77a0c98c"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt___local_stdio_scanf_options.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt___local_stdio_scanf_options.c",
+        "sha256": "edc0b2e3db7939533c6affea6e053868f9f8124485512c98b30327fd622907ab"
+      }
+    ],
+    "libmsvcrt.a(lib64_libucrt_extra_a-ucrt_ms_fwprintf.o)": [
+      {
+        "path": "mingw-w64-crt/stdio/ucrt_ms_fwprintf.c",
+        "sha256": "716fa99e24ae293e0f337ba57e8f2cc7bd3f6ec703483c27d0b2eabba2860563"
+      }
+    ],
+    "startup(dllcrt2.o)": [
+      {
+        "path": "mingw-w64-crt/crt/crtdll.c",
+        "sha256": "158dcc7681f335dc36c4bcf86e41444d6507679cab80a68433666df690217990"
+      }
+    ],
+    "startup(crtbegin.o)": [
+      {
+        "path": "mingw-w64-crt/crt/crtbegin.c",
+        "sha256": "692fdc825a472b8dfda48e65eace55caf5396c8536236b814b967007c978a8b0"
+      }
+    ],
+    "startup(crtend.o)": [
+      {
+        "path": "mingw-w64-crt/crt/crtend.c",
+        "sha256": "692fdc825a472b8dfda48e65eace55caf5396c8536236b814b967007c978a8b0"
+      }
+    ]
+  },
+  "selected_sources_modified": false,
+  "runtime_notice_bundle": "licenses/MinGW-source-notices.txt"
+}

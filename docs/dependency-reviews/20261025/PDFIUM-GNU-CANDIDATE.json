@@ -1,0 +1,115 @@
+{
+  "schema": "folderwing-pdfium-gnu-adoption-candidate/v1",
+  "date": "2026-10-25",
+  "outcome": "maintained build, runtime source/notices, focused acceptance and packaging complete; ready for adoption",
+  "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+  "recipe": "tools/pdfium-build/gnu/README.md",
+  "inputs": "tools/pdfium-build/gnu/inputs.json",
+  "toolchain": "LLVM-MinGW 20261020 / LLVM 23.1.4 / Windows x64 GNU ABI / UCRT",
+  "runtime_sha256": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+  "runtime_bytes": 8957440,
+  "artifacts": {
+    "folderwing-pdfium-gnu-8086-win-x64.zip": {
+      "sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+      "bytes": 4284026
+    },
+    "folderwing-pdfium-gnu-8086-recipe.zip": {
+      "sha256": "74678cc9f7e2e7f37ee5075eab76c5db2e309c1a24f610ff225d0f2f9e59b59f",
+      "bytes": 435470
+    }
+  },
+  "artifact_directory": "build/pdfium-gnu-maintained/20261025/distribution",
+  "export_count": 471,
+  "hardening": {
+    "aslr": true,
+    "nx": true,
+    "high_entropy_va": true,
+    "cfg_instrumented": true,
+    "cfg_table_entries": 4375,
+    "cet_compat": true,
+    "gnu_stack_protector": true
+  },
+  "microsoft_startup_archives_observed": false,
+  "microsoft_compiler_or_sdk_required": false,
+  "runtime_source_inventory": "tools/pdfium-build/gnu/runtime-sources.json",
+  "runtime_notice_catalogs": [
+    "tools/pdfium-build/gnu/notices.json",
+    "tools/pdfium-build/gnu/supplemental-notices.json"
+  ],
+  "runtime_source_license_inventory_completed": true,
+  "production_recipe_integrated": true,
+  "source_restore_profile": "new workspace from exact cached Git objects, repacked without alternates; exact toolchain ZIP restored; no generated files or objects borrowed",
+  "compile_units": {
+    "target_c_cpp": 1016,
+    "host_nasm": 84,
+    "assembly": 27,
+    "replaced_cxx_objects": 51
+  },
+  "acceptance": {
+    "distinct_assertions": 3079,
+    "selectors": 73,
+    "failures": 0,
+    "receipt_id": "700147ae057ba401f19bea84ab5a6131bcb5c92758acf99e8c611d86ae307c77",
+    "record": "build/pdfium-gnu-maintained/20261025/acceptance/RESULT.json"
+  },
+  "package_checks": {
+    "count": 12,
+    "receipt_id": "c808d3d9b5fe0ec09796e089d14dae071bc0e53d01fc9fe25385427f1d45a710",
+    "record": "build/pdfium-gnu-maintained/20261025/package-check/RESULT.json",
+    "repeat_zip_bytes_identical": true
+  },
+  "proposed_dependency_pin": {
+    "version": "chromium/8086-folderwing-gnu-20261025",
+    "archive_name": "folderwing-pdfium-gnu-8086-win-x64.zip",
+    "sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+    "bytes": 4284026,
+    "root": "",
+    "required": [
+      "bin/pdfium.dll",
+      "include/fpdfview.h",
+      "lib/pdfium.dll.a",
+      "BUILDINFO.json",
+      "THIRD-PARTY-NOTICES.txt",
+      "RUNTIME.md"
+    ],
+    "stamp": "VERSION.folderwing",
+    "source_sha256": {
+      "bin/pdfium.dll": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832"
+    },
+    "hosting_url_pending": true
+  },
+  "remaining_adoption_steps": [
+    "Select the accepted GNU archive in the release input lock and development downloader; provide a pinned local archive or immutable hosting URL, with no upstream fallback.",
+    "Adopt its runtime notices/source mapping in the active release inventory and retire the active Microsoft-runtime note; preserve historical review records.",
+    "Restore the changed dependency in a new owned bootstrap workspace, build the candidate release against its C headers, and bind the release receipt to this runtime hash.",
+    "Host reviewed dependency artifacts before enabling public automated releases."
+  ],
+  "installed_release_adopted": false,
+  "default_pin_changed": false,
+  "public_release_ready": false,
+  "full_application_suite_run": false,
+  "second_full_compiler_rebuild_run": false,
+  "wsl_stopped": false,
+  "evidence": {
+    "build_receipt": {
+      "path": "C:/Work/fw-pdfium-gnu-final-20261025/BUILD.json",
+      "sha256": "3077941a46faaa4755f51621260e839bef20d0762f0e54eeb8a83d9db36c9d61"
+    },
+    "runtime_audit": {
+      "path": "build/pdfium-gnu-maintained/20261025/RUNTIME-AUDIT.json",
+      "sha256": "eca387ae9bf26709f967abf4be99ad398d2c552ed18bac1386ec948c2aa5f168"
+    },
+    "acceptance": {
+      "path": "build/pdfium-gnu-maintained/20261025/acceptance/RESULT.json",
+      "sha256": "6866367e7bf6b1803c98b92c2886f55a6fd96cdef78efcd9d9468ce48a520d26"
+    },
+    "package_checks": {
+      "path": "build/pdfium-gnu-maintained/20261025/package-check/RESULT.json",
+      "sha256": "d5d19d9c7da29dbdde1f18a9a185a4f1ce7258bcd8bfe2a913c56db70ae3cdfb"
+    },
+    "manifest": {
+      "path": "build/pdfium-gnu-maintained/20261025/distribution/MANIFEST.json",
+      "sha256": "6de49d782f0763da32b61a938a2ef643b3840b0e405dde42e15fa2d6d6bccb26"
+    }
+  }
+}

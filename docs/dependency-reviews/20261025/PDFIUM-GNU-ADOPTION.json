@@ -1,0 +1,63 @@
+{
+  "schema": "folderwing-pdfium-gnu-adoption/v1",
+  "date": "2026-10-25",
+  "outcome": "default and working release adopted; fresh release acceptance passed",
+  "runtime_sha256": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+  "version": "chromium/8086-folderwing-gnu-20261025",
+  "default_pin_changed": true,
+  "working_release_adopted": true,
+  "import_library_alias": "lib/pdfium.dll.lib is a byte-identical copy of GNU lib/pdfium.dll.a, not an MSVC startup archive",
+  "notice_inventory_active_files": 129,
+  "legacy_input_backup": "build/dependency-backups/pdfium-legacy-07996cd8e81f46809090be0e50178d15",
+  "working_release_backup": "build/pdfium-gnu-adoption/20261025/release-backup",
+  "full_feature_build": {
+    "proof_root": "C:/Work/fw-gnu-adoption-20261025",
+    "revision": "7449280e5e84364cd8029f6697752805caad8e3f",
+    "build_receipt_sha256": "9aa300748833e0d698c4310fa110dd7fd489e445763c2091d212c64280853c6d",
+    "bootstrap_receipt_sha256": "636c02742c00f9237dcf8d199830de6961655c29134bcf83b5bd6a648c60b864",
+    "same_production_code_as_current": true,
+    "later_changes": "closure documentation and inventory metadata only"
+  },
+  "native_selected": {
+    "selectors": 79,
+    "distinct_assertions": 3147,
+    "failures": 0,
+    "receipt_id": "f10f935ab89e66bd339ac4c6f167351ec6aeb134c55737245477f8b9b9641ecc",
+    "branding_evidence": "same-image/source branding receipt reused from mandatory portable release smoke"
+  },
+  "installer_checks": {
+    "checks": 8,
+    "receipt_id": "1ed605d4cac66fad0db46545c099f1399875c7c31abbb60807b718c555a7c3aa"
+  },
+  "package_acceptance": {
+    "checks": 257,
+    "input_key": "0a0a149d2b8b3b7bf400a859223c80ff5cbf4a77e44700de96f299c7035cd1b0",
+    "record": "C:/Work/fw-gnu-adoption-20261025/build/package-acceptance/RESULT.json"
+  },
+  "portable_artifacts": {
+    "Folderwing-0.1.0-windows-x64.zip": {
+      "sha256": "4ba42db631eeb7fe0847a61deb1a18a3dd0d2f1f87693241e29724f697b8e040",
+      "bytes": 26844356
+    },
+    "folderwing-media-lgpl-sources-20261025.tar.gz": {
+      "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+      "bytes": 101050019
+    },
+    "folderwing-pdfium-gnu-8086-recipe.zip": {
+      "sha256": "74678cc9f7e2e7f37ee5075eab76c5db2e309c1a24f610ff225d0f2f9e59b59f",
+      "bytes": 435470
+    }
+  },
+  "hosting": {
+    "prepared_directory": "C:/Work/folderwing-dependency-hosting-20261025",
+    "proposed_repository": "L1nuxOne/folderwing",
+    "published": false,
+    "status": "awaiting choice to create the first public repository and publish the four dependency assets",
+    "application_source_published": false
+  },
+  "public_release_ready": false,
+  "full_suite_run": false,
+  "existing_user_processes_stopped": false,
+  "wsl_stopped": false,
+  "review": "docs/PDFIUM_GNU_ADOPTION.md"
+}

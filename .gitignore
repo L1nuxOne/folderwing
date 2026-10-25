@@ -1,0 +1,14 @@
+build/
+.zig-cache/
+zig-out/
+*.pdb
+*.lib
+*.exp
+third_party/
+
+# Generated Python caches and editing/replacement leftovers
+__pycache__/
+*.py[cod]
+*.orig
+*.old
+*.migrating

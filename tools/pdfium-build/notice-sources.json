@@ -1,0 +1,23 @@
+[
+  {
+    "path": "licenses/Chromium-buildtools-LICENSE",
+    "url": "https://chromium.googlesource.com/chromium/src/buildtools/+/64e87f9fbdaf6f53f6cff8f15e4b06f17cead514/LICENSE?format=TEXT",
+    "sha256": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e"
+  },
+  {
+    "path": "licenses/LLVM-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/62397f8b/LICENSE.TXT",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee"
+  },
+  {
+    "path": "licenses/compiler-rt-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/62397f8b/compiler-rt/LICENSE.TXT",
+    "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+  },
+  {
+    "path": "licenses/PDFium-LICENSE",
+    "url": "https://pdfium.googlesource.com/pdfium/+/2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec/LICENSE",
+    "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+    "basis": "Enclosing BSD license for PDFium and build-recipe source; buildtools has its separate retained Chromium license."
+  }
+]

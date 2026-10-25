@@ -1,0 +1,5 @@
+FROM ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
+ENV DEBIAN_FRONTEND=noninteractive
+COPY toolchain-debs/ /toolchain-debs/
+RUN --network=none apt-get install -y --no-install-recommends /toolchain-debs/*.deb && rm -rf /toolchain-debs && mkdir -p /toolchain-record && dpkg-query -W -f='${Package}\t${Version}\t${Architecture}\n' > /toolchain-record/packages.tsv
+WORKDIR /work

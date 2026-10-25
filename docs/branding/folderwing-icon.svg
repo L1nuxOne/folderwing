@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 256 256">
+  <title>Folderwing</title>
+  <desc>A coral folder unfolds into a plum wing on a cream app tile.</desc>
+  <rect x="8" y="8" width="240" height="240" rx="42" fill="#fff7ef"/>
+  <path fill="#ff6655" d="M29 76Q29 61 43 63L91 69Q98 70 101 77L107 89Q109 93 115 95L146 107C126 116 117 142 98 172L39 135Q29 130 29 119Z"/>
+  <path fill="#ff6655" d="M144 117Q170 94 226 77L209 91Q174 102 144 117Z"/>
+  <path fill="#30213c" d="M86 198C108 171 122 132 144 117Q163 103 226 77L170 156Q165 162 158 165Z"/>
+</svg>

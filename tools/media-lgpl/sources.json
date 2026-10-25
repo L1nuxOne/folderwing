@@ -1,0 +1,175 @@
+{
+  "schema": "folderwing-minimal-lgpl-source-lock/v1",
+  "mpv_api_baseline": "e471496c56f0f49c133bd88b50aed62b845f1909",
+  "base_image": "ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
+  "sources": [
+    {
+      "name": "mpv",
+      "repository": "https://github.com/mpv-player/mpv",
+      "ref": "e471496c56f0f49c133bd88b50aed62b845f1909",
+      "commit": "e471496c56f0f49c133bd88b50aed62b845f1909",
+      "url": "https://codeload.github.com/mpv-player/mpv/tar.gz/e471496c56f0f49c133bd88b50aed62b845f1909",
+      "archive": "mpv-e471496c56f0f49c133bd88b50aed62b845f1909.tar.gz",
+      "sha256": "562674ce7a0f6ac0681291037abc4c8595e0d1202d86d27eb341113eb7d984ba",
+      "bytes": 7494230
+    },
+    {
+      "name": "ffmpeg",
+      "repository": "https://github.com/FFmpeg/FFmpeg",
+      "ref": "9a861e9687d30e657d59521817cad18405995983",
+      "commit": "9a861e9687d30e657d59521817cad18405995983",
+      "url": "https://codeload.github.com/FFmpeg/FFmpeg/tar.gz/9a861e9687d30e657d59521817cad18405995983",
+      "archive": "ffmpeg-9a861e9687d30e657d59521817cad18405995983.tar.gz",
+      "sha256": "c1b0fd16eae5b06838e456ab58924553a94aba087e3ad2e7d983c288003d6f6a",
+      "bytes": 17963570
+    },
+    {
+      "name": "libass",
+      "repository": "https://github.com/libass/libass",
+      "ref": "0.17.5",
+      "commit": "4a05d8127f525943ebf45fdc6497c9e665947f0d",
+      "url": "https://codeload.github.com/libass/libass/tar.gz/4a05d8127f525943ebf45fdc6497c9e665947f0d",
+      "archive": "libass-4a05d8127f525943ebf45fdc6497c9e665947f0d.tar.gz",
+      "sha256": "3546ecc8748c62e100a9dd18e52ea2d17d7facedf89cfcad97000ad60b1bce2b",
+      "bytes": 351823
+    },
+    {
+      "name": "freetype",
+      "repository": "https://github.com/freetype/freetype",
+      "ref": "VER-2-14-3",
+      "commit": "0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "url": "https://codeload.github.com/freetype/freetype/tar.gz/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+      "archive": "freetype-0a0221a1347e2f1e07c395263540026e9a0aa7c7.tar.gz",
+      "sha256": "11cd478953fc1d382f20a233b8e2aed6c31b47cbf0568c4bdb3334bcc1550698",
+      "bytes": 2517889
+    },
+    {
+      "name": "fribidi",
+      "repository": "https://github.com/fribidi/fribidi",
+      "ref": "v1.0.17",
+      "commit": "b93119f5fdc7ea47672cc304c1455ffa6dfe7536",
+      "url": "https://codeload.github.com/fribidi/fribidi/tar.gz/b93119f5fdc7ea47672cc304c1455ffa6dfe7536",
+      "archive": "fribidi-b93119f5fdc7ea47672cc304c1455ffa6dfe7536.tar.gz",
+      "sha256": "f309091695b3b0f2fd5f9caa7941d906ab08df9ab8f9931bf5ee674bc00b489b",
+      "bytes": 2161272
+    },
+    {
+      "name": "harfbuzz",
+      "repository": "https://github.com/harfbuzz/harfbuzz",
+      "ref": "15.0.0",
+      "commit": "35f656a1a2bab548ea7f54a6dd3fba2b09680d14",
+      "url": "https://codeload.github.com/harfbuzz/harfbuzz/tar.gz/35f656a1a2bab548ea7f54a6dd3fba2b09680d14",
+      "archive": "harfbuzz-35f656a1a2bab548ea7f54a6dd3fba2b09680d14.tar.gz",
+      "sha256": "f4d39fc3216d82d01ba2a18ba03a05b69f60510585b764784224a5f51f372a38",
+      "bytes": 39011620
+    },
+    {
+      "name": "libplacebo",
+      "repository": "https://github.com/haasn/libplacebo",
+      "ref": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "url": "https://codeload.github.com/haasn/libplacebo/tar.gz/cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "archive": "libplacebo-cee9b076f2c63104ccfd497fa79c39a867293ec4.tar.gz",
+      "sha256": "6f8fa218cbafd8e5f50b8a82d918e1d8bbb92f9f980820bc0b34d92e9b79e484",
+      "bytes": 863019
+    },
+    {
+      "name": "shaderc",
+      "repository": "https://github.com/google/shaderc",
+      "ref": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "commit": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "url": "https://codeload.github.com/google/shaderc/tar.gz/b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "archive": "shaderc-b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc.tar.gz",
+      "sha256": "b0f73c2f50df5f24e78fae6d04f1e95131c65ea3ea13fd8998a317a5d632a51f",
+      "bytes": 237669
+    },
+    {
+      "name": "spirv-cross",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
+      "ref": "f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+      "commit": "f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Cross/tar.gz/f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+      "archive": "spirv-cross-f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7.tar.gz",
+      "sha256": "92b0458889ed77eac9892b3be5a41e3cf716849fd90f39632e159e555abf3d03",
+      "bytes": 2027619
+    },
+    {
+      "name": "dav1d",
+      "repository": "https://github.com/videolan/dav1d",
+      "ref": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+      "commit": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+      "url": "https://codeload.github.com/videolan/dav1d/tar.gz/54706fc6bc0cdecab7e9593974a4039cc038fca7",
+      "archive": "dav1d-54706fc6bc0cdecab7e9593974a4039cc038fca7.tar.gz",
+      "sha256": "9edb11a2108b375cc58370354e705feebc93430bb780130363815c1e1ac0c250",
+      "bytes": 1751896
+    },
+    {
+      "name": "opus",
+      "repository": "https://github.com/xiph/opus",
+      "ref": "v1.5.2",
+      "commit": "ddbe48383984d56acd9e1ab6a090c54ca6b735a6",
+      "url": "https://codeload.github.com/xiph/opus/tar.gz/ddbe48383984d56acd9e1ab6a090c54ca6b735a6",
+      "archive": "opus-ddbe48383984d56acd9e1ab6a090c54ca6b735a6.tar.gz",
+      "sha256": "18e9d9e26565e279753aafb6823a482ef85ea9fddbfdcdbff8fd095b12dd96b6",
+      "bytes": 4184347
+    },
+    {
+      "name": "zlib",
+      "repository": "https://github.com/madler/zlib",
+      "ref": "v1.3.2",
+      "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
+      "url": "https://codeload.github.com/madler/zlib/tar.gz/da607da739fa6047df13e66a2af6b8bec7c2a498",
+      "archive": "zlib-da607da739fa6047df13e66a2af6b8bec7c2a498.tar.gz",
+      "sha256": "b9258cf6254e7f7c37f1cd61dba943a1c5ea3cff5718c789834dac359094f5f7",
+      "bytes": 1567269
+    },
+    {
+      "name": "glslang",
+      "repository": "https://github.com/KhronosGroup/glslang",
+      "ref": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "commit": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "url": "https://codeload.github.com/KhronosGroup/glslang/tar.gz/e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "archive": "glslang-e1b562a8bed273a02f30b59b66a5d499793cede5.tar.gz",
+      "sha256": "907174a24713c6202c146f164bf81783f1fbc79c8cb821a30f18f159eb980312",
+      "bytes": 4641535
+    },
+    {
+      "name": "spirv-headers",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "ref": "04fd3caa1e8267e4d95c806cad901181728e1006",
+      "commit": "04fd3caa1e8267e4d95c806cad901181728e1006",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/04fd3caa1e8267e4d95c806cad901181728e1006",
+      "archive": "spirv-headers-04fd3caa1e8267e4d95c806cad901181728e1006.tar.gz",
+      "sha256": "392f4801409aad9c4f1b77745f179952fd6264e4c8bd0fc1bc45dfa6807bf6d0",
+      "bytes": 594644
+    },
+    {
+      "name": "spirv-tools",
+      "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+      "ref": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "commit": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "archive": "spirv-tools-ef96ed763b43b59b33b31b362f09a02b729fa1c9.tar.gz",
+      "sha256": "82c62146083fd558735a3171cf97cfc47903ca7d368482e87f94bd44883c0f00",
+      "bytes": 3559528
+    },
+    {
+      "name": "fast-float",
+      "repository": "https://github.com/fastfloat/fast_float",
+      "ref": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "commit": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "url": "https://codeload.github.com/fastfloat/fast_float/tar.gz/97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "archive": "fast-float-97b54ca9e75f5303507699d27c6b4f4efe4641a1.tar.gz",
+      "sha256": "2b132274539286e41f37857cac22aa8441d21bd86d55de825a3342b149f66801",
+      "bytes": 120200
+    }
+  ],
+  "forbidden_features": [
+    "gpl",
+    "nonfree",
+    "dvd",
+    "scripting",
+    "network-media",
+    "encoding"
+  ]
+}

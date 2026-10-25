@@ -1,0 +1,52 @@
+name: Build proposed LGPL media dependency
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14.7'
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            build/media-work/archives
+            build/media-context/toolchain-debs
+          key: folderwing-media-inputs-${{ hashFiles('tools/media-lgpl/*.json') }}
+      - name: Acquire exact source and compiler packages
+        run: |
+          python tools/media-lgpl/acquire.py --work-directory build/media-work
+          python tools/media-lgpl/fetch-toolchain.py --directory build/media-context/toolchain-debs
+          cp tools/media-lgpl/Dockerfile.locked build/media-context/Dockerfile
+          cp tools/media-lgpl/build.sh build/media-work/build.sh
+      - name: Reconstruct locked builder
+        run: docker build -t folderwing-media-locked build/media-context
+      - name: Compile without network and preserve notices
+        run: |
+          docker run --rm --network none --cpus 2 --memory 5g --memory-swap 7g -e FOLDERWING_BUILD_JOBS=2             --mount "type=bind,source=$PWD/build/media-work,target=/work"             --mount "type=bind,source=$PWD/tools/media-lgpl,target=/recipe,readonly"             folderwing-media-locked bash -c 'bash /work/build.sh && python3 /recipe/capture-toolchain.py'
+      - name: Package proposed runtime and corresponding sources
+        env:
+          BUILD_RUN_ID: ${{ github.run_id }}
+        run: python tools/media-lgpl/package.py --build-id "run-$BUILD_RUN_ID" --work-directory build/media-work --output-directory build/proposed-media
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: proposed-media-dependency
+          path: |
+            build/proposed-media/*.zip
+            build/proposed-media/*.tar.gz
+            build/proposed-media/media-dependencies.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Retain failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: media-build-diagnostics
+          path: build/media-work/logs/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,0 +1,18 @@
+{
+  "generator": "built-in image_gen",
+  "purpose": "OpenPilot logo concept exploration; no logo installed or release changed",
+  "assets": [
+    {
+      "file": "01-split-orbit.png",
+      "sha256": "4c335bce16c0f56323705a651a6b25b17394e0ec7a8efaa80cb652e900e967b2"
+    },
+    {
+      "file": "02-waypoint.png",
+      "sha256": "44580f9e9143917679423e0da9946234e423f436ecc55b4ac91c71fafc0d08c6"
+    },
+    {
+      "file": "03-folderwing.png",
+      "sha256": "f102698b7f5466efe7a1634016b58f74e977578aa0c1fa7cf5acf939bad428ba"
+    }
+  ]
+}

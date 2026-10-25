@@ -1,0 +1,63 @@
+2026-10-05T13:58:46.0500111Z Image: windows-2022
+2026-10-05T13:58:46.0502291Z Included Software: https://github.com/actions/runner-images/blob/win22/20260927.320/images/windows/Windows2022-Readme.md
+2026-10-05T13:58:46.7354914Z Uses: bblanchon/pdfium-binaries/.github/workflows/build.yml@refs/heads/master (5325fa6d0d9379329f10f98fdc4839b4e40f2e79)
+2026-10-05T13:58:46.7360714Z   branch: chromium/8086
+2026-10-05T13:58:53.6572844Z + WindowsSDK_DIR='/c/Program Files (x86)/Windows Kits/10/bin/10.0.28000.0'
+2026-10-05T14:01:17.9953621Z + gclient sync -r origin/chromium/8086 --no-history --shallow
+2026-10-05T14:07:47.8013663Z [508/1190] CXX obj/buildtools/third_party/libc++/libc++/any.obj
+2026-10-05T14:07:49.3469219Z [511/1190] CXX obj/buildtools/third_party/libc++/libc++/call_once.obj
+2026-10-05T14:07:53.0667263Z [512/1190] CXX obj/buildtools/third_party/libc++/libc++/bind.obj
+2026-10-05T14:07:54.9156781Z [514/1190] CXX obj/buildtools/third_party/libc++/libc++/barrier.obj
+2026-10-05T14:07:55.1500741Z [515/1190] CXX obj/buildtools/third_party/libc++/libc++/atomic.obj
+2026-10-05T14:07:55.3224300Z [516/1190] CXX obj/buildtools/third_party/libc++/libc++/condition_variable_destructor.obj
+2026-10-05T14:07:55.6822076Z [517/1190] CXX obj/buildtools/third_party/libc++/libc++/algorithm.obj
+2026-10-05T14:07:55.7914580Z [518/1190] CXX obj/buildtools/third_party/libc++/libc++/charconv.obj
+2026-10-05T14:07:56.6813443Z [519/1190] CXX obj/buildtools/third_party/libc++/libc++/exception.obj
+2026-10-05T14:07:58.9185255Z [520/1190] CXX obj/buildtools/third_party/libc++/libc++/error_category.obj
+2026-10-05T14:07:59.3746648Z [521/1190] CXX obj/buildtools/third_party/libc++/libc++/chrono.obj
+2026-10-05T14:08:01.9516475Z [522/1190] CXX obj/buildtools/third_party/libc++/libc++/condition_variable.obj
+2026-10-05T14:08:03.2647067Z [523/1190] CXX obj/buildtools/third_party/libc++/libc++/filesystem_error.obj
+2026-10-05T14:08:04.9065902Z [524/1190] CXX obj/buildtools/third_party/libc++/libc++/filesystem_clock.obj
+2026-10-05T14:08:04.9684511Z [525/1190] CXX obj/buildtools/third_party/libc++/libc++/directory_iterator.obj
+2026-10-05T14:08:05.7256975Z [526/1190] CXX obj/buildtools/third_party/libc++/libc++/path.obj
+2026-10-05T14:08:07.2828156Z [527/1190] CXX obj/buildtools/third_party/libc++/libc++/functional.obj
+2026-10-05T14:08:07.5492700Z [528/1190] CXX obj/buildtools/third_party/libc++/libc++/future.obj
+2026-10-05T14:08:08.3911592Z [529/1190] CXX obj/buildtools/third_party/libc++/libc++/operations.obj
+2026-10-05T14:08:10.0181848Z [530/1190] CXX obj/buildtools/third_party/libc++/libc++/ios.obj
+2026-10-05T14:08:11.2497451Z [531/1190] CXX obj/buildtools/third_party/libc++/libc++/mutex.obj
+2026-10-05T14:08:11.7320803Z [532/1190] CXX obj/buildtools/third_party/libc++/libc++/hash.obj
+2026-10-05T14:08:11.9979885Z [533/1190] CXX obj/buildtools/third_party/libc++/libc++/mutex_destructor.obj
+2026-10-05T14:08:12.3990933Z [534/1190] CXX obj/buildtools/third_party/libc++/libc++/iostream.obj
+2026-10-05T14:08:12.4074284Z [535/1190] CXX obj/buildtools/third_party/libc++/libc++/new_handler.obj
+2026-10-05T14:08:12.4094258Z [536/1190] CXX obj/buildtools/third_party/libc++/libc++/new_helpers.obj
+2026-10-05T14:08:12.4257956Z [537/1190] CXX obj/buildtools/third_party/libc++/libc++/ios.instantiations.obj
+2026-10-05T14:08:12.8261509Z [538/1190] CXX obj/buildtools/third_party/libc++/libc++/optional.obj
+2026-10-05T14:08:15.2666930Z [539/1190] CXX obj/buildtools/third_party/libc++/libc++/random.obj
+2026-10-05T14:08:16.6176826Z [540/1190] CXX obj/buildtools/third_party/libc++/libc++/memory.obj
+2026-10-05T14:08:17.4168397Z [541/1190] CXX obj/buildtools/third_party/libc++/libc++/d2fixed.obj
+2026-10-05T14:08:17.7423448Z [542/1190] CXX obj/buildtools/third_party/libc++/libc++/random_shuffle.obj
+2026-10-05T14:08:18.3789346Z [543/1190] CXX obj/buildtools/third_party/libc++/libc++/shared_mutex.obj
+2026-10-05T14:08:18.7620602Z [544/1190] CXX obj/buildtools/third_party/libc++/libc++/regex.obj
+2026-10-05T14:08:19.8188319Z [545/1190] CXX obj/buildtools/third_party/libc++/libc++/d2s.obj
+2026-10-05T14:08:21.2263875Z [546/1190] CXX obj/buildtools/third_party/libc++/libc++/f2s.obj
+2026-10-05T14:08:21.4766767Z [547/1190] CXX obj/buildtools/third_party/libc++/libc++/stdexcept.obj
+2026-10-05T14:08:22.0247071Z [548/1190] CXX obj/buildtools/third_party/libc++/libc++/locale.obj
+2026-10-05T14:08:22.0567895Z [549/1190] CXX obj/buildtools/third_party/libc++/libc++/typeinfo.obj
+2026-10-05T14:08:22.3530676Z [550/1190] CXX obj/buildtools/third_party/libc++/libc++/variant.obj
+2026-10-05T14:08:22.7436118Z [551/1190] CXX obj/buildtools/third_party/libc++/libc++/valarray.obj
+2026-10-05T14:08:23.0722607Z [552/1190] CXX obj/buildtools/third_party/libc++/libc++/verbose_abort.obj
+2026-10-05T14:08:23.6823373Z [553/1190] CXX obj/buildtools/third_party/libc++/libc++/new.obj
+2026-10-05T14:08:24.1577708Z [554/1190] CXX obj/buildtools/third_party/libc++/libc++/system_error.obj
+2026-10-05T14:08:24.2954622Z [555/1190] CXX obj/buildtools/third_party/libc++/libc++/strstream.obj
+2026-10-05T14:08:24.6712597Z [556/1190] CXX obj/buildtools/third_party/libc++/libc++/string.obj
+2026-10-05T14:08:25.8886979Z [557/1190] CXX obj/buildtools/third_party/libc++/libc++/support.obj
+2026-10-05T14:08:26.4058059Z [558/1190] CXX obj/buildtools/third_party/libc++/libc++/vector.obj
+2026-10-05T14:08:26.6537041Z [559/1190] CXX obj/buildtools/third_party/libc++/libc++/thread.obj
+2026-10-05T14:08:27.4234634Z [561/1190] CXX obj/buildtools/third_party/libc++/libc++/locale_win32.obj
+2026-10-05T14:08:30.1665834Z [579/1190] CXX obj/buildtools/third_party/libc++/libc++/thread_win32.obj
+2026-10-05T14:16:46.3896238Z [1039/1190] CC obj/third_party/fx_libopenjpeg/ht_dec.obj
+2026-10-05T14:19:03.4606379Z + THIRD_PARTY_LIBRARIES=$'abseil-cpp\ndragonbox\nfast_float\nfx_agg\nfx_freetype\nfx_lcms2\nfx_libopenjpeg\ngoogletest\nharfbuzz\nicu\njpeg\nlcms2\nlibc\nlibjpeg_turbo\nlibopenjpeg2\nlibpng\nllvm-libc\nnasm\npng\nsimdutf\ntest_fonts\nzlib'
+2026-10-05T14:19:16.9515887Z -- The C compiler identification is MSVC 19.44.35229.0
+2026-10-05T14:19:18.5064793Z -- The CXX compiler identification is MSVC 19.44.35229.0
+2026-10-05T14:19:19.7848819Z -- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+2026-10-05T14:19:20.5419618Z -- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped

@@ -1,0 +1,2195 @@
+{
+  "schema": "folderwing-dependency-inventory/v1",
+  "review_date": "2026-10-25",
+  "project_license": "MIT",
+  "project_license_file": "LICENSE",
+  "project_license_sha256": "521f234833364cbfa4ffb482eeeb8fe823ebf9322a5047ecba4fb443dc867527",
+  "scope": "Pinned runtime/header dependencies, media sources and notices, exact PDFium source graph and application toolchain runtime review. PDFium Microsoft incorporated-code grant and binary package terms remain unresolved; no MIT incompatibility is established.",
+  "source_inputs_sha256": {
+    "LICENSE": "521f234833364cbfa4ffb482eeeb8fe823ebf9322a5047ecba4fb443dc867527",
+    "build.ps1": "302a9d6844ddc72aa22968b9f8bbbd6154cafcb57b227421c4a47830f2c3dcca",
+    "tools/get-media.ps1": "8b9f00bbceb9b9819533cdb3503b95929100c8f514f39fff7068b6fa7bcf4eae",
+    "tools/media-dependencies.json": "9011093f1f50274d5a80f1f0ab9985958c2e936116502f2a8cd743a7aec95efa",
+    "tools/get-archives.ps1": "cf9ce35e7113a198dde9fab18a9b9f7a46e4e4dd71378467617383093fc3f64e",
+    "tools/archive-dependencies.json": "bf148bf8b67df8f47144b3d9360af8feff7b1df6222ef3d741f44d8ee71e2d15",
+    "tools/get-pdfium.ps1": "d577d3f6de2c18f187bd13ba9ba8ee8dfd556d91480a172b74c9e6e89a3a6751",
+    "tools/get-libwebp.ps1": "9f99a8d845d96b5bcfcd616738ba0e2e3ed7cee411fb4851c85bbec1b9ed0a7b",
+    "tools/get-libvterm.ps1": "a9e8b7600c8ef44fe91f032d774886cfa98cfc65d4e7dc570f4e1b07480fa961",
+    "tools/get-sqlite.ps1": "50e7fa676d6d5aab62d1b15b61a9f9563f46daac11463a65b0a0f5a1b920cbc2",
+    "app/mediaengine.cpp": "0466d4c572951c7e6dacdc3fdade05ecab32f26e324627227e1cf6bf67803ed2",
+    "tools/media-lgpl/acquire.py": "10ab5896b5aea03ccd01b51d50afe4e529a64133a26d348889484312b71c8879",
+    "tools/media-lgpl/build.sh": "433ae7b1c8dd743153eb73e7f0d71e47da505bbbdf9559065984494dcb147c7d",
+    "tools/media-lgpl/Dockerfile": "432afc6ae036b6aa97f19d73e5a462a709cf26b0d1697763375363ed1331f519",
+    "tools/media-lgpl/Dockerfile.locked": "5bb8c15886ed59df48f7839f85d75998cdcff6d85439ea2c689c1d3fe38fcd07",
+    "tools/media-lgpl/fetch-toolchain.py": "068637c6c5e25f86a46382681a16a4fbb419c1a0fbeb9fd1004f283a03268acb",
+    "tools/media-lgpl/headers.json": "8abb317c3a75bd925b5a9235d9713c590802fd3ec2b69ca9f7a4cecc025ed4ab",
+    "tools/media-lgpl/lock-toolchain.py": "1bde6527cfe7ca339247f8b352dac1e213965c2aebdfc158537dcb665bdf26f7",
+    "tools/media-lgpl/package.py": "dde168f119ac89e8b2fa6f9722922454ea8724c5e9faa70e0f6ffa372e294873",
+    "tools/media-lgpl/sources.json": "d62263fc265c684efb5a0ee557a2d72438186beda5790e4e9150f0f7e04d1e6f",
+    "tools/media-lgpl/toolchain-sources.json": "65fb70381dfe6d34b062f203ea6290365bf244810cd1119c252c534c0f1e81b2",
+    "tools/media-lgpl/toolchain.json": "2081ef7641779e950e1e793c0e87514ea5e0d715b5a2e234039e8425aa0637b3",
+    "tools/copy-media-assets.ps1": "128ee10e4120f244df4d6a89703a6a813c110af9a8183fb92590daac3c30ad34",
+    "tools/bootstrap-release.py": "3c9f85008311bb94afcea9b6228122f3ddb14e38e6b58c0de7903719e3dd3477",
+    "tools/release_common.py": "7712f4745f194d0912ef6ff2e0fa64b5d2e6cf267eb0a520cadfbc1097d9c101",
+    "tools/release-inputs.json": "342b4e6fa81c5785ed19dd358dca1c8734bc4aa782a6955e7218c5ff56394872",
+    "tools/release-files.json": "af084f7676a4511ff7bccc3df0111199dff3ae85171f5082406931f019ba9a23",
+    "tools/build-release.ps1": "50c05fe27fb5e587be7e1ebbd22dc45e2d9b7b756f6fd109f8f7cd8329061170",
+    "tools/package-release.py": "c3fff6fe994b0e87535697efdd9492705cdc4d71f0a603b1db27b759ed198768",
+    "tools/release-build-receipt.py": "038c1020a74728b4edb95fc6afa3b7e543705eba5db9a640f92e733c1d0fab7e",
+    "tools/check-release.py": "284bbbbb734e6544f5c4de7a6716873c425ff505bf93a49bfa46c99c4b087fe2",
+    "tools/media-lgpl/capture-toolchain.py": "63e056a7ed86025315a5ed934fc6d3d864f30ba99e7eb3aa7b2bab1280ab1f2b",
+    "tests/release_smoke.ps1": "56efb04ab401aedd395dca13aa8132ace1a8fb44bbb1ec72521b3310ba668682",
+    "tests/release_packaging.ps1": "2f277030d1180a4dafda332ce31d81a1a2e640353e161d9625e0ed2fb7dec919",
+    "tests/make_media_fixtures.py": "1f8bed0d526aef496416c7769f489453a63a9070b7fc308684789f22de24b774",
+    ".github/workflows/build.yml": "66ef821f3ab5f45371825a36d8ff5543ba0d561f98bf29fc81db10a182e3932c",
+    ".github/workflows/media.yml": "e5a27fbbcfeae34380641be6ddb7faf480df997feb4149fa9879d3e69baa98b5",
+    ".github/actions-pins.json": "a39bc00511ac378c20879dd0240c7a47f1c731b9c34c44026bfc1aa25e045d80",
+    "tools/pdfium-build/audit.py": "687ed20cf398c8bf085ea670d084895139d0c57d69b40e9ed6b463202caf8958",
+    "tools/pdfium-build/build.py": "2c1a4962613db6279e1076131eb6ca4246c94df7baa3b6acfed1208c9d4dcf96",
+    "tools/pdfium-build/inputs.json": "9fd90458e232dc2d4d7f83e19c68f1ba724bb0e63f136d6c5f0431dedc305e92",
+    "tools/pdfium-build/notice-sources.json": "a8dbe42d9ecb5c464818de89600f4eac6a2e85166d027450f7d6b4e94ff7b866",
+    "tools/pdfium-build/package.py": "6a5a8841a8a1f974bb1bcb030e1a6ae002be05f8eba427f64c3ada4e7ae20412",
+    "tools/pdfium-build/PREREQUISITES.md": "d9ddc34279d2b1f7583e5c3e933a54987de7541d07e3f440faa501248b5d187d",
+    "tools/pdfium-build/README.md": "003f89bb76a36f7a081bf073a89199b716312bee5d2a3408a2b3656b8c42eb5a",
+    "tools/pdfium-build/source-graph.json": "47fccf27dc049868db99b9aea9e2a133d400349ef8d42b8d49d7cb9f1c997edf",
+    "tools/pdfium-build/toolchain.lock.json": "7f9aebf308fc0a9d49b149c07c396fef80bcedd54ae7d0e6c726fcdf840ea526",
+    "tools/pdfium-build/licenses/Chromium-buildtools-LICENSE": "ff11d445fb41a1087c7630e120ab15f1a2cb67c1b707173cb494141805fca35e",
+    "tools/pdfium-build/licenses/compiler-rt-LICENSE.TXT": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+    "tools/pdfium-build/licenses/LLVM-LICENSE.TXT": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+    "tools/pdfium-build/licenses/PDFium-LICENSE": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+    "tools/pdfium-build/patches/chromium-build.patch": "faf1cec5e5a1b5ff720d2908d26818d04c58f27982cce7217cf540500bf53edf",
+    "tools/pdfium-build/patches/pdfium.patch": "d07eeda5344074997dee3ce12e3454f0f3596744a813ab326a54db5406b1c8f0",
+    "docs/PDFIUM_CONTROLLED_BUILD.md": "2e2f6446bbfcba313086e9f85ac49be1fe8e643d16d0e5db6f516d0751cb7a1e",
+    "tests/native-impact.json": "3025e64f41f23abc72e13c7cfaf47c7b3b97fd512f8b4e56a79690e13f849198",
+    "docs/PDFIUM_DISTRIBUTION_REVIEW_20261025.md": "0b0e2fd144f45c4d9d7263b15234353ea31d17a368b59a3828379ec709c8d10d",
+    "docs/dependency-reviews/20261025/MICROSOFT-DISTRIBUTION-INQUIRY.txt": "b413164500bd40fd5101d347891137e3bc4c85c6c7e657ca61f1a6c8d8292505",
+    "docs/dependency-reviews/20261025/LLVM-MINGW-EXPERIMENT.json": "e2def57ef47da2d1c7de36195c08596e32106d088e2fc0d9517c0df39122cd57",
+    "tools/pdfium-build/patches/llvm-mingw-portability.patch": "5eb5ac53e80a5a5d648defaa9fbc1f57f43ac310db9401fe687490c4623071e0",
+    "docs/dependency-reviews/20261025/LLVM-MINGW-PORTABILITY.json": "58ce063499edfb81c213adb3f91aefac2a041d76e975e0fe3a12cfcb998841a5",
+    "tools/pdfium-build/gnu/README.md": "f0ebcab52324355d17586fda8353317df91956080c825130d976882a7266d8e3",
+    "tools/pdfium-build/gnu/RUNTIME.md": "ac8fa37b30791d526fc7bbbc17119012a6e1191b84bf2a50897ac6454b2ab5bc",
+    "tools/pdfium-build/gnu/audit_runtime.py": "d2fc478e763d6b404d00b2080b76bba104aa254d772ea2603a96a4d25db305d8",
+    "tools/pdfium-build/gnu/build.py": "8fc112fc94f1ffa7a9b75912b38dc3896aafb0851539bda5a535028ccdc14b44",
+    "tools/pdfium-build/gnu/graph.json": "5534ec330ba2ed9adf9733a6993c238d5a20c9705bf85291112f8a594a5bc8d3",
+    "tools/pdfium-build/gnu/inputs.json": "bc9c0613ee19548942fe465e506ad6105482a291398e54ec15f1c9ca774e336e",
+    "tools/pdfium-build/gnu/licenses/COPYING": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+    "tools/pdfium-build/gnu/licenses/COPYING.MinGW-w64-runtime.txt": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+    "tools/pdfium-build/gnu/licenses/COPYING.MinGW-w64.txt": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+    "tools/pdfium-build/gnu/licenses/COPYING.winpthreads.txt": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+    "tools/pdfium-build/gnu/licenses/LLVM-LICENSE.TXT": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+    "tools/pdfium-build/gnu/licenses/MinGW-DISCLAIMER.txt": "039ed6b4f31bb7fb97e733170b58cc435335352e4745734fcfd113877fdaf340",
+    "tools/pdfium-build/gnu/licenses/MinGW-source-notices.txt": "deccf97c5be359fcc89efb32ca89c1ca91cb97cac8e7c8a00b0ce487e41c1e88",
+    "tools/pdfium-build/gnu/licenses/compiler-rt-LICENSE.TXT": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+    "tools/pdfium-build/gnu/licenses/libcxx-LICENSE.TXT": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+    "tools/pdfium-build/gnu/licenses/libcxxabi-LICENSE.TXT": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+    "tools/pdfium-build/gnu/licenses/libunwind-LICENSE.TXT": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d",
+    "tools/pdfium-build/gnu/notice-provenance.json": "b5db96191c6fd0f0779e618b4ddfd46b0a68735750157000e2069a886da06784",
+    "tools/pdfium-build/gnu/notices.json": "33cfdb6c4af2116789930fc3cb381701d49026d4caf7d87a9a60f07e8376f9d7",
+    "tools/pdfium-build/gnu/package.py": "ac86bbefec5094f706203879ab53ccac196e875464c5ea0266c43f12e2413f06",
+    "tools/pdfium-build/gnu/restore.py": "5c4e0f90b8efdc0653a20e96d7420ee5795f7ddd76d15262f58a17e4df4ccbf5",
+    "tools/pdfium-build/gnu/runtime-sources.json": "9699e183be69baf44078e841c3c5e57dcc726d01821715aaadfc32de794fc6df",
+    "tools/pdfium-build/gnu/sources.json": "9651ef0421b0fdfb844810eb59583093f384fed37df500afc3352b9d7e313821",
+    "tools/pdfium-build/gnu/supplemental-notices.json": "b3a54cb3e2dd001d6eac06ec1d853da9c6f7d42244805fdccd076bb49a758b69",
+    "tools/pdfium-build/gnu/toolchain-files.json": "88aafe88ea5cd09be4bef76aaff936a000729e57698c8fa6f3de1efc90a62edc",
+    "docs/dependency-reviews/20261025/PDFIUM-GNU-CANDIDATE.json": "4a5fd35779da2f0de2db532ca115e8fb936a4acb578a80c3a1043b26b37ed10d",
+    "docs/PDFIUM_GNU_BUILD.md": "5d9ba3f3a96df1b8d90cdcb20962db7a4e27658fd2b4d8b13aef9dccbc539fe3",
+    "tools/get-pdfium.py": "c8b63e3ce605ae058118eedd60b178dfa1edf0436978aca323823e78914b040b",
+    "docs/PDFIUM_GNU_ADOPTION.md": "2c809a2155072e92eeb253b80e032b9e3ca264b6e66fcf33f567ad32cbd533b9",
+    "docs/dependency-reviews/20261025/PDFIUM-GNU-ADOPTION.json": "de4c6a95fefe97d58ff5c6490ded1109aa3eb23088c75824ccbd742288d68fbf",
+    "docs/DEPENDENCIES.md": "a3bf99d0cd9fed8badb6184c1d02979f6ed5bbaa1dc842128598713fc7f3490f",
+    "docs/RELEASING.md": "ac76d4524d747210e15bdda78ae0187a92cb8a4df24e70eba0462106008e940a",
+    "README.md": "0e376323b2180671185f9e479c2b93cf9ace79b23b71971f26f377ad5dd54de4",
+    "docs/DEPENDENCY_HOSTING.md": "646a8e1fc54fa3a8cee261ec5ef230703d4529de1e7f2972784125304e9a80d5",
+    "docs/dependency-reviews/20261025/DEPENDENCY-HOSTING.json": "df95c5a5f3fca7e477c91edce16d0a090b352f1507f2bf4edbfc633266ac799b",
+    "docs/SOURCE_PUBLISHING.md": "14cc3ab272663bdca53a520c62fda0724ce9ae1f220255a6941e3245b93f8c1c"
+  },
+  "release_ready": true,
+  "components": [
+    {
+      "id": "miniz",
+      "name": "miniz",
+      "version": "3.1.2",
+      "license_expression": "MIT",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-zip.exe"
+      ],
+      "origin": {
+        "url": "https://codeload.github.com/richgel999/miniz/tar.gz/refs/tags/3.1.2",
+        "archive_sha256": "98468f8924934b723276680f85238b6c78bf1f8b49b4459cc9b7214a20e2e9fb",
+        "manifest": "tools/archive-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/archives/miniz-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/archives/lib/libminiz.a",
+        "sha256": "4bb38e8311ba2f3857c6d4eacc419be3399f4e13a13a38c512972a998244a4b8"
+      },
+      "notice_status": "Full prepared notices included by explicit release packager",
+      "license_basis": "pinned distribution notice; libarchive file-level exceptions retained conservatively"
+    },
+    {
+      "id": "libarchive",
+      "name": "libarchive",
+      "version": "3.8.10",
+      "license_expression": "BSD-2-Clause AND BSD-3-Clause AND (CC0-1.0 OR OpenSSL OR Apache-2.0)",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-archive.exe"
+      ],
+      "origin": {
+        "url": "https://codeload.github.com/libarchive/libarchive/tar.gz/refs/tags/v3.8.10",
+        "archive_sha256": "6ec4ad1b96f92f9fe3a74bac2647e7b122a4496aa804e2fb9b50f2030283582c",
+        "manifest": "tools/archive-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/archives/libarchive-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/archives/lib/libarchive.a",
+        "sha256": "f3123773c16048c7a3c62504e10c1ed0738f3d5064e174c3c00c015c9c8c9aa8"
+      },
+      "notice_status": "Full prepared notices included by explicit release packager",
+      "license_basis": "pinned distribution notice; libarchive file-level exceptions retained conservatively"
+    },
+    {
+      "id": "zlib",
+      "name": "zlib",
+      "version": "1.3.2",
+      "license_expression": "Zlib",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-archive.exe",
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "url": "https://codeload.github.com/madler/zlib/tar.gz/refs/tags/v1.3.2",
+        "archive_sha256": "b99a0b86c0ba9360ec7e78c4f1e43b1cbdf1e6936c8fa0f6835c0cd694a495a1",
+        "manifest": "tools/archive-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/archives/zlib-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/archives/lib/libzs.a",
+        "sha256": "b8d6831e1d1b0039362412a8d7a0e405262a3406c235a2d9adb3d951789c2e94"
+      },
+      "notice_status": "Full prepared notices included by explicit release packager",
+      "license_basis": "pinned distribution notice; libarchive file-level exceptions retained conservatively",
+      "media_source_pin": {
+        "name": "zlib",
+        "repository": "https://github.com/madler/zlib",
+        "ref": "v1.3.2",
+        "commit": "da607da739fa6047df13e66a2af6b8bec7c2a498",
+        "url": "https://codeload.github.com/madler/zlib/tar.gz/da607da739fa6047df13e66a2af6b8bec7c2a498",
+        "archive": "zlib-da607da739fa6047df13e66a2af6b8bec7c2a498.tar.gz",
+        "sha256": "b9258cf6254e7f7c37f1cd61dba943a1c5ea3cff5718c789834dac359094f5f7",
+        "bytes": 1567269
+      }
+    },
+    {
+      "id": "bzip2",
+      "name": "bzip2/libbzip2",
+      "version": "1.0.8",
+      "license_expression": "bzip2-1.0.6",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-archive.exe"
+      ],
+      "origin": {
+        "url": "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz",
+        "archive_sha256": "ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269",
+        "manifest": "tools/archive-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/archives/bzip2-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/archives/lib/libbz2.a",
+        "sha256": "969a68bed0ff566e41830cec02c1eb19730fde2c2deae91ff41da781c8a7009f"
+      },
+      "notice_status": "Full prepared notices included by explicit release packager",
+      "license_basis": "pinned distribution notice; libarchive file-level exceptions retained conservatively"
+    },
+    {
+      "id": "liblzma",
+      "name": "XZ liblzma",
+      "version": "5.8.4",
+      "license_expression": "0BSD",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-archive.exe"
+      ],
+      "origin": {
+        "url": "https://codeload.github.com/tukaani-project/xz/tar.gz/refs/tags/v5.8.4",
+        "archive_sha256": "b6b34c52e672e810d339db14e0c10b5b6f5f67a30d8d05cdac5d8cb4d82f78d5",
+        "manifest": "tools/archive-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/archives/xz-COPYING.txt",
+        "licenses/third-party/archives/xz-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/archives/lib/liblzma.a",
+        "sha256": "f3c50758b035cdaf23b9a05052ffa82fa93e3afb0d0361f0ea80b57c86f2a9ab"
+      },
+      "notice_status": "Full prepared notices included by explicit release packager",
+      "license_basis": "pinned distribution notice; libarchive file-level exceptions retained conservatively"
+    },
+    {
+      "id": "libwebp",
+      "name": "libwebp decoder/demux",
+      "version": "1.6.0",
+      "license_expression": "BSD-3-Clause",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-image.exe"
+      ],
+      "origin": {
+        "url": "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz",
+        "archive_sha256": "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564",
+        "script": "tools/get-libwebp.ps1"
+      },
+      "notices": [
+        "licenses/third-party/libwebp/COPYING",
+        "licenses/third-party/libwebp/PATENTS"
+      ],
+      "notice_status": "COPYING and PATENTS already copied to development build output"
+    },
+    {
+      "id": "pdfium",
+      "name": "PDFium controlled GNU package",
+      "version": "chromium/8086-folderwing-gnu-20261025",
+      "license_expression": "BSD-3-Clause AND LicenseRef-PDFium-bundled-components AND Apache-2.0 WITH LLVM-exception AND LicenseRef-MinGW-Runtime-Notices AND MIT AND BSD-3-Clause",
+      "relationship": "dynamically-linked",
+      "artifacts": [
+        "folderwing-pdf.exe",
+        "pdfium.dll"
+      ],
+      "origin": {
+        "archive_name": "folderwing-pdfium-gnu-8086-win-x64.zip",
+        "archive_sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+        "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+        "script": "tools/get-pdfium.ps1",
+        "build_recipe": "tools/pdfium-build/gnu",
+        "source_review": "docs/PDFIUM_GNU_BUILD.md",
+        "hosting": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025",
+        "url": "https://github.com/L1nuxOne/folderwing/releases/download/dependencies-20261025/folderwing-pdfium-gnu-8086-win-x64.zip"
+      },
+      "notices": [
+        "licenses/third-party/pdfium/package-LICENSE",
+        "licenses/third-party/pdfium/licenses/abseil.txt",
+        "licenses/third-party/pdfium/licenses/agg23.txt",
+        "licenses/third-party/pdfium/licenses/dragonbox-Apache2-LLVM.txt",
+        "licenses/third-party/pdfium/licenses/dragonbox-Boost.txt",
+        "licenses/third-party/pdfium/licenses/fast_float.txt",
+        "licenses/third-party/pdfium/licenses/freetype.txt",
+        "licenses/third-party/pdfium/licenses/harfbuzz.txt",
+        "licenses/third-party/pdfium/licenses/icu.txt",
+        "licenses/third-party/pdfium/licenses/lcms.txt",
+        "licenses/third-party/pdfium/licenses/libjpeg_turbo.ijg",
+        "licenses/third-party/pdfium/licenses/libjpeg_turbo.md",
+        "licenses/third-party/pdfium/licenses/libopenjpeg.txt",
+        "licenses/third-party/pdfium/licenses/libpng.txt",
+        "licenses/third-party/pdfium/licenses/llvm-libc.txt",
+        "licenses/third-party/pdfium/licenses/pdfium.txt",
+        "licenses/third-party/pdfium/licenses/simdutf.txt",
+        "licenses/third-party/pdfium/licenses/zlib.txt",
+        "licenses/third-party/pdfium/lcms-LICENSE.txt",
+        "licenses/third-party/pdfium/openjpeg-LICENSE.txt",
+        "licenses/third-party/pdfium/agg23-copying.txt",
+        "licenses/third-party/pdfium/source-file-notices.txt",
+        "licenses/third-party/pdfium/ACKNOWLEDGEMENTS.txt",
+        "licenses/third-party/pdfium-gnu-runtime/LLVM-LICENSE.TXT",
+        "licenses/third-party/pdfium-gnu-runtime/compiler-rt-LICENSE.TXT",
+        "licenses/third-party/pdfium-gnu-runtime/libcxx-LICENSE.TXT",
+        "licenses/third-party/pdfium-gnu-runtime/libcxxabi-LICENSE.TXT",
+        "licenses/third-party/pdfium-gnu-runtime/libunwind-LICENSE.TXT",
+        "licenses/third-party/pdfium-gnu-runtime/COPYING",
+        "licenses/third-party/pdfium-gnu-runtime/COPYING.MinGW-w64.txt",
+        "licenses/third-party/pdfium-gnu-runtime/COPYING.MinGW-w64-runtime.txt",
+        "licenses/third-party/pdfium-gnu-runtime/COPYING.winpthreads.txt",
+        "licenses/third-party/pdfium-gnu-runtime/MinGW-DISCLAIMER.txt",
+        "licenses/third-party/pdfium-gnu-runtime/MinGW-source-notices.txt",
+        "licenses/third-party/pdfium-gnu-runtime/RUNTIME.md"
+      ],
+      "notice_status": "Full prepared notices included by tools/package-release.py using the explicit inventory",
+      "bundled_notice_catalog": [
+        {
+          "name": "abseil.txt",
+          "component": "abseil-cpp",
+          "path": "licenses/third-party/pdfium/licenses/abseil.txt",
+          "license_expression": "Apache-2.0",
+          "version": "DEPS checkout; upstream README revision is descriptive",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/src/third_party/abseil-cpp.git",
+            "commit": "a00d74bb55b38f213a3c6110b4bcab5bb565bd56"
+          }
+        },
+        {
+          "name": "agg23.txt",
+          "component": "agg23",
+          "path": "licenses/third-party/pdfium/licenses/agg23.txt",
+          "license_expression": "LicenseRef-AGG-2.3-Permission",
+          "version": "2.3 PDFium hard fork",
+          "source": {
+            "repository": "https://pdfium.googlesource.com/pdfium",
+            "commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+            "path": "third_party/agg23"
+          }
+        },
+        {
+          "name": "dragonbox-Apache2-LLVM.txt",
+          "component": "dragonbox",
+          "path": "licenses/third-party/pdfium/licenses/dragonbox-Apache2-LLVM.txt",
+          "license_expression": "Apache-2.0 WITH LLVM-exception",
+          "version": "1.1.3 label; exact DEPS checkout below",
+          "source": {
+            "repository": "https://chromium.googlesource.com/external/github.com/jk-jeon/dragonbox.git",
+            "commit": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44"
+          }
+        },
+        {
+          "name": "dragonbox-Boost.txt",
+          "component": "dragonbox",
+          "path": "licenses/third-party/pdfium/licenses/dragonbox-Boost.txt",
+          "license_expression": "BSL-1.0",
+          "version": "1.1.3 label; Boost alternative selected",
+          "source": {
+            "repository": "https://chromium.googlesource.com/external/github.com/jk-jeon/dragonbox.git",
+            "commit": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44"
+          }
+        },
+        {
+          "name": "fast_float.txt",
+          "component": "fast_float",
+          "path": "licenses/third-party/pdfium/licenses/fast_float.txt",
+          "license_expression": "MIT",
+          "version": "8.3.0",
+          "source": {
+            "repository": "https://chromium.googlesource.com/external/github.com/fastfloat/fast_float.git",
+            "commit": "b0ab987b3dfdde13fa1915f65ef2a5c068d9208c"
+          }
+        },
+        {
+          "name": "freetype.txt",
+          "component": "freetype",
+          "path": "licenses/third-party/pdfium/licenses/freetype.txt",
+          "license_expression": "FTL",
+          "version": "2.14.3-85",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git",
+            "commit": "4800589f76dc62fbe523a74a59e0d4850a5dd7df"
+          }
+        },
+        {
+          "name": "harfbuzz.txt",
+          "component": "harfbuzz",
+          "path": "licenses/third-party/pdfium/licenses/harfbuzz.txt",
+          "license_expression": "MIT-Modern-Variant",
+          "version": "14.5.0-10",
+          "source": {
+            "repository": "https://chromium.googlesource.com/external/github.com/harfbuzz/harfbuzz.git",
+            "commit": "ff36703b95013ec1d437e6038e1aa7c881275f4e"
+          }
+        },
+        {
+          "name": "icu.txt",
+          "component": "icu",
+          "path": "licenses/third-party/pdfium/licenses/icu.txt",
+          "license_expression": "Unicode-3.0 AND LicenseRef-ICU-ThirdParty-Notices",
+          "version": "78.2",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/deps/icu.git",
+            "commit": "5aa526207171ecadf31597f0980a7b7ad8872f33"
+          }
+        },
+        {
+          "name": "lcms.txt",
+          "component": "lcms",
+          "path": "licenses/third-party/pdfium/licenses/lcms.txt",
+          "license_expression": "MIT",
+          "version": "2.19 PDFium fork",
+          "source": {
+            "repository": "https://pdfium.googlesource.com/pdfium",
+            "commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+            "path": "third_party/lcms"
+          }
+        },
+        {
+          "name": "libjpeg_turbo.ijg",
+          "component": "libjpeg_turbo",
+          "path": "licenses/third-party/pdfium/licenses/libjpeg_turbo.ijg",
+          "license_expression": "IJG",
+          "version": "3.1.0 upstream label; Chromium checkout authoritative",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git",
+            "commit": "640f254ad0fa03f6b1f29f89b7dd9366f2f6e533"
+          }
+        },
+        {
+          "name": "libjpeg_turbo.md",
+          "component": "libjpeg_turbo",
+          "path": "licenses/third-party/pdfium/licenses/libjpeg_turbo.md",
+          "license_expression": "BSD-3-Clause AND IJG AND Zlib",
+          "version": "3.1.0 upstream label; conservative license roll-up",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/deps/libjpeg_turbo.git",
+            "commit": "640f254ad0fa03f6b1f29f89b7dd9366f2f6e533"
+          }
+        },
+        {
+          "name": "libopenjpeg.txt",
+          "component": "libopenjpeg",
+          "path": "licenses/third-party/pdfium/licenses/libopenjpeg.txt",
+          "license_expression": "BSD-2-Clause",
+          "version": "2.5.4 PDFium fork",
+          "source": {
+            "repository": "https://pdfium.googlesource.com/pdfium",
+            "commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+            "path": "third_party/libopenjpeg"
+          }
+        },
+        {
+          "name": "libpng.txt",
+          "component": "libpng",
+          "path": "licenses/third-party/pdfium/licenses/libpng.txt",
+          "license_expression": "Libpng-2.0 AND Libpng",
+          "version": "1.6.58",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/src/third_party/libpng.git",
+            "commit": "0179a807421cf96731cdfa10008bba04fda243c1"
+          }
+        },
+        {
+          "name": "llvm-libc.txt",
+          "component": "llvm-libc",
+          "path": "licenses/third-party/pdfium/licenses/llvm-libc.txt",
+          "license_expression": "Apache-2.0 WITH LLVM-exception AND NCSA",
+          "version": "DEPS checkout",
+          "source": {
+            "repository": "https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libc.git",
+            "commit": "14e51fd2cd7ec21294f18a3a0b2fc5339afea271"
+          }
+        },
+        {
+          "name": "pdfium.txt",
+          "component": "pdfium",
+          "path": "licenses/third-party/pdfium/licenses/pdfium.txt",
+          "license_expression": "BSD-3-Clause",
+          "version": "157.0.8086.0",
+          "source": {
+            "repository": "https://pdfium.googlesource.com/pdfium",
+            "commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+            "path": "."
+          }
+        },
+        {
+          "name": "simdutf.txt",
+          "component": "simdutf",
+          "path": "licenses/third-party/pdfium/licenses/simdutf.txt",
+          "license_expression": "MIT",
+          "version": "7.7.0 Chromium integration",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/src/third_party/simdutf",
+            "commit": "f7356eed293f8208c40b3c1b344a50bd70971983"
+          }
+        },
+        {
+          "name": "zlib.txt",
+          "component": "zlib",
+          "path": "licenses/third-party/pdfium/licenses/zlib.txt",
+          "license_expression": "Zlib",
+          "version": "1.3.2 Chromium integration",
+          "source": {
+            "repository": "https://chromium.googlesource.com/chromium/src/third_party/zlib.git",
+            "commit": "456ae730017b9b4bd3371927abc82627fd51feef"
+          }
+        }
+      ],
+      "closure_status": "Closed for default controlled GNU route: runtime source/notices, default input, working release and fresh release acceptance complete. Public hosting is tracked under DEP-01.",
+      "observed_binary_sha256": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+      "controlled_build_candidate": {
+        "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+        "runtime_sha256": "8b36e28dbc4e47f7f4dc182036d6a404fdc7ddfde5391c1976a317053edac9e3",
+        "bytes": 7164928,
+        "recipe": "tools/pdfium-build/build.py",
+        "inputs": "tools/pdfium-build/inputs.json",
+        "review": "docs/PDFIUM_CONTROLLED_BUILD.md",
+        "external_runtime_imports": [
+          "Windows UCRT API sets",
+          "VCRUNTIME140.dll",
+          "VCRUNTIME140_1.dll"
+        ],
+        "static_microsoft_support_objects": 31,
+        "adopted_for_installed_release": false,
+        "public_release_ready": false,
+        "distribution_review": "docs/PDFIUM_DISTRIBUTION_REVIEW_20261025.md"
+      },
+      "llvm_mingw_candidate": {
+        "runtime_sha256": "6085648b6e8f4c031a92722a82ae57d35c444a15b08d406121df5869c14d9f3f",
+        "bytes": 40368640,
+        "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+        "toolchain": "LLVM-MinGW 20261020 / LLVM 23.1.4 / GNU ABI / UCRT",
+        "record": "docs/dependency-reviews/20261025/LLVM-MINGW-PORTABILITY.json",
+        "patch": "tools/pdfium-build/patches/llvm-mingw-portability.patch",
+        "export_count": 471,
+        "acceptance": "PDF 85 assertions; archive 197; complete host 2882 (includes PDF); actual allocator 1280 allocation cases plus 32 null frees",
+        "runtime_source_license_inventory_completed": false,
+        "production_recipe_integrated": false,
+        "adopted_for_installed_release": false,
+        "public_release_ready": false,
+        "historical_prototype_superseded": true
+      },
+      "maintained_gnu_candidate": {
+        "record": "docs/dependency-reviews/20261025/PDFIUM-GNU-CANDIDATE.json",
+        "record_sha256": "4a5fd35779da2f0de2db532ca115e8fb936a4acb578a80c3a1043b26b37ed10d",
+        "runtime_sha256": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+        "bytes": 8957440,
+        "artifacts": {
+          "folderwing-pdfium-gnu-8086-win-x64.zip": {
+            "sha256": "143966b99f5ce2bf181e0dadf8f038f8dc9914e0b8195aebbe86af7242cbfb0d",
+            "bytes": 4284026
+          },
+          "folderwing-pdfium-gnu-8086-recipe.zip": {
+            "sha256": "74678cc9f7e2e7f37ee5075eab76c5db2e309c1a24f610ff225d0f2f9e59b59f",
+            "bytes": 435470
+          }
+        },
+        "recipe": "tools/pdfium-build/gnu/build.py",
+        "inputs": "tools/pdfium-build/gnu/inputs.json",
+        "runtime_source_license_inventory_completed": true,
+        "production_recipe_integrated": true,
+        "distinct_native_assertions": 3079,
+        "selectors": 73,
+        "package_checks": 12,
+        "adopted_for_installed_release": true,
+        "public_release_ready": true,
+        "default_pin_adopted": true,
+        "adoption_record": "docs/dependency-reviews/20261025/PDFIUM-GNU-ADOPTION.json",
+        "readiness_basis": "Subsequent local adoption and public-hosting records; the pinned runtime ZIP retains its pre-adoption metadata."
+      },
+      "historical_microsoft_package": {
+        "origin": {
+          "url": "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium/8086/pdfium-win-x64.tgz",
+          "archive_sha256": "1fd8af952832dbb0eb16d9249f68fe09e5f5ebf7c3dd9f6066ea2720cc28487d",
+          "script": "tools/get-pdfium.ps1",
+          "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+          "packager_commit": "5325fa6d0d9379329f10f98fdc4839b4e40f2e79",
+          "source_review": "docs/dependency-reviews/20261025/pdfium.json"
+        },
+        "license_expression": "BSD-3-Clause AND LicenseRef-PDFium-bundled-components AND LicenseRef-Microsoft-VisualStudio-Distributable-Code",
+        "observed_binary_sha256": "1f2aee4286b8cf0413ab4562b7121aa454f9cfd9afd6ca8609bcef80927b3f80",
+        "retired_active_notices": [
+          "licenses/third-party/pdfium/MICROSOFT-RUNTIME-NOTE.txt",
+          "licenses/third-party/pdfium/libc++.LICENSE.TXT"
+        ],
+        "distribution_review": "docs/PDFIUM_DISTRIBUTION_REVIEW_20261025.md"
+      },
+      "gnu_runtime_inventory": "tools/pdfium-build/gnu/runtime-sources.json",
+      "active_public_distribution_ready": true
+    },
+    {
+      "id": "libvterm",
+      "name": "libvterm",
+      "version": "0.3.3",
+      "license_expression": "MIT",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-terminal.exe"
+      ],
+      "origin": {
+        "url": "https://www.leonerd.org.uk/code/libvterm/libvterm-0.3.3.tar.gz",
+        "archive_sha256": "09156f43dd2128bd347cbeebe50d9a571d32c64e0cf18d211197946aff7226e0",
+        "script": "tools/get-libvterm.ps1"
+      },
+      "notices": [
+        "licenses/third-party/libvterm/LICENSE"
+      ],
+      "notice_status": "Full prepared notices included by tools/package-release.py using the explicit inventory"
+    },
+    {
+      "id": "sqlite",
+      "name": "SQLite amalgamation",
+      "version": "3.54.0",
+      "license_expression": "LicenseRef-SQLite-Public-Domain",
+      "relationship": "statically-linked",
+      "artifacts": [
+        "folderwing-wsl"
+      ],
+      "origin": {
+        "url": "https://sqlite.org/2026/sqlite-amalgamation-3540000.zip",
+        "archive_sha256": "68e913b0fe8ec6b4e5f391c594a28872884e80d6cd042a1e50c957be46b5aa4d",
+        "script": "tools/get-sqlite.ps1",
+        "licensing_url": "https://sqlite.org/copyright.html"
+      },
+      "notices": [],
+      "source_sha256": {
+        "sqlite3.c": "2da161e310ef0aba3465f22a4d12b8a43723236f0942fa76e8aac523c3317243",
+        "sqlite3.h": "cd20a2877bc82b94e36c1093b727dd87cfa3c1d581aac6e240925535cbd90166"
+      },
+      "notice_status": "public-domain dedication documented by upstream; retain provenance"
+    },
+    {
+      "id": "mpv-api",
+      "name": "mpv public client/render headers",
+      "version": "e471496c56",
+      "license_expression": "ISC",
+      "relationship": "compiled-header-interface",
+      "artifacts": [
+        "folderwing-media.exe"
+      ],
+      "origin": {
+        "url": "https://github.com/mpv-player/mpv/tree/e471496c56/include/mpv",
+        "manifest": "tools/media-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/mpv/API-NOTICES.txt"
+      ],
+      "header_sha256": {
+        "client.h": "3da9b8c61c3fb4e2d76bd248cebf72f3ee830331411b71a76adbd5e05660cc50",
+        "render.h": "f2550aa29b2e9b20988bd954b4383e9fa05fd9e40d1669fbc6edf2afac603f15",
+        "render_d3d11.h": "7b880453ee3c780b0d0f1c3f8ecaa1d23b289522f4c687e6857c8475f4a3f6fb",
+        "render_gl.h": "48662c0ed9872a14dd9e1684105c97f69f94a0414709c254c5d372adc41d2e69",
+        "stream_cb.h": "188e58b6d14383e15a5dffdc4ecebbdfbf2e412b9c099ff21b571f747a8ce32d"
+      },
+      "notice_status": "prepared in repository; does not determine the DLL license"
+    },
+    {
+      "id": "libmpv",
+      "name": "Current libmpv development DLL",
+      "version": "folderwing-lgpl-20261025",
+      "license_expression": "LGPL-3.0-or-later",
+      "relationship": "dynamically-loaded",
+      "artifacts": [
+        "folderwing-media.exe",
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "recipe": "tools/media-lgpl",
+        "archive": "folderwing-media-lgpl-20261025.zip",
+        "archive_sha256": "8fc1435bc46bd42dc79024625a6cbafee52f1f2c56ee295522dfeaab465c572d"
+      },
+      "notices": [
+        "licenses/third-party/media/mpv/Copyright",
+        "licenses/third-party/media/mpv/LICENSE.GPL",
+        "licenses/third-party/media/mpv/LICENSE.LGPL"
+      ],
+      "observed_binary_sha256": "5aed1333fa5daaa6b4c9518702f5550978129e40361f0f6572b2216fde22326b",
+      "license_basis": "Own pinned source build; mpv gpl=false, FFmpeg GPL/nonfree disabled, LGPLv3 selected with full component notices",
+      "redistribution_status": "built-and-source-bundled; public download must host matching source archive",
+      "closure_status": "exact 17 media source archives and matching MinGW runtime sources/patches retained",
+      "review": "docs/MEDIA_LGPL_BUILD.md",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "ffmpeg-current",
+      "name": "FFmpeg embedded in current libmpv",
+      "version": "9a861e9687d30e657d59521817cad18405995983",
+      "license_expression": "LGPL-3.0-or-later",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "ffmpeg",
+        "repository": "https://github.com/FFmpeg/FFmpeg",
+        "ref": "9a861e9687d30e657d59521817cad18405995983",
+        "commit": "9a861e9687d30e657d59521817cad18405995983",
+        "url": "https://codeload.github.com/FFmpeg/FFmpeg/tar.gz/9a861e9687d30e657d59521817cad18405995983",
+        "archive": "ffmpeg-9a861e9687d30e657d59521817cad18405995983.tar.gz",
+        "sha256": "c1b0fd16eae5b06838e456ab58924553a94aba087e3ad2e7d983c288003d6f6a",
+        "bytes": 17963570
+      },
+      "notices": [
+        "licenses/third-party/media/ffmpeg/COPYING.GPLv2",
+        "licenses/third-party/media/ffmpeg/COPYING.GPLv3",
+        "licenses/third-party/media/ffmpeg/COPYING.LGPLv2.1",
+        "licenses/third-party/media/ffmpeg/COPYING.LGPLv3",
+        "licenses/third-party/media/ffmpeg/LICENSE.md",
+        "licenses/third-party/media/ffmpeg/doc/authors.texi",
+        "licenses/third-party/media/ffmpeg/tests/checkasm/ext/LICENSE",
+        "licenses/third-party/media/ffmpeg/tests/checkasm/ext/src/html_data/LICENSE"
+      ],
+      "version_basis": "full source commit and archive hash used by own build",
+      "closure_status": "source archive/configuration preserved; GPL and nonfree disabled; version3 enabled",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "musl",
+      "name": "musl libc",
+      "version": "Zig 0.17.0 source snapshot b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+      "license_expression": "MIT AND LicenseRef-musl-component-notices",
+      "relationship": "static-toolchain-runtime",
+      "artifacts": [
+        "folderwing-wsl"
+      ],
+      "origin": {
+        "url": "https://git.musl-libc.org/cgit/musl/tree/COPYRIGHT",
+        "toolchain": "Zig 0.17.0",
+        "toolchain_source": {
+          "url": "https://ziglang.org/download/0.17.0/zig-0.17.0.tar.xz",
+          "sha256": "b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+          "bytes": 23049960,
+          "root": "zig-0.17.0"
+        },
+        "toolchain_archive_sha256": "b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428",
+        "review": "docs/dependency-reviews/20261025/crt.json"
+      },
+      "notices": [
+        "licenses/third-party/toolchain/musl-COPYRIGHT",
+        "licenses/third-party/toolchain/zig-musl-file-notices.txt"
+      ],
+      "notice_status": "Included by explicit inventory and release packager",
+      "closure_status": "Reviewed for pinned x86_64 Windows GNU/static Linux musl build; source-resource equality and conservative file notices recorded"
+    },
+    {
+      "id": "mingw-runtime",
+      "name": "MinGW-w64 CRT/headers from Zig",
+      "version": "Zig 0.17.0 source snapshot b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+      "license_expression": "ZPL-2.1 AND LicenseRef-MinGW-file-exceptions",
+      "relationship": "toolchain-runtime",
+      "artifacts": [
+        "Windows executables"
+      ],
+      "origin": {
+        "url": "https://www.mingw-w64.org/",
+        "toolchain": "Zig 0.17.0",
+        "toolchain_source": {
+          "url": "https://ziglang.org/download/0.17.0/zig-0.17.0.tar.xz",
+          "sha256": "b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+          "bytes": 23049960,
+          "root": "zig-0.17.0"
+        },
+        "toolchain_archive_sha256": "b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428",
+        "review": "docs/dependency-reviews/20261025/crt.json"
+      },
+      "notices": [
+        "licenses/third-party/toolchain/mingw-COPYING",
+        "licenses/third-party/toolchain/mingw-file-notices.txt",
+        "licenses/third-party/toolchain/header-notices.txt",
+        "licenses/third-party/toolchain/LGPL-2.1.txt",
+        "licenses/third-party/toolchain/GPL-2.0.txt"
+      ],
+      "notice_status": "Included by explicit inventory and release packager",
+      "closure_status": "Reviewed for pinned x86_64 Windows GNU/static Linux musl build; source-resource equality and conservative file notices recorded"
+    },
+    {
+      "id": "zig-runtime",
+      "name": "Zig C runtime and compiler builtins",
+      "version": "Zig 0.17.0 source snapshot b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+      "license_expression": "MIT AND LicenseRef-musl-component-notices",
+      "relationship": "toolchain-runtime",
+      "artifacts": [
+        "compiler-selected builtins in Windows/Linux binaries"
+      ],
+      "origin": {
+        "url": "https://github.com/ziglang/zig",
+        "toolchain": "Zig 0.17.0",
+        "toolchain_source": {
+          "url": "https://ziglang.org/download/0.17.0/zig-0.17.0.tar.xz",
+          "sha256": "b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+          "bytes": 23049960,
+          "root": "zig-0.17.0"
+        },
+        "toolchain_archive_sha256": "b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428",
+        "review": "docs/dependency-reviews/20261025/crt.json"
+      },
+      "notices": [
+        "licenses/third-party/toolchain/zig-LICENSE",
+        "licenses/third-party/toolchain/musl-COPYRIGHT",
+        "licenses/third-party/toolchain/zig-musl-file-notices.txt"
+      ],
+      "notice_status": "Included by explicit inventory and release packager",
+      "closure_status": "Reviewed for pinned x86_64 Windows GNU/static Linux musl build; source-resource equality and conservative file notices recorded"
+    },
+    {
+      "id": "media-libass",
+      "name": "libass (media build)",
+      "version": "0.17.5",
+      "license_expression": "ISC",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "libass",
+        "repository": "https://github.com/libass/libass",
+        "ref": "0.17.5",
+        "commit": "4a05d8127f525943ebf45fdc6497c9e665947f0d",
+        "url": "https://codeload.github.com/libass/libass/tar.gz/4a05d8127f525943ebf45fdc6497c9e665947f0d",
+        "archive": "libass-4a05d8127f525943ebf45fdc6497c9e665947f0d.tar.gz",
+        "sha256": "3546ecc8748c62e100a9dd18e52ea2d17d7facedf89cfcad97000ad60b1bce2b",
+        "bytes": 351823
+      },
+      "notices": [
+        "licenses/third-party/media/libass/COPYING"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-freetype",
+      "name": "freetype (media build)",
+      "version": "VER-2-14-3",
+      "license_expression": "FTL",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "freetype",
+        "repository": "https://github.com/freetype/freetype",
+        "ref": "VER-2-14-3",
+        "commit": "0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+        "url": "https://codeload.github.com/freetype/freetype/tar.gz/0a0221a1347e2f1e07c395263540026e9a0aa7c7",
+        "archive": "freetype-0a0221a1347e2f1e07c395263540026e9a0aa7c7.tar.gz",
+        "sha256": "11cd478953fc1d382f20a233b8e2aed6c31b47cbf0568c4bdb3334bcc1550698",
+        "bytes": 2517889
+      },
+      "notices": [
+        "licenses/third-party/media/freetype/LICENSE.TXT",
+        "licenses/third-party/media/freetype/docs/FTL.TXT",
+        "licenses/third-party/media/freetype/docs/GPLv2.TXT"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package",
+      "license_selection": "FreeType License; attribution included in THIRD-PARTY-NOTICES.txt"
+    },
+    {
+      "id": "media-fribidi",
+      "name": "fribidi (media build)",
+      "version": "v1.0.17",
+      "license_expression": "LGPL-2.1-or-later",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "fribidi",
+        "repository": "https://github.com/fribidi/fribidi",
+        "ref": "v1.0.17",
+        "commit": "b93119f5fdc7ea47672cc304c1455ffa6dfe7536",
+        "url": "https://codeload.github.com/fribidi/fribidi/tar.gz/b93119f5fdc7ea47672cc304c1455ffa6dfe7536",
+        "archive": "fribidi-b93119f5fdc7ea47672cc304c1455ffa6dfe7536.tar.gz",
+        "sha256": "f309091695b3b0f2fd5f9caa7941d906ab08df9ab8f9931bf5ee674bc00b489b",
+        "bytes": 2161272
+      },
+      "notices": [
+        "licenses/third-party/media/fribidi/AUTHORS",
+        "licenses/third-party/media/fribidi/COPYING"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-harfbuzz",
+      "name": "harfbuzz (media build)",
+      "version": "15.0.0",
+      "license_expression": "LicenseRef-HarfBuzz-Old-MIT",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "harfbuzz",
+        "repository": "https://github.com/harfbuzz/harfbuzz",
+        "ref": "15.0.0",
+        "commit": "35f656a1a2bab548ea7f54a6dd3fba2b09680d14",
+        "url": "https://codeload.github.com/harfbuzz/harfbuzz/tar.gz/35f656a1a2bab548ea7f54a6dd3fba2b09680d14",
+        "archive": "harfbuzz-35f656a1a2bab548ea7f54a6dd3fba2b09680d14.tar.gz",
+        "sha256": "f4d39fc3216d82d01ba2a18ba03a05b69f60510585b764784224a5f51f372a38",
+        "bytes": 39011620
+      },
+      "notices": [
+        "licenses/third-party/media/harfbuzz/AUTHORS",
+        "licenses/third-party/media/harfbuzz/COPYING",
+        "licenses/third-party/media/harfbuzz/perf/texts/COPYING",
+        "licenses/third-party/media/harfbuzz/src/ms-use/COPYING",
+        "licenses/third-party/media/harfbuzz/test/COPYING",
+        "licenses/third-party/media/harfbuzz/test/shape/data/aots/COPYING",
+        "licenses/third-party/media/harfbuzz/test/shape/data/text-rendering-tests/COPYING"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-libplacebo",
+      "name": "libplacebo (media build)",
+      "version": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+      "license_expression": "LGPL-2.1-or-later",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "libplacebo",
+        "repository": "https://github.com/haasn/libplacebo",
+        "ref": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+        "commit": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+        "url": "https://codeload.github.com/haasn/libplacebo/tar.gz/cee9b076f2c63104ccfd497fa79c39a867293ec4",
+        "archive": "libplacebo-cee9b076f2c63104ccfd497fa79c39a867293ec4.tar.gz",
+        "sha256": "6f8fa218cbafd8e5f50b8a82d918e1d8bbb92f9f980820bc0b34d92e9b79e484",
+        "bytes": 863019
+      },
+      "notices": [
+        "licenses/third-party/media/libplacebo/LICENSE",
+        "licenses/third-party/media/libplacebo/demos/LICENSE"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-shaderc",
+      "name": "shaderc (media build)",
+      "version": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+      "license_expression": "Apache-2.0",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "shaderc",
+        "repository": "https://github.com/google/shaderc",
+        "ref": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+        "commit": "b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+        "url": "https://codeload.github.com/google/shaderc/tar.gz/b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc",
+        "archive": "shaderc-b64fd42c4a2a9d501c47aca5d3571f7673a5e9cc.tar.gz",
+        "sha256": "b0f73c2f50df5f24e78fae6d04f1e95131c65ea3ea13fd8998a317a5d632a51f",
+        "bytes": 237669
+      },
+      "notices": [
+        "licenses/third-party/media/shaderc/AUTHORS",
+        "licenses/third-party/media/shaderc/LICENSE",
+        "licenses/third-party/media/shaderc/license-checker.cfg"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-spirv-cross",
+      "name": "spirv-cross (media build)",
+      "version": "f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+      "license_expression": "Apache-2.0",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "spirv-cross",
+        "repository": "https://github.com/KhronosGroup/SPIRV-Cross",
+        "ref": "f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+        "commit": "f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+        "url": "https://codeload.github.com/KhronosGroup/SPIRV-Cross/tar.gz/f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7",
+        "archive": "spirv-cross-f11ba9f0b21ba8fc15153d50a2a1ae31ab1cf8f7.tar.gz",
+        "sha256": "92b0458889ed77eac9892b3be5a41e3cf716849fd90f39632e159e555abf3d03",
+        "bytes": 2027619
+      },
+      "notices": [
+        "licenses/third-party/media/spirv-cross/LICENSE",
+        "licenses/third-party/media/spirv-cross/LICENSES/Apache-2.0.txt",
+        "licenses/third-party/media/spirv-cross/LICENSES/CC-BY-4.0.txt",
+        "licenses/third-party/media/spirv-cross/LICENSES/LicenseRef-KhronosFreeUse.txt",
+        "licenses/third-party/media/spirv-cross/LICENSES/MIT.txt"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-dav1d",
+      "name": "dav1d (media build)",
+      "version": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+      "license_expression": "BSD-2-Clause",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "dav1d",
+        "repository": "https://github.com/videolan/dav1d",
+        "ref": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+        "commit": "54706fc6bc0cdecab7e9593974a4039cc038fca7",
+        "url": "https://codeload.github.com/videolan/dav1d/tar.gz/54706fc6bc0cdecab7e9593974a4039cc038fca7",
+        "archive": "dav1d-54706fc6bc0cdecab7e9593974a4039cc038fca7.tar.gz",
+        "sha256": "9edb11a2108b375cc58370354e705feebc93430bb780130363815c1e1ac0c250",
+        "bytes": 1751896
+      },
+      "notices": [
+        "licenses/third-party/media/dav1d/COPYING",
+        "licenses/third-party/media/dav1d/doc/PATENTS"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-opus",
+      "name": "opus (media build)",
+      "version": "v1.5.2",
+      "license_expression": "BSD-3-Clause",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "opus",
+        "repository": "https://github.com/xiph/opus",
+        "ref": "v1.5.2",
+        "commit": "ddbe48383984d56acd9e1ab6a090c54ca6b735a6",
+        "url": "https://codeload.github.com/xiph/opus/tar.gz/ddbe48383984d56acd9e1ab6a090c54ca6b735a6",
+        "archive": "opus-ddbe48383984d56acd9e1ab6a090c54ca6b735a6.tar.gz",
+        "sha256": "18e9d9e26565e279753aafb6823a482ef85ea9fddbfdcdbff8fd095b12dd96b6",
+        "bytes": 4184347
+      },
+      "notices": [
+        "licenses/third-party/media/opus/AUTHORS",
+        "licenses/third-party/media/opus/COPYING",
+        "licenses/third-party/media/opus/LICENSE_PLEASE_READ.txt"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-glslang",
+      "name": "glslang (media build)",
+      "version": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+      "license_expression": "LicenseRef-glslang-BSD-MIT-Apache",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "glslang",
+        "repository": "https://github.com/KhronosGroup/glslang",
+        "ref": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+        "commit": "e1b562a8bed273a02f30b59b66a5d499793cede5",
+        "url": "https://codeload.github.com/KhronosGroup/glslang/tar.gz/e1b562a8bed273a02f30b59b66a5d499793cede5",
+        "archive": "glslang-e1b562a8bed273a02f30b59b66a5d499793cede5.tar.gz",
+        "sha256": "907174a24713c6202c146f164bf81783f1fbc79c8cb821a30f18f159eb980312",
+        "bytes": 4641535
+      },
+      "notices": [
+        "licenses/third-party/media/glslang/LICENSE.txt",
+        "licenses/third-party/media/glslang/LICENSES/AML-glslang.txt",
+        "licenses/third-party/media/glslang/LICENSES/Apache-2.0.txt",
+        "licenses/third-party/media/glslang/LICENSES/BSD-2-Clause.txt",
+        "licenses/third-party/media/glslang/LICENSES/BSD-3-Clause.txt",
+        "licenses/third-party/media/glslang/LICENSES/Bison-exception-2.2.txt",
+        "licenses/third-party/media/glslang/LICENSES/GPL-3.0-or-later.txt",
+        "licenses/third-party/media/glslang/LICENSES/MIT-Khronos-old.txt",
+        "licenses/third-party/media/glslang/LICENSES/MIT.txt",
+        "licenses/third-party/media/glslang/license-checker.cfg"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-spirv-headers",
+      "name": "spirv-headers (media build)",
+      "version": "04fd3caa1e8267e4d95c806cad901181728e1006",
+      "license_expression": "LicenseRef-Khronos-MIT-and-component-notices",
+      "relationship": "media-header-or-inline-dependency",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "spirv-headers",
+        "repository": "https://github.com/KhronosGroup/SPIRV-Headers",
+        "ref": "04fd3caa1e8267e4d95c806cad901181728e1006",
+        "commit": "04fd3caa1e8267e4d95c806cad901181728e1006",
+        "url": "https://codeload.github.com/KhronosGroup/SPIRV-Headers/tar.gz/04fd3caa1e8267e4d95c806cad901181728e1006",
+        "archive": "spirv-headers-04fd3caa1e8267e4d95c806cad901181728e1006.tar.gz",
+        "sha256": "392f4801409aad9c4f1b77745f179952fd6264e4c8bd0fc1bc45dfa6807bf6d0",
+        "bytes": 594644
+      },
+      "notices": [
+        "licenses/third-party/media/spirv-headers/LICENSE",
+        "licenses/third-party/media/spirv-headers/LICENSES/CC-BY-4.0.txt",
+        "licenses/third-party/media/spirv-headers/LICENSES/MIT.txt"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-spirv-tools",
+      "name": "spirv-tools (media build)",
+      "version": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+      "license_expression": "Apache-2.0",
+      "relationship": "transitive-static-media",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "spirv-tools",
+        "repository": "https://github.com/KhronosGroup/SPIRV-Tools",
+        "ref": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+        "commit": "ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+        "url": "https://codeload.github.com/KhronosGroup/SPIRV-Tools/tar.gz/ef96ed763b43b59b33b31b362f09a02b729fa1c9",
+        "archive": "spirv-tools-ef96ed763b43b59b33b31b362f09a02b729fa1c9.tar.gz",
+        "sha256": "82c62146083fd558735a3171cf97cfc47903ca7d368482e87f94bd44883c0f00",
+        "bytes": 3559528
+      },
+      "notices": [
+        "licenses/third-party/media/spirv-tools/LICENSE",
+        "licenses/third-party/media/spirv-tools/utils/vscode/src/lsp/LICENSE"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-fast-float",
+      "name": "fast-float (media build)",
+      "version": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+      "license_expression": "MIT",
+      "relationship": "media-header-or-inline-dependency",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "fast-float",
+        "repository": "https://github.com/fastfloat/fast_float",
+        "ref": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+        "commit": "97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+        "url": "https://codeload.github.com/fastfloat/fast_float/tar.gz/97b54ca9e75f5303507699d27c6b4f4efe4641a1",
+        "archive": "fast-float-97b54ca9e75f5303507699d27c6b4f4efe4641a1.tar.gz",
+        "sha256": "2b132274539286e41f37857cac22aa8441d21bd86d55de825a3342b149f66801",
+        "bytes": 120200
+      },
+      "notices": [
+        "licenses/third-party/media/fast-float/AUTHORS",
+        "licenses/third-party/media/fast-float/LICENSE-APACHE",
+        "licenses/third-party/media/fast-float/LICENSE-BOOST",
+        "licenses/third-party/media/fast-float/LICENSE-MIT"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package",
+      "license_selection": "MIT option selected from upstream multi-license; all supplied license alternatives preserved"
+    },
+    {
+      "id": "media-vulkan-headers",
+      "name": "vulkan-headers (media build)",
+      "version": "libplacebo 3rdparty/Vulkan-Headers gitlink",
+      "license_expression": "Apache-2.0 OR MIT",
+      "relationship": "media-header-or-inline-dependency",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "name": "vulkan-headers",
+        "repository": "https://github.com/KhronosGroup/Vulkan-Headers",
+        "commit": "450bd2232225d6c7728a4108055ac2e37cef6475",
+        "ref": "libplacebo 3rdparty/Vulkan-Headers gitlink",
+        "url": "https://codeload.github.com/KhronosGroup/Vulkan-Headers/tar.gz/450bd2232225d6c7728a4108055ac2e37cef6475",
+        "archive": "vulkan-headers-450bd2232225d6c7728a4108055ac2e37cef6475.tar.gz",
+        "sha256": "26df9841c30806a994e2fdf42f7c87bcb1ced9db9a06033469123939fb3fa075",
+        "bytes": 2940820
+      },
+      "notices": [
+        "licenses/third-party/media/vulkan-headers/LICENSE.md",
+        "licenses/third-party/media/vulkan-headers/LICENSES/Apache-2.0.txt",
+        "licenses/third-party/media/vulkan-headers/LICENSES/MIT.txt"
+      ],
+      "license_basis": "pinned source notices; LicenseRef entries retain distribution/file exceptions rather than inventing a single SPDX conclusion",
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "media-compiler-runtimes",
+      "name": "MinGW-w64 / GCC libgcc, libstdc++, libatomic and winpthreads runtimes",
+      "version": "MinGW-w64 11.0.1-3build1; GCC MinGW package 13.2.0-6ubuntu1+26.1",
+      "license_expression": "LicenseRef-MinGW-runtime AND (GPL-3.0-or-later WITH GCC-exception-3.1)",
+      "relationship": "media-static-toolchain-runtime",
+      "artifacts": [
+        "libmpv-2.dll"
+      ],
+      "origin": {
+        "toolchain_lock": "tools/media-lgpl/toolchain.json",
+        "runtime_sources": "tools/media-lgpl/toolchain-sources.json"
+      },
+      "notices": [
+        "licenses/third-party/media/toolchain/binutils-mingw-w64-x86-64.copyright",
+        "licenses/third-party/media/toolchain/g++-mingw-w64-x86-64-posix.copyright",
+        "licenses/third-party/media/toolchain/gcc-mingw-w64-base.copyright",
+        "licenses/third-party/media/toolchain/gcc-mingw-w64-x86-64-posix-runtime.copyright",
+        "licenses/third-party/media/toolchain/gcc-mingw-w64-x86-64-posix.copyright",
+        "licenses/third-party/media/toolchain/libgcc-13-dev.copyright",
+        "licenses/third-party/media/toolchain/libgcc-s1.copyright",
+        "licenses/third-party/media/toolchain/libstdc++-13-dev.copyright",
+        "licenses/third-party/media/toolchain/libstdc++6.copyright",
+        "licenses/third-party/media/toolchain/mingw-w64-common.copyright",
+        "licenses/third-party/media/toolchain/mingw-w64-x86-64-dev.copyright"
+      ],
+      "corresponding_source_bundle": {
+        "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+        "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+        "bytes": 101050019
+      },
+      "manifest": "tools/media-dependencies.json",
+      "recipe": "tools/media-lgpl",
+      "notice_status": "all manifest-listed media runtime notices copied by normal and focused builders; source archive retained alongside the local runtime package"
+    },
+    {
+      "id": "clang-headers",
+      "name": "Compiler-supplied Clang headers",
+      "version": "LLVM 22.1.8 in Zig 0.17.0",
+      "license_expression": "Apache-2.0 WITH LLVM-exception",
+      "relationship": "compiled-header-interface",
+      "artifacts": [
+        "own Windows/Linux binaries"
+      ],
+      "origin": {
+        "url": "https://github.com/llvm/llvm-project/blob/llvmorg-22.1.8/LICENSE.TXT",
+        "toolchain_manifest": "tools/release-inputs.json"
+      },
+      "notices": [
+        "licenses/third-party/toolchain/LLVM-LICENSE.TXT",
+        "licenses/third-party/toolchain/header-notices.txt"
+      ],
+      "notice_status": "Full text and file notices prepared"
+    }
+  ],
+  "notice_files": [
+    {
+      "path": "licenses/third-party/archives/bzip2-LICENSE.txt",
+      "sha256": "c6dbbf828498be844a89eaa3b84adbab3199e342eb5cb2ed2f0d4ba7ec0f38a3",
+      "origin": "third_party/archives/licenses/bzip2-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/archives/libarchive-LICENSE.txt",
+      "sha256": "30e556b3959e3985d66efefec5eaac51d4995053caa1d3cffe6eb916f146f229",
+      "origin": "third_party/archives/licenses/libarchive-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/archives/miniz-LICENSE.txt",
+      "sha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3",
+      "origin": "third_party/archives/licenses/miniz-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/archives/xz-COPYING.txt",
+      "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8",
+      "origin": "third_party/archives/licenses/xz-COPYING.txt"
+    },
+    {
+      "path": "licenses/third-party/archives/xz-LICENSE.txt",
+      "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1",
+      "origin": "third_party/archives/licenses/xz-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/archives/zlib-LICENSE.txt",
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "origin": "third_party/archives/licenses/zlib-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/libwebp/COPYING",
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+      "origin": "third_party/libwebp/COPYING"
+    },
+    {
+      "path": "licenses/third-party/libwebp/PATENTS",
+      "sha256": "cc3273e0694ea5896145e0677699b53471b03ea43021ddc50e7923fbb9f5023c",
+      "origin": "third_party/libwebp/PATENTS"
+    },
+    {
+      "path": "licenses/third-party/libvterm/LICENSE",
+      "sha256": "66c627cf44f0c59daf81ba442e62e9b3d3cd1091a41e116de5ea9058a57bbba7",
+      "origin": "third_party/libvterm/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/pdfium/package-LICENSE",
+      "sha256": "8854f4388f1ca13b3ad9baa42e95f5546b4c0b17109c159256d3eca7be39b09b",
+      "origin": "third_party/pdfium/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/abseil.txt",
+      "sha256": "f54fff0b905df5b3464527c652a30e903b172d6dcab4d89b5e6f105d5e4a4603",
+      "origin": "third_party/pdfium/licenses/abseil.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/agg23.txt",
+      "sha256": "c110d3ea2ad77467ce0dcff7d3337e6c8be8049a5103f4b9bd5fd911a77972e5",
+      "origin": "third_party/pdfium/licenses/agg23.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/dragonbox-Apache2-LLVM.txt",
+      "sha256": "4964a7aaf2801a42d2342d2f5bbccd2126be7a5d8d46150e1338a43ea70da5de",
+      "origin": "third_party/pdfium/licenses/dragonbox-Apache2-LLVM.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/dragonbox-Boost.txt",
+      "sha256": "beb8e42e9d6b4284e03304d05a81a0755200a965fc8d0a5e0aea1e84cf805d6e",
+      "origin": "third_party/pdfium/licenses/dragonbox-Boost.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/fast_float.txt",
+      "sha256": "bf1b57355feca8fce77ee95f48002f8d4789fb71b30ec7599c06cda4901fbb2b",
+      "origin": "third_party/pdfium/licenses/fast_float.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/freetype.txt",
+      "sha256": "f4b133e25df1f86ad3ffea453aa0e613f0474f34778dbbb3e437e7b2724937d8",
+      "origin": "third_party/pdfium/licenses/freetype.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/harfbuzz.txt",
+      "sha256": "bd836c0ddca8ea0bab54a03cd32b6ff7256cbb3840fca2edc1249a4ed92c5b02",
+      "origin": "third_party/pdfium/licenses/harfbuzz.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/icu.txt",
+      "sha256": "93679f4389d53b6835d89843f251844fb9bc455b35bab036d3c8e7abe497a47a",
+      "origin": "third_party/pdfium/licenses/icu.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/lcms.txt",
+      "sha256": "7312b68c5b25e9bf2b828706fb4e29588f22705112f411fd42e1f7d84c3d139a",
+      "origin": "third_party/pdfium/licenses/lcms.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/libjpeg_turbo.ijg",
+      "sha256": "db16a04128171879c60708d171b88d97345a2dd20f9bfc173680a4497c73f704",
+      "origin": "third_party/pdfium/licenses/libjpeg_turbo.ijg"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/libjpeg_turbo.md",
+      "sha256": "be2b2b5ab168bce87bc3e31f2a5c5adba4b7f6e9e51d618e958d1d46972ebd95",
+      "origin": "third_party/pdfium/licenses/libjpeg_turbo.md"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/libopenjpeg.txt",
+      "sha256": "c5ab0890a737c2dfa7ba675036554f6d17741d98629b0c2a145354d00617e6b2",
+      "origin": "third_party/pdfium/licenses/libopenjpeg.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/libpng.txt",
+      "sha256": "452390433ba0f88aa3e2b122c647741b72a0c117cd6ed7a329b49785aecb5511",
+      "origin": "third_party/pdfium/licenses/libpng.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/llvm-libc.txt",
+      "sha256": "3b6226c32e168c83b891d8d6f0d3c29c2116dc3ef93dc93c307b54f279ecf383",
+      "origin": "third_party/pdfium/licenses/llvm-libc.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/pdfium.txt",
+      "sha256": "961eacd9633fff6d051db7208b755e9210e30efac7adec3e6a6d52798f0ccf0e",
+      "origin": "third_party/pdfium/licenses/pdfium.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/simdutf.txt",
+      "sha256": "c172a0ba936ff31230febb5dad869e25cb7c1a07480c7a381be8cf011bb52719",
+      "origin": "third_party/pdfium/licenses/simdutf.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium/licenses/zlib.txt",
+      "sha256": "33fd641c9f3b0e0be64bc78fea9e94807674cdd70c48477599226cb8956565fe",
+      "origin": "third_party/pdfium/licenses/zlib.txt"
+    },
+    {
+      "path": "licenses/third-party/toolchain/zig-LICENSE",
+      "sha256": "5c537d6853e005298a285d508cff9ac7192cea23576c840d485b2b586a7ff177",
+      "origin": "$ZIG_ROOT/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/toolchain/musl-COPYRIGHT",
+      "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+      "origin": "$ZIG_ROOT/lib/libc/musl/COPYRIGHT"
+    },
+    {
+      "path": "licenses/third-party/toolchain/mingw-COPYING",
+      "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+      "origin": "$ZIG_ROOT/lib/libc/mingw/COPYING"
+    },
+    {
+      "path": "licenses/third-party/mpv/API-NOTICES.txt",
+      "sha256": "c5daed2c3c9db6c95714c191d163ec1c8b743eba33277d5f2931a3c2cfdf0990",
+      "origin": "Leading copyright/license blocks of the five pinned include/mpv/*.h headers"
+    },
+    {
+      "path": "licenses/third-party/media/dav1d/COPYING",
+      "sha256": "dd92c3c2247c5651606fc23a5e2d6a1ebc5ace9a3e49cbde0e12f05ad1cb1ee5",
+      "origin": "third_party/mpv/LICENSES/dav1d/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/fast-float/AUTHORS",
+      "sha256": "ed249424bce4e318fa190dd6d8becf60cfc37287132ad3f89e16e0f28d878dcf",
+      "origin": "third_party/mpv/LICENSES/fast-float/AUTHORS"
+    },
+    {
+      "path": "licenses/third-party/media/fast-float/LICENSE-APACHE",
+      "sha256": "097a889aa954d04e088b790b10a4014d6189561d0a6013935a73ce3d4ddaaf06",
+      "origin": "third_party/mpv/LICENSES/fast-float/LICENSE-APACHE"
+    },
+    {
+      "path": "licenses/third-party/media/fast-float/LICENSE-BOOST",
+      "sha256": "8d8291caf1cee26d23acf3eb67c9f9a2d58f1c681b16a4fbe8cbfb9e3c0b5a9b",
+      "origin": "third_party/mpv/LICENSES/fast-float/LICENSE-BOOST"
+    },
+    {
+      "path": "licenses/third-party/media/fast-float/LICENSE-MIT",
+      "sha256": "e562f3f974ced7e69dd1db77b820b36bcf8f30377f1aa105723fba449c53c4e6",
+      "origin": "third_party/mpv/LICENSES/fast-float/LICENSE-MIT"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/COPYING.GPLv2",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/COPYING.GPLv2"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/COPYING.GPLv3",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/COPYING.GPLv3"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/COPYING.LGPLv2.1",
+      "sha256": "246041b6ecf9bc32d718a62c57877c78b5eb397b6467e74ed7ae2626ab189c30",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/COPYING.LGPLv2.1"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/COPYING.LGPLv3",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/COPYING.LGPLv3"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/LICENSE.md",
+      "sha256": "e6dc72d5665a1ebd6dcc841de59278dad4ca77ecc47b03f1064a55c3e9ea8bb8",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/LICENSE.md"
+    },
+    {
+      "path": "licenses/third-party/media/freetype/LICENSE.TXT",
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+      "origin": "third_party/mpv/LICENSES/freetype/LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/media/fribidi/AUTHORS",
+      "sha256": "cb173f55c9514c8f38f4647ac3fedd5f8611358d331e65ab955da931e826861c",
+      "origin": "third_party/mpv/LICENSES/fribidi/AUTHORS"
+    },
+    {
+      "path": "licenses/third-party/media/fribidi/COPYING",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "origin": "third_party/mpv/LICENSES/fribidi/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/license-checker.cfg",
+      "sha256": "0b7c936ff1270fb5089750e326f732ce2f08b18e804dc8847aa44561d0a7a277",
+      "origin": "third_party/mpv/LICENSES/glslang/license-checker.cfg"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSE.txt",
+      "sha256": "17e70c676e1521ff3e4686f04a2053d93a7e28a33be8de7ec37ab0ff72feb677",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/AUTHORS",
+      "sha256": "19bfe8f5ed100636cd24ab0c90a3f71c21d8b02d9ba00719447a0faab364d49f",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/AUTHORS"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/COPYING",
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/libass/COPYING",
+      "sha256": "f7e30699d02798351e7f839e3d3bfeb29ce65e44efa7735c225464c4fd7dfe9c",
+      "origin": "third_party/mpv/LICENSES/libass/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/libplacebo/LICENSE",
+      "sha256": "b3aa400aca6d2ba1f0bd03bd98d03d1fe7489a3bbb26969d72016360af8a5c9d",
+      "origin": "third_party/mpv/LICENSES/libplacebo/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/mpv/Copyright",
+      "sha256": "bfe9ee4cceabcb8ecbfadf208d04156f73d801e6a57369a5606bb8341e204a23",
+      "origin": "third_party/mpv/LICENSES/mpv/Copyright"
+    },
+    {
+      "path": "licenses/third-party/media/mpv/LICENSE.GPL",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+      "origin": "third_party/mpv/LICENSES/mpv/LICENSE.GPL"
+    },
+    {
+      "path": "licenses/third-party/media/mpv/LICENSE.LGPL",
+      "sha256": "72b672113d642cbb8ef5dcc76938db801983c56e50b1400ab930f1a64d6dc8d9",
+      "origin": "third_party/mpv/LICENSES/mpv/LICENSE.LGPL"
+    },
+    {
+      "path": "licenses/third-party/media/opus/AUTHORS",
+      "sha256": "f9fd849e652219ce98e008303370b352d37663d0ffb27b8dc514ad93c9c7438b",
+      "origin": "third_party/mpv/LICENSES/opus/AUTHORS"
+    },
+    {
+      "path": "licenses/third-party/media/opus/COPYING",
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551",
+      "origin": "third_party/mpv/LICENSES/opus/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/opus/LICENSE_PLEASE_READ.txt",
+      "sha256": "7efb4989e0cd1b256229bdf2f09300c5d14e35db0e7476bfb87fac243498273d",
+      "origin": "third_party/mpv/LICENSES/opus/LICENSE_PLEASE_READ.txt"
+    },
+    {
+      "path": "licenses/third-party/media/shaderc/AUTHORS",
+      "sha256": "9fb4b067e4c9a1f91ea1c26465b3d1c6b515cb24860e0dbb719879925a5a1248",
+      "origin": "third_party/mpv/LICENSES/shaderc/AUTHORS"
+    },
+    {
+      "path": "licenses/third-party/media/shaderc/LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "origin": "third_party/mpv/LICENSES/shaderc/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/shaderc/license-checker.cfg",
+      "sha256": "ff39f110e4b17c6a2e24eacc14a32674c2c1f2385828bdc23a0399d3475fffc8",
+      "origin": "third_party/mpv/LICENSES/shaderc/license-checker.cfg"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-cross/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "third_party/mpv/LICENSES/spirv-cross/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-headers/LICENSE",
+      "sha256": "ea43b1de38a6f90c488800d66dec1ed671e68cda530266bc96951fb5b6307613",
+      "origin": "third_party/mpv/LICENSES/spirv-headers/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-tools/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "third_party/mpv/LICENSES/spirv-tools/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/binutils-mingw-w64-x86-64.copyright",
+      "sha256": "5182c3332b57023367c32c7dcb9b3ec9c5d567d33d10ba221d44dbdf504069b3",
+      "origin": "third_party/mpv/LICENSES/toolchain/binutils-mingw-w64-x86-64.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/g++-mingw-w64-x86-64-posix.copyright",
+      "sha256": "a481f772f7a53335f13b32c6c54eb1c8577ce97704edd3757ab7ed4287a8e96a",
+      "origin": "third_party/mpv/LICENSES/toolchain/g++-mingw-w64-x86-64-posix.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/gcc-mingw-w64-base.copyright",
+      "sha256": "a481f772f7a53335f13b32c6c54eb1c8577ce97704edd3757ab7ed4287a8e96a",
+      "origin": "third_party/mpv/LICENSES/toolchain/gcc-mingw-w64-base.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/gcc-mingw-w64-x86-64-posix-runtime.copyright",
+      "sha256": "a481f772f7a53335f13b32c6c54eb1c8577ce97704edd3757ab7ed4287a8e96a",
+      "origin": "third_party/mpv/LICENSES/toolchain/gcc-mingw-w64-x86-64-posix-runtime.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/gcc-mingw-w64-x86-64-posix.copyright",
+      "sha256": "a481f772f7a53335f13b32c6c54eb1c8577ce97704edd3757ab7ed4287a8e96a",
+      "origin": "third_party/mpv/LICENSES/toolchain/gcc-mingw-w64-x86-64-posix.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/libgcc-13-dev.copyright",
+      "sha256": "08c6f3dee4c19aa1e57eb7d4ad45829b2e99656313bd07fa0922e2553f500be5",
+      "origin": "third_party/mpv/LICENSES/toolchain/libgcc-13-dev.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/libgcc-s1.copyright",
+      "sha256": "20390f8a6f3b1e4d7cb45dd8652dabb259bbef688cbad839bcdb0b9ba7252f79",
+      "origin": "third_party/mpv/LICENSES/toolchain/libgcc-s1.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/libstdc++-13-dev.copyright",
+      "sha256": "08c6f3dee4c19aa1e57eb7d4ad45829b2e99656313bd07fa0922e2553f500be5",
+      "origin": "third_party/mpv/LICENSES/toolchain/libstdc++-13-dev.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/libstdc++6.copyright",
+      "sha256": "20390f8a6f3b1e4d7cb45dd8652dabb259bbef688cbad839bcdb0b9ba7252f79",
+      "origin": "third_party/mpv/LICENSES/toolchain/libstdc++6.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/mingw-w64-common.copyright",
+      "sha256": "af23297b7d17e8e31817a5d58088de6fdafe34705bb5a7d1d330f08711b31314",
+      "origin": "third_party/mpv/LICENSES/toolchain/mingw-w64-common.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/toolchain/mingw-w64-x86-64-dev.copyright",
+      "sha256": "af23297b7d17e8e31817a5d58088de6fdafe34705bb5a7d1d330f08711b31314",
+      "origin": "third_party/mpv/LICENSES/toolchain/mingw-w64-x86-64-dev.copyright"
+    },
+    {
+      "path": "licenses/third-party/media/vulkan-headers/LICENSE.md",
+      "sha256": "ac24e5ea920e4318e4d02c4086ae51f53cfb03feed06c18df1019e7ada1ec7bc",
+      "origin": "third_party/mpv/LICENSES/vulkan-headers/LICENSE.md"
+    },
+    {
+      "path": "licenses/third-party/media/zlib/LICENSE",
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+      "origin": "third_party/mpv/LICENSES/zlib/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/dav1d/doc/PATENTS",
+      "sha256": "335eca574598bf4ca181b12f708d6669e5a5e78c8e1513e5b35fa1f03901484b",
+      "origin": "third_party/mpv/LICENSES/dav1d/doc/PATENTS"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/doc/authors.texi",
+      "sha256": "fb5fac6dd8f7474033e933814491a8297d8723c52be4dcbcc82eef9c4f008dd2",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/doc/authors.texi"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/tests/checkasm/ext/LICENSE",
+      "sha256": "a2dc8194271e5989c0622531c645a7b41af5da92eeb2531e4f2a3ec31023bc52",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/tests/checkasm/ext/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/ffmpeg/tests/checkasm/ext/src/html_data/LICENSE",
+      "sha256": "0fd2c601fb2ead2add56807b7e32664da8d973b9835a422464f210bfea997a52",
+      "origin": "third_party/mpv/LICENSES/ffmpeg/tests/checkasm/ext/src/html_data/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/freetype/docs/FTL.TXT",
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "origin": "third_party/mpv/LICENSES/freetype/docs/FTL.TXT"
+    },
+    {
+      "path": "licenses/third-party/media/freetype/docs/GPLv2.TXT",
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+      "origin": "third_party/mpv/LICENSES/freetype/docs/GPLv2.TXT"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/AML-glslang.txt",
+      "sha256": "cc8ea571129dbee2997e52a54d1f715f8b0159a22f28f985a9b2b31708a48620",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/AML-glslang.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/Apache-2.0.txt",
+      "sha256": "b22c5c23f3d598370ef51d7e539d5d5074207344fd86e41433f413e116f6a4f7",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/Apache-2.0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/Bison-exception-2.2.txt",
+      "sha256": "218a0cdacd4059d01e2ccff5b31d3e968a6a9c8ee7e4e0fc231c47d7fbf422c3",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/Bison-exception-2.2.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/BSD-2-Clause.txt",
+      "sha256": "789daa57a2ebb49cfc3e67cd1a1f994d5dc221138a8c3cd1934b2ed47b86d356",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/BSD-2-Clause.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/BSD-3-Clause.txt",
+      "sha256": "5a93d5831e1297ab10fe643e1a631e83be392896da14ee2951285a79012df69d",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/BSD-3-Clause.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/GPL-3.0-or-later.txt",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/GPL-3.0-or-later.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/MIT-Khronos-old.txt",
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/MIT-Khronos-old.txt"
+    },
+    {
+      "path": "licenses/third-party/media/glslang/LICENSES/MIT.txt",
+      "sha256": "b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5",
+      "origin": "third_party/mpv/LICENSES/glslang/LICENSES/MIT.txt"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/test/COPYING",
+      "sha256": "9b35b8485f69cd298fccbb3c40a827dc06cf1185553bef827903497d2944a8d7",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/test/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/perf/texts/COPYING",
+      "sha256": "cf977e70247d5fa9d44955e4d8ed23b503c31f78570f62136756278c2cfcb3c3",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/perf/texts/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/src/ms-use/COPYING",
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/src/ms-use/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/test/shape/data/aots/COPYING",
+      "sha256": "f55f74bf740db07bb032a90aa74af4307adea3d489c1ccba12453cf0c0a764cb",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/test/shape/data/aots/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/harfbuzz/test/shape/data/text-rendering-tests/COPYING",
+      "sha256": "d24039e4d22c9bc72096f6174374539d92a3d6e1163938546ec59179fe095e6f",
+      "origin": "third_party/mpv/LICENSES/harfbuzz/test/shape/data/text-rendering-tests/COPYING"
+    },
+    {
+      "path": "licenses/third-party/media/libplacebo/demos/LICENSE",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "origin": "third_party/mpv/LICENSES/libplacebo/demos/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-cross/LICENSES/Apache-2.0.txt",
+      "sha256": "44b0a56e80b41a1b0a6bd1292515e806539fd97b30be54c2719e6c763190ab57",
+      "origin": "third_party/mpv/LICENSES/spirv-cross/LICENSES/Apache-2.0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-cross/LICENSES/CC-BY-4.0.txt",
+      "sha256": "b89aeb7c2a164a0576786dd2a8b57f2fb628b23981f0a06bd77e2f99a9befa0f",
+      "origin": "third_party/mpv/LICENSES/spirv-cross/LICENSES/CC-BY-4.0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-cross/LICENSES/LicenseRef-KhronosFreeUse.txt",
+      "sha256": "fbeaca472f4f70e276dd1106ca5097435967a22ad6c1d8200aef7ad9f70aaf3f",
+      "origin": "third_party/mpv/LICENSES/spirv-cross/LICENSES/LicenseRef-KhronosFreeUse.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-cross/LICENSES/MIT.txt",
+      "sha256": "8f25018489d6fe0dec34a352314c38dc146247b7de65735790f4398a92afa84b",
+      "origin": "third_party/mpv/LICENSES/spirv-cross/LICENSES/MIT.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-headers/LICENSES/CC-BY-4.0.txt",
+      "sha256": "9e5f1b3c610b9c2da5c313bf81d577a7d1acec686bdb0384edefa6df0f90cd94",
+      "origin": "third_party/mpv/LICENSES/spirv-headers/LICENSES/CC-BY-4.0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-headers/LICENSES/MIT.txt",
+      "sha256": "6d7c9e9d7d12c8d3753bdb24417b84819ba4d6c2f025c37948113d86dc81eef9",
+      "origin": "third_party/mpv/LICENSES/spirv-headers/LICENSES/MIT.txt"
+    },
+    {
+      "path": "licenses/third-party/media/spirv-tools/utils/vscode/src/lsp/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "third_party/mpv/LICENSES/spirv-tools/utils/vscode/src/lsp/LICENSE"
+    },
+    {
+      "path": "licenses/third-party/media/vulkan-headers/LICENSES/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "third_party/mpv/LICENSES/vulkan-headers/LICENSES/Apache-2.0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/vulkan-headers/LICENSES/MIT.txt",
+      "sha256": "1ca3502222d967f3be5751c55f6b7ee735b5383909c3b501495f54b216dbf227",
+      "origin": "third_party/mpv/LICENSES/vulkan-headers/LICENSES/MIT.txt"
+    },
+    {
+      "path": "licenses/third-party/media/zlib/contrib/dotzlib/LICENSE_1_0.txt",
+      "sha256": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+      "origin": "third_party/mpv/LICENSES/zlib/contrib/dotzlib/LICENSE_1_0.txt"
+    },
+    {
+      "path": "licenses/third-party/media/zlib/contrib/minizip/LICENSE.Info-Zip",
+      "sha256": "fc686023047ce5ce3a18a9b8a777156f0e475929d3de06bac279f3c025d2b2ca",
+      "origin": "third_party/mpv/LICENSES/zlib/contrib/minizip/LICENSE.Info-Zip"
+    },
+    {
+      "path": "licenses/third-party/pdfium/ACKNOWLEDGEMENTS.txt",
+      "sha256": "3507fe6da1e0615c47b5f7736be0892e49619e8fd95615eb1d86ff2123ac707d",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/pdfium/agg23-copying.txt",
+      "sha256": "0e16f9c2285583269242e94c6f502de0c9910dfcbbc7b386e236cdf29ecd4333",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/pdfium/lcms-LICENSE.txt",
+      "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/pdfium/openjpeg-LICENSE.txt",
+      "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/pdfium/source-file-notices.txt",
+      "sha256": "dc504e67d599785caf994888c74c90af747026b2d82cf848418c0ab0383eda98",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/GPL-2.0.txt",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/LGPL-2.1.txt",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/LLVM-LICENSE.TXT",
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/header-notices.txt",
+      "sha256": "2b7b2b10b0330f995fc781e1a25b5bf9ac444e7198a78c588e91498f6d80513e",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/mingw-file-notices.txt",
+      "sha256": "32fea077dd704500b283dada68b2e04386a3f6f383d0c04f84bee8860ea9a96b",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/toolchain/zig-musl-file-notices.txt",
+      "sha256": "951182e9128108efe7b60ae62a9b5fbde6508b7f5f2c5a537cce6ac8fdfd6eea",
+      "origin": "Pinned 2026-10-25 CRT/PDFium source review; see docs/dependency-reviews/20261025"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/LLVM-LICENSE.TXT",
+      "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+      "origin": "tools/pdfium-build/gnu/licenses/LLVM-LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/compiler-rt-LICENSE.TXT",
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+      "origin": "tools/pdfium-build/gnu/licenses/compiler-rt-LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/libcxx-LICENSE.TXT",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+      "origin": "tools/pdfium-build/gnu/licenses/libcxx-LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/libcxxabi-LICENSE.TXT",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+      "origin": "tools/pdfium-build/gnu/licenses/libcxxabi-LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/libunwind-LICENSE.TXT",
+      "sha256": "b5efebcaca80879234098e52d1725e6d9eb8fb96a19fce625d39184b705f7b6d",
+      "origin": "tools/pdfium-build/gnu/licenses/libunwind-LICENSE.TXT"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/COPYING",
+      "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+      "origin": "tools/pdfium-build/gnu/licenses/COPYING"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/COPYING.MinGW-w64.txt",
+      "sha256": "f38e6194bd3bfa1b654f118e5acefe0aead437bbe669eee43957ccc65a7127f1",
+      "origin": "tools/pdfium-build/gnu/licenses/COPYING.MinGW-w64.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/COPYING.MinGW-w64-runtime.txt",
+      "sha256": "1db8da07b436c68833c0673ffee3d9fcb2526047f3820b81661865dfedc79a1f",
+      "origin": "tools/pdfium-build/gnu/licenses/COPYING.MinGW-w64-runtime.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/COPYING.winpthreads.txt",
+      "sha256": "63263614cdd29f2f93cba85e992f041b31f9fc7b4033692f31269489a8a1b177",
+      "origin": "tools/pdfium-build/gnu/licenses/COPYING.winpthreads.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/MinGW-DISCLAIMER.txt",
+      "sha256": "039ed6b4f31bb7fb97e733170b58cc435335352e4745734fcfd113877fdaf340",
+      "origin": "tools/pdfium-build/gnu/licenses/MinGW-DISCLAIMER.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/MinGW-source-notices.txt",
+      "sha256": "deccf97c5be359fcc89efb32ca89c1ca91cb97cac8e7c8a00b0ce487e41c1e88",
+      "origin": "tools/pdfium-build/gnu/licenses/MinGW-source-notices.txt"
+    },
+    {
+      "path": "licenses/third-party/pdfium-gnu-runtime/RUNTIME.md",
+      "sha256": "ac8fa37b30791d526fc7bbbc17119012a6e1191b84bf2a50897ac6454b2ab5bc",
+      "origin": "tools/pdfium-build/gnu/RUNTIME.md"
+    }
+  ],
+  "build_tools": [
+    {
+      "id": "cmake",
+      "version": "4.4.4",
+      "license_expression": "BSD-3-Clause",
+      "url": "https://github.com/Kitware/CMake/releases/download/v4.4.4/cmake-4.4.4-windows-x86_64.zip",
+      "archive_sha256": "bace36e94b31c68ab6fa295f26dfa11219e0701cf7c94b0284a7d1cb13dac536",
+      "distributed_with_app": false
+    },
+    {
+      "id": "ninja",
+      "version": "1.13.2",
+      "license_expression": "Apache-2.0",
+      "url": "https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-win.zip",
+      "archive_sha256": "07fc8261b42b20e71d1720b39068c2e14ffcee6396b76fb7a795fb460b78dc65",
+      "distributed_with_app": false
+    },
+    {
+      "id": "zig",
+      "version": "0.17.0",
+      "license_expression": "MIT AND LicenseRef-Zig-bundled-toolchain-components",
+      "distributed_with_app": false,
+      "note": "separate runtime components above may be incorporated into app binaries",
+      "origin": {
+        "url": "https://ziglang.org/download/0.17.0/zig-x86_64-windows-0.17.0.zip",
+        "sha256": "b5663f69581dcf391293fbf16c06cb80d81d806545ce618b4d0bab7f0eb8c428",
+        "source": {
+          "url": "https://ziglang.org/download/0.17.0/zig-0.17.0.tar.xz",
+          "sha256": "b6c7f1728f043700d6529bac980800792f824256a9d2f1839b3d62beed0b8abd",
+          "bytes": 23049960,
+          "root": "zig-0.17.0"
+        }
+      },
+      "executable_sha256": "f54b14f02a4d7d8ac62a94a0663486eb166bba3745d85b466238c1b93e723d46"
+    },
+    {
+      "id": "7zip",
+      "version": "external installation; not pinned",
+      "license_expression": "NOASSERTION",
+      "distributed_with_app": false,
+      "note": "only used to unpack the pinned media development archive"
+    },
+    {
+      "id": "asset-authoring-python",
+      "version": "not a runtime dependency",
+      "license_expression": "NOASSERTION",
+      "distributed_with_app": false,
+      "note": "CairoSVG/Pillow re-export icons; ordinary app builds consume checked-in ICO"
+    }
+  ],
+  "external_integrations": [
+    {
+      "id": "windows",
+      "scope": "Windows APIs/Media Foundation/WIC/Direct2D/D3D11/OS codecs",
+      "distributed_with_app": false,
+      "note": "OS-provided system dependencies; no Windows system DLLs copied into package"
+    },
+    {
+      "id": "git",
+      "scope": "User-installed Git invoked on demand",
+      "distributed_with_app": false
+    },
+    {
+      "id": "everything",
+      "scope": "User-installed Everything queried via IPC",
+      "distributed_with_app": false
+    },
+    {
+      "id": "direct",
+      "scope": "Separately installed optional Direct companion; direct-client.exe currently beside local development build",
+      "license_expression": "Apache-2.0",
+      "distributed_with_app": "release decision pending",
+      "note": "Keep separate; if bundled, inventory that project/runtime and its dependencies independently. No personal runtime, auth or configuration belongs in the app archive."
+    }
+  ],
+  "open_items": [
+    {
+      "id": "DEP-01",
+      "item": "The four accepted PDFium runtime/recipe and media runtime/source artifacts are published in L1nuxOne/folderwing release dependencies-20261025. Uploaded hashes and unauthenticated public downloads match all pins; the default hosted PDFium installer passed. Both repository Actions base URLs are configured. Application source/workflow publication and each future app build remain separate.",
+      "status": "closed: accepted dependency artifacts publicly hosted and CI base URLs configured",
+      "hosting_record": "docs/dependency-reviews/20261025/DEPENDENCY-HOSTING.json"
+    },
+    {
+      "id": "DEP-02",
+      "item": "Closed by explicit release packager: all inventory notices, including PDFium, libvterm and mpv API headers, enter the candidate ZIP.",
+      "status": "implemented; package acceptance required per candidate"
+    },
+    {
+      "id": "DEP-03",
+      "item": "Closed for pinned Zig 0.17.0 build: actual runtime-family traces, all 1,842 notice-bearing resource/source matches and file/header notice superset retained.",
+      "status": "closed",
+      "review": "docs/DEPENDENCY_REVIEW_20261025.md"
+    },
+    {
+      "id": "DEP-04",
+      "item": "The accepted GNU PDFium package is the default and is installed in the working release. Fresh full-feature release build/portable smoke, 79 impacted native selectors, eight installer checks and 257 package checks passed. Active GNU runtime notices and recipe companion are packaged. The historical Microsoft inquiry remains separate and does not gate this route.",
+      "status": "closed: GNU default/working-release adoption and fresh release validation",
+      "review": "docs/DEPENDENCY_REVIEW_20261025.md",
+      "controlled_build_review": "docs/PDFIUM_CONTROLLED_BUILD.md",
+      "distribution_review": "docs/PDFIUM_DISTRIBUTION_REVIEW_20261025.md",
+      "distribution_followup_receipt": "build/pdfium-controlled/20261025/distribution-followup/RESULT.json",
+      "inquiry_status": "sent with explicit user authorization on 2026-10-25; awaiting Microsoft clarification",
+      "distribution_inquiry": "docs/dependency-reviews/20261025/MICROSOFT-DISTRIBUTION-INQUIRY.txt",
+      "community_product_setup": {
+        "product": "Visual Studio Community 2022",
+        "version": "17.14.42",
+        "toolset": "14.44.35207",
+        "sdk": "10.0.26100",
+        "state": "installed and component-verified on 2026-10-25",
+        "usage_basis": "Individual developer working on own application; ongoing eligibility/compliance required",
+        "evidence_directory": "C:/Work/fw-vs-community-20261025",
+        "prior_pdfium_candidate_rebuilt": false,
+        "redistribution_question_resolved": false
+      },
+      "community_2026_product_setup": {
+        "version": "18.11.1",
+        "state": "installed and component-verified on 2026-10-25",
+        "toolsets": [
+          "14.51.36231",
+          "14.44.35207"
+        ],
+        "sdk": "10.0.26100",
+        "evidence_directory": "C:/Work/fw-vs-community-2026-20261025",
+        "usage_basis": "Community individual developer provision for own application; ongoing eligibility/compliance required",
+        "prior_pdfium_candidate_rebuilt": false
+      },
+      "llvm_mingw_experiment": {
+        "record": "docs/dependency-reviews/20261025/LLVM-MINGW-EXPERIMENT.json",
+        "outcome": "requires source-level Windows allocator portability patch; no DLL produced",
+        "adopted": false
+      },
+      "gnu_portability_followup": {
+        "record": "docs/dependency-reviews/20261025/LLVM-MINGW-PORTABILITY.json",
+        "runtime_sha256": "6085648b6e8f4c031a92722a82ae57d35c444a15b08d406121df5869c14d9f3f",
+        "outcome": "built and passed bounded technical acceptance",
+        "adopted": false
+      },
+      "maintained_gnu_candidate": {
+        "record": "docs/dependency-reviews/20261025/PDFIUM-GNU-CANDIDATE.json",
+        "runtime_sha256": "0da63a26cb2d23fc8d61409b07ce267bc111832d9b6c8fe7a11ea1f7393e0832",
+        "outcome": "ready for adoption",
+        "adopted": true
+      },
+      "gnu_default_adoption": "docs/PDFIUM_GNU_ADOPTION.md",
+      "adoption_record": "docs/dependency-reviews/20261025/PDFIUM-GNU-ADOPTION.json"
+    },
+    {
+      "id": "DEP-05",
+      "item": "Keep optional Direct runtime outside the default app package until its independent inventory is complete.",
+      "status": "satisfied for the default package: Direct is excluded; its own inventory remains separate"
+    }
+  ],
+  "public_release_automation_created": true,
+  "media_build": {
+    "state": "built, source-bundled; focused acceptance receipt is recorded separately",
+    "sources": 17,
+    "source_bundle": {
+      "filename": "folderwing-media-lgpl-sources-20261025.tar.gz",
+      "sha256": "673d462da9c3022fa9c4bb2439970b0c964a8f74e9a7d4f127d39eb4070d31d2",
+      "bytes": 101050019
+    },
+    "runtime_sha256": "5aed1333fa5daaa6b4c9518702f5550978129e40361f0f6572b2216fde22326b",
+    "acceptance_cohort": "build/media_lgpl/20261025"
+  },
+  "release_packaging": {
+    "manifest": "tools/release-files.json",
+    "packager": "tools/package-release.py",
+    "bootstrap": "tools/bootstrap-release.py",
+    "workflow": ".github/workflows/build.yml",
+    "direct_bundled": false,
+    "public_release_ready": true,
+    "hosting_record": "docs/dependency-reviews/20261025/DEPENDENCY-HOSTING.json"
+  },
+  "review_documents": [
+    "docs/DEPENDENCY_REVIEW_20261025.md",
+    "docs/dependency-reviews/20261025/crt.json",
+    "docs/dependency-reviews/20261025/pdfium.json",
+    "docs/PDFIUM_CONTROLLED_BUILD.md",
+    "docs/PDFIUM_GNU_BUILD.md",
+    "docs/PDFIUM_GNU_ADOPTION.md",
+    "docs/DEPENDENCY_HOSTING.md"
+  ],
+  "public_repository": "https://github.com/L1nuxOne/folderwing",
+  "public_application_source_published": true,
+  "public_application_release_published": false,
+  "source_publication_guide": "docs/SOURCE_PUBLISHING.md"
+}

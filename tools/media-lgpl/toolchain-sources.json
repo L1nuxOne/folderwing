@@ -1,0 +1,28 @@
+{
+  "schema": "folderwing-media-toolchain-source-lock/v1",
+  "source_package": "mingw-w64",
+  "version": "11.0.1-3build1",
+  "metadata_url": "https://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/mingw-w64_11.0.1-3build1.dsc",
+  "metadata_sha256": "a9c601ae428084b0d4d1685e41fad9d5aaa4c67ab8a3ac99d3dae0ec2999db4f",
+  "signature": "upstream signed metadata retained; PGP signature not independently verified in this task",
+  "archives": [
+    {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/mingw-w64_11.0.1.orig.tar.bz2",
+      "archive": "mingw-w64_11.0.1.orig.tar.bz2",
+      "sha256": "3f66bce069ee8bed7439a1a13da7cb91a5e67ea6170f21317ac7f5794625ee10",
+      "bytes": 10057401
+    },
+    {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/mingw-w64_11.0.1.orig.tar.bz2.asc",
+      "archive": "mingw-w64_11.0.1.orig.tar.bz2.asc",
+      "sha256": "2d0fbff66504777860c5970b2dd1699159721d030566e928e2b730abb3e049e2",
+      "bytes": 269
+    },
+    {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/m/mingw-w64/mingw-w64_11.0.1-3build1.debian.tar.xz",
+      "archive": "mingw-w64_11.0.1-3build1.debian.tar.xz",
+      "sha256": "8c182708e1b329bb6d5b6ea95f5cafeb7681027604b89dfb3e2031a73bc90576",
+      "bytes": 108804
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "bundle_sha256": "d38f91a4b7854aba17cde808c16c9eb2235e418bfb6eaf03e948ebad13db1cf1",
+  "files": {
+    "corrupt.zip": "d6d45e9386284952cfe4b3b3f147e49a0554c3498c06cec401c5d4374fa908fa",
+    "cp437.zip": "c36de4b396c78274d852530cc2735204f99d3c31d078aac7811289db5c681495",
+    "document.pdf": "7ac9ee65b87eda7549606424c3548aa96d96d26929ded0c9ecb193a574a61607",
+    "empty.zip": "8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85",
+    "fallback.zip": "ce91eaa813fa4140364a9d139ba8b45b08b3da1aa40e01cd78369d4ad7e88f06",
+    "notes.md": "b5fd33b58954508124714f2f17cae35dbae46ad637a628d27cac56e38b5fd4ca",
+    "picture.png": "b440019923b1fb2524c32bc2bc2b9001b53b76c96b4c5591f98187ec2785f898",
+    "preview.7z": "242e4ec5e11019738882700d0fd25729fd23597d1622eb6cd764060a743d9ffd",
+    "preview.tar": "654fa1c1f48964bba04b3859401dddf7f98ee38573dd1ebe9ab80a30cef382e2",
+    "preview.tar.gz": "eb2be8691c92d30f5f9fdfd9159398f5aa62c120baecf9033f69e8aa710e22b2",
+    "preview.zip": "91b48c0a18c76a8c7910f01f53f657d415b2cec880b552fb7af66b9d88c91735",
+    "too-large.zip": "00c379cefd07d857271304928b2a2b0d5c12733f7cde6144303104b47eb36643",
+    "unsafe.zip": "a1e5c5ff8286aaf3526137fc15b501ea6162086b35bb4e15c76f78f8b326d533"
+  },
+  "provenance": "Synthetic OpenPilot-owned archive fixtures: Python zipfile/tarfile, one-page PDF; PNG reuses the existing verified tests/fixtures/images/alpha.png. 7z written by Windows bsdtar. Malformed/path-escape entries remain inside test archives and are never extracted by the fixture installer."
+}

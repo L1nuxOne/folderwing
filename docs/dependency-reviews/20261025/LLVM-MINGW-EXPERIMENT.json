@@ -1,0 +1,71 @@
+{
+  "schema": "folderwing-pdfium-mingw-experiment/v1",
+  "outcome": "configuration-only build blocked by upstream allocator portability",
+  "receipt_id": "c8fa7eee523117da6ae487015d6f6e5b34eb551f9842bcb50f8fee04c8c9b7fd",
+  "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+  "toolchain": {
+    "project": "mstorsjo/llvm-mingw",
+    "tag": "20261020",
+    "llvm_version": "23.1.4",
+    "asset": "llvm-mingw-20261020-ucrt-x86_64.zip",
+    "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20261020/llvm-mingw-20261020-ucrt-x86_64.zip",
+    "sha256": "fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd",
+    "bytes": 190612575,
+    "publisher_digest_source": "https://api.github.com/repos/mstorsjo/llvm-mingw/releases/tags/20261020",
+    "purpose": "bounded experiment; not accepted release input"
+  },
+  "configuration_rounds": 3,
+  "final_representative_compile_results": {
+    "passed": 6,
+    "failed": 0
+  },
+  "planned_compile_units": 1016,
+  "planned_assembly_units": 27,
+  "full_compile_attempt": {
+    "passed": 17,
+    "failed": 1,
+    "not_started": 998,
+    "elapsed_seconds": 8.531
+  },
+  "first_blocker": {
+    "file": "core/fxcrt/fx_memory.cpp",
+    "line": 103,
+    "error": "posix_memalign undeclared on Windows GNU target",
+    "cause": "Aligned allocator selects the Windows API using COMPILER_MSVC instead of a Windows-platform condition",
+    "paired_contract": "core/fxcrt/fx_memory.h also selects the matching aligned deallocator and malloc declarations using COMPILER_MSVC"
+  },
+  "allocator_runtime_probe": {
+    "cases": 36,
+    "passed": true,
+    "scope": "Isolated runtime API check, not a PDFium acceptance test",
+    "pe": {
+      "scope": "Allocator probe only, not a PDFium DLL",
+      "imports": [
+        "KERNEL32.dll",
+        "api-ms-win-crt-environment-l1-1-0.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll",
+        "api-ms-win-crt-locale-l1-1-0.dll",
+        "api-ms-win-crt-math-l1-1-0.dll",
+        "api-ms-win-crt-private-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-string-l1-1-0.dll"
+      ],
+      "hardening": {
+        "aslr": true,
+        "nx": true,
+        "cfg": true
+      }
+    }
+  },
+  "next_scope": "A small isolated platform-portability patch must cover allocation, deallocation and declarations together. Do not spoof the Microsoft compiler macro globally. Then resume compilation to discover remaining blockers.",
+  "pdfium_dll_produced": false,
+  "export_render_helper_acceptance": "not run: no LLVM-MinGW PDFium DLL was produced",
+  "production_recipe_changed": false,
+  "installed_release_changed": false,
+  "source_files_unchanged": true,
+  "wsl_boot_preserved": true,
+  "public_release_ready": false,
+  "receipt": "build/pdfium-mingw/20261025/RESULT.json",
+  "experiment_workspace": "C:\\Work\\fw-pdfium-mingw-20261025"
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "folderwing-pdfium-gnu-inputs/v1",
+  "toolchain": {
+    "project": "mstorsjo/llvm-mingw",
+    "tag": "20261020",
+    "llvm_version": "23.1.4",
+    "asset": "llvm-mingw-20261020-ucrt-x86_64.zip",
+    "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20261020/llvm-mingw-20261020-ucrt-x86_64.zip",
+    "sha256": "fd5462b7f5d93b2ff981fcd3f9c7e427e47f3203c64ea91c27bcc444eebd74cd",
+    "bytes": 190612575,
+    "publisher_digest_source": "https://api.github.com/repos/mstorsjo/llvm-mingw/releases/tags/20261020",
+    "purpose": "Pinned GNU build and statically linked runtime input; exact archive and selected extracted files verified"
+  },
+  "llvm_mingw_commit": "e08a31fbfe5cfdad07b698299af22d66e5608383",
+  "mingw_w64_commit": "0d6dfbc348dfad714761c0a7151615767f96bcb5",
+  "llvm_tag": "llvmorg-23.1.4",
+  "source_commit": "2fd6cff57d9412cc42ef1a7e4e0a59b13a1e7cec",
+  "version": "157.0.8086.0",
+  "source_graph_sha256": "47fccf27dc049868db99b9aea9e2a133d400349ef8d42b8d49d7cb9f1c997edf",
+  "graph_sha256": "5534ec330ba2ed9adf9733a6993c238d5a20c9705bf85291112f8a594a5bc8d3",
+  "sources_sha256": "9651ef0421b0fdfb844810eb59583093f384fed37df500afc3352b9d7e313821",
+  "toolchain_files_sha256": "88aafe88ea5cd09be4bef76aaff936a000729e57698c8fa6f3de1efc90a62edc",
+  "patch_sha256": "5eb5ac53e80a5a5d648defaa9fbc1f57f43ac310db9401fe687490c4623071e0",
+  "notices_sha256": "33cfdb6c4af2116789930fc3cb381701d49026d4caf7d87a9a60f07e8376f9d7",
+  "public_release_ready": false,
+  "llvm_commit": "7a941dfb2877a0b8cf30323fefa85ad019e0b0f5",
+  "interface_patch_sha256": "d07eeda5344074997dee3ce12e3454f0f3596744a813ab326a54db5406b1c8f0"
+}

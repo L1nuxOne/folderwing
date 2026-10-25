@@ -1,0 +1,33 @@
+/* Force the real libmpv/D3D11 engine for every fixture, even codecs MF supports. */
+#include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "../app/mediaengine.h"
+#include <mpv/client.h>
+static int passed,failed;static volatile LONG frames,colored;static wchar_t fixtures[32768];
+#define CHECK(label,c) do{if(c){passed++;printf("ok %s\n",label);}else{failed++;printf("FAIL %d %s\n",__LINE__,label);}}while(0)
+static void frame(const void *pixels,uint32_t width,uint32_t height,uint32_t stride,void *unused){(void)unused;int colors=0;const unsigned char *p=(const unsigned char*)pixels;for(uint32_t y=0;y<height;y+=8)for(uint32_t x=0;x<width;x+=8){const unsigned char *v=p+(size_t)y*stride+x*4;if(abs((int)v[0]-(int)v[1])>40||abs((int)v[1]-(int)v[2])>40)colors++;}if(colors>30)InterlockedExchange(&colored,1);InterlockedIncrement(&frames);}
+static mediap_state state(void){mediap_state s;media_engine_poll(&s);return s;}
+static void pump(int ms){ULONGLONG end=GetTickCount64()+ms;do{state();Sleep(5);}while(GetTickCount64()<end);}
+static int ready(void){ULONGLONG end=GetTickCount64()+15000;do{mediap_state s=state();if(s.state==MEDIAP_FAILED){printf("engine_error=%lu\n",(unsigned long)s.error);return 0;}if(s.state==MEDIAP_READY&&InterlockedCompareExchange(&colored,0,0))return 1;Sleep(5);}while(GetTickCount64()<end);return 0;}
+static int open_video(const wchar_t *leaf){wchar_t path[32768];swprintf(path,32768,L"%ls\\%ls",fixtures,leaf);InterlockedExchange(&frames,0);InterlockedExchange(&colored,0);int32_t e=media_engine_open(path,1,640,360,MEDIAP_MUTED,frame,NULL);if(e)printf("open_error=%ld\n",(long)e);return e==0;}
+static void test_media_codec_matrix_decode_seek_and_pixels(void){const wchar_t *files[]={L"h264_aac.mp4",L"h264_aac.mkv",L"h264_4k60.mp4",L"hevc_aac.mp4",L"av1_aac.mp4",L"vp8_vorbis.webm",L"vp9_opus.webm",L"mpeg4_pcm.avi"};for(unsigned i=0;i<sizeof files/sizeof *files;i++){printf("fixture=%ls\n",files[i]);int opened=open_video(files[i]);CHECK("forced libmpv source opens",opened);if(opened){int decoded=ready();CHECK("actual D3D11 rendering produces colored pixels",decoded);if(decoded){mediap_state s=state();CHECK("forced backend reports video-only dimensions and duration",s.backend==2&&s.has_video&&!s.has_audio&&s.width>0&&s.height>0&&s.duration>4.8&&s.muted&&s.paused);media_engine_control(MEDIA_PLAY,0);pump(650);CHECK("decoded playback advances",state().position>.2);media_engine_control(MEDIA_SEEK,2.5);media_engine_control(MEDIA_PAUSE,0);pump(500);s=state();CHECK("forced codec seek reaches target and pauses",s.paused&&fabs(s.position-2.5)<.25);}}media_engine_close();CHECK("codec close unloads the replaceable DLL",GetModuleHandleW(L"libmpv-2.dll")==NULL);}}
+static void test_media_codec_early_close_and_reopen(void){CHECK("source starts for immediate cancellation",open_video(L"vp9_opus.webm"));media_engine_close();CHECK("early close unloads libmpv",GetModuleHandleW(L"libmpv-2.dll")==NULL);CHECK("fresh source renders after cancelled load",open_video(L"vp8_vorbis.webm")&&ready());media_engine_close();CHECK("final close leaves no loaded media DLL",GetModuleHandleW(L"libmpv-2.dll")==NULL);}
+static void test_media_explicit_software_decode(void){
+ wchar_t dllpath[32768];GetModuleFileNameW(NULL,dllpath,32768);wchar_t *slash=wcsrchr(dllpath,L'\\');if(!slash){CHECK("software probe locates candidate directory",0);return;}wcscpy(slash+1,L"libmpv-2.dll");HMODULE dll=LoadLibraryExW(dllpath,NULL,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);CHECK("software probe loads the exact candidate DLL",dll!=NULL);if(!dll)return;
+ mpv_handle *(*create)(void)=(mpv_handle *(*)(void))GetProcAddress(dll,"mpv_create");
+ int (*option)(mpv_handle*,const char*,const char*)=(int (*)(mpv_handle*,const char*,const char*))GetProcAddress(dll,"mpv_set_option_string");
+ int (*initialize)(mpv_handle*)=(int (*)(mpv_handle*))GetProcAddress(dll,"mpv_initialize");
+ int (*command)(mpv_handle*,const char** )=(int (*)(mpv_handle*,const char**))GetProcAddress(dll,"mpv_command");
+ int (*property)(mpv_handle*,const char*,mpv_format,void*)=(int (*)(mpv_handle*,const char*,mpv_format,void*))GetProcAddress(dll,"mpv_get_property");
+ char *(*string)(mpv_handle*,const char*)=(char *(*)(mpv_handle*,const char*))GetProcAddress(dll,"mpv_get_property_string");
+ void (*release)(void*)=(void (*)(void*))GetProcAddress(dll,"mpv_free");
+ void (*destroy)(mpv_handle*)=(void (*)(mpv_handle*))GetProcAddress(dll,"mpv_terminate_destroy");
+ CHECK("software probe resolves its public client API",create&&option&&initialize&&command&&property&&string&&release&&destroy);if(!(create&&option&&initialize&&command&&property&&string&&release&&destroy)){FreeLibrary(dll);return;}
+ const wchar_t *files[]={L"hevc_aac.mp4",L"av1_aac.mp4",L"vp9_opus.webm"};
+ for(unsigned i=0;i<3;i++){printf("software_fixture=%ls\n",files[i]);mpv_handle *h=create();CHECK("software decoder instance created",h!=NULL);if(!h)continue;int scripts=option(h,"load-scripts","no");int configured=(scripts>=0||scripts==MPV_ERROR_OPTION_NOT_FOUND)&&option(h,"config","no")>=0&&option(h,"audio","no")>=0&&option(h,"vo","null")>=0&&option(h,"hwdec","no")>=0&&option(h,"pause","no")>=0;int initialized=configured&&initialize(h)>=0;CHECK("explicit software decode initializes without audio output",initialized);if(initialized){wchar_t path[32768];char utf8[131072];swprintf(path,32768,L"%ls\\%ls",fixtures,files[i]);WideCharToMultiByte(CP_UTF8,0,path,-1,utf8,sizeof utf8,NULL,NULL);const char *args[]={"loadfile",utf8,"replace",NULL};CHECK("software fixture command accepted",command(h,args)>=0);int decoded=0;ULONGLONG end=GetTickCount64()+15000;do{int64_t width=0;double position=0;if(property(h,"video-out-params/w",MPV_FORMAT_INT64,&width)>=0&&property(h,"time-pos",MPV_FORMAT_DOUBLE,&position)>=0&&width>0&&position>.2){decoded=1;break;}Sleep(10);}while(GetTickCount64()<end);char *hw=string(h,"hwdec-current"),*codec=string(h,"video-codec");printf("software_codec=%s hwdec=%s\n",codec?codec:"unavailable",hw?hw:"unavailable");CHECK("software decoder emits frames with hardware disabled",decoded&&hw&&!strcmp(hw,"no"));release(hw);release(codec);}destroy(h);}
+ FreeLibrary(dll);CHECK("software probe unloads its DLL",GetModuleHandleW(L"libmpv-2.dll")==NULL);
+}
+int wmain(int argc,wchar_t **argv){setvbuf(stdout,NULL,_IONBF,0);if(argc!=2)return 2;wcsncpy(fixtures,argv[1],32767);CoInitializeEx(NULL,COINIT_MULTITHREADED);test_media_codec_matrix_decode_seek_and_pixels();test_media_codec_early_close_and_reopen();test_media_explicit_software_decode();CoUninitialize();printf("%d passed, %d failed; 3 codec selectors\n",passed,failed);return failed?1:0;}

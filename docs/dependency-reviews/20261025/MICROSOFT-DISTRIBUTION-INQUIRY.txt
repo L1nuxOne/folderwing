@@ -1,0 +1,55 @@
+Status: sent with explicit user authorization on 2026-10-25T03:19:21.000Z.
+Recipient: visualcpp@microsoft.com
+Recipient source: Microsoft's C++ Team Blog, "Updates to Visual Studio Build Tools
+license for C and C++ Open-Source projects", August 18, 2022:
+https://devblogs.microsoft.com/cppblog/updates-to-visual-studio-build-tools-license-for-c-and-cpp-open-source-projects/
+
+Subject: Clarification: redistribution of PDFium /MD output under VS 2022 Build Tools OSS dependency terms
+
+Hello C++ team,
+
+I am preparing Folderwing, a personal Windows application whose own source is MIT,
+for public source and binary distribution. Its PDF preview uses third-party
+PDFium, built from BSD-licensed source with the accompanying component notices.
+
+The controlled build uses Chromium Clang/LLD, release MSVC libraries from toolset
+14.44.35207, and Windows SDK 10.0.26100.0. Microsoft payloads were obtained from
+the official Visual Studio 2022 manifest into a portable build directory under
+the Build Tools OSS-dependency permission, not from an installed Community IDE.
+The changes to PDFium are limited to build/interface configuration.
+
+All translation units use /MD. The resulting pdfium.dll imports the Windows UCRT,
+VCRUNTIME140.dll and VCRUNTIME140_1.dll. Its map also shows 30 release startup/support
+objects from msvcrt.lib and one from vcruntime.lib, including CRT entry-point/TLS
+initialization and security-cookie support. No debug libraries are used.
+
+We intend to distribute only the application/PDFium binaries and required notices.
+The VC runtime will be an external prerequisite installed using Microsoft's
+official installer. We will not distribute Microsoft's toolchain, CRT sources,
+loose Microsoft .lib files, runtime DLLs, or runtime installer.
+
+Could you confirm the applicable licensing basis and requirements?
+
+1. Does the Visual Studio 2022 Build Tools OSS-dependency permission cover public
+   distribution of this linked PDFium output, including its release startup/support
+   code? If so, which agreement/provision establishes that distribution right?
+2. If a valid Visual Studio Community license is required, does Community section 4
+   cover this incorporated release CRT startup/support code? The 2022 REDIST list
+   names DLLs/MSMs but does not explicitly identify these startup libraries.
+3. Under the applicable route, what specific Microsoft terms must the binary
+   package carry, and what agreement, if any, must external users/distributors
+   accept solely for these incorporated portions? We intend to preserve all rights
+   granted by the MIT/BSD and other open-source component licenses.
+4. If the Community route is needed, can an eligible individual acquire/use that
+   license with the C++ build components only, without installing the full IDE?
+
+Microsoft's deployment documentation describes static linking as a supported
+deployment method. We also found the earlier discussion of this precise EULA/list
+ambiguity, including the August 22, 2022 C++ team follow-up, but could not find a
+definitive resolution:
+https://developercommunity.visualstudio.com/t/Distributing-application-statically-link/10111550
+
+A reference to the applicable published terms, or written clarification covering
+this build and distribution scenario, would be very helpful.
+
+Thank you.

@@ -1,0 +1,2211 @@
+PDFium chromium/8086 and enabled in-tree libraries: source file attribution supplement
+
+Verbatim source comment groups from the pinned source distribution.
+This is a conservative attribution superset, not a claim every file is linked.
+
+Files: constants/access_permissions.h, core/fpdfapi/page/cpdf_function_unittest.cpp, core/fxcrt/autonuller.h, core/fxcrt/autonuller_unittest.cpp, core/fxcrt/css/cfx_csssyntaxparser_unittest.cpp, core/fxge/cfx_fillrenderoptions.h, core/fxge/cfx_textrenderoptions.h, core/fxge/dib/cfx_dibbase_unittest.cpp, core/fxge/win32/ctext_only_printer_driver.cpp, core/fxge/win32/ctext_only_printer_driver.h, fpdfsdk/cpdfsdk_helpers_unittest.cpp, fpdfsdk/fpdf_signature.cpp, fpdfsdk/fpdf_signature_embeddertest.cpp, fpdfsdk/fpdfxfa/cpdfxfa_context_embeddertest.cpp, fpdfsdk/pwl/cpwl_special_button_embeddertest.cpp, public/fpdf_signature.h
+
+// Copyright 2020 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: constants/annotation_common.h, constants/annotation_flags.h, constants/form_fields.h, core/fpdfapi/font/cpdf_cidfont_unittest.cpp, core/fpdfapi/render/fpdf_progressive_render_embeddertest.cpp, core/fxcodec/basic/basicmodule.cpp, core/fxcodec/progressive_decoder_unittest.cpp, core/fxcrt/byteorder.h, core/fxcrt/byteorder_unittest.cpp, core/fxcrt/cfx_memorystream_unittest.cpp, core/fxcrt/cfx_seekablestreamproxy_unittest.cpp, core/fxcrt/cfx_timer_unittest.cpp, core/fxcrt/fx_memory_wrappers.h, core/fxcrt/fx_memory_wrappers_unittest.cpp, core/fxcrt/observed_ptr.cpp, core/fxcrt/stream_write_utils.cpp, core/fxcrt/stream_write_utils.h, core/fxcrt/tree_node.h, core/fxcrt/tree_node_unittest.cpp, core/fxge/cfx_face.cpp, core/fxge/cfx_face.h, core/fxge/cfx_folderfontinfo_unittest.cpp, core/fxge/cfx_fontmapper_unittest.cpp, core/fxge/cfx_glyphbitmap.cpp, core/fxge/dib/cfx_cmyk_to_srgb_unittest.cpp, fpdfsdk/cpdfsdk_baannot_embeddertest.cpp, fpdfsdk/fpdf_javascript.cpp, fpdfsdk/fpdf_javascript_embeddertest.cpp, fpdfsdk/fpdf_searchex_embeddertest.cpp, fpdfsdk/fpdf_sysfontinfo_embeddertest.cpp, fpdfsdk/fpdf_thumbnail.cpp, fpdfsdk/fpdf_thumbnail_embeddertest.cpp, fpdfsdk/fpdf_view_unittest.cpp, fpdfsdk/fpdfxfa/cpdfxfa_docenvironment_embeddertest.cpp, public/fpdf_javascript.h, public/fpdf_thumbnail.h
+
+// Copyright 2019 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: constants/appearance.h, constants/ascii.h, core/fpdfapi/page/cpdf_colorspace_unittest.cpp, core/fpdfapi/parser/cpdf_object_stream_unittest.cpp, core/fpdfdoc/cpdf_action_unittest.cpp, core/fxcrt/cfx_datetime_unittest.cpp, core/fxcrt/mask.h, core/fxcrt/mask_unittest.cpp, core/fxcrt/scoped_set_insertion.h, core/fxcrt/scoped_set_insertion_unittest.cpp, core/fxcrt/span_util.h, core/fxcrt/span_util_unittest.cpp, core/fxge/cfx_path_unittest.cpp, core/fxge/win32/cfx_psfonttracker.cpp, core/fxge/win32/cfx_psfonttracker.h, core/fxge/win32/cfx_psrenderer_unittest.cpp
+
+// Copyright 2021 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: constants/catalog.h, core/fpdfapi/edit/cpdf_font_util.cpp, core/fpdfapi/edit/cpdf_font_util.h, core/fpdfapi/edit/cpdf_fontsubsetter.cpp, core/fpdfapi/edit/cpdf_fontsubsetter.h, core/fpdfapi/edit/cpdf_fontsubsetter_embeddertest.cpp, core/fpdfapi/font/cpdf_facebasedsimplefont.cpp, core/fpdfapi/font/cpdf_facebasedsimplefont.h, core/fpdfapi/page/cpdf_dib_unittest.cpp, core/fpdfapi/page/cpdf_page_unittest.cpp, core/fpdfdoc/cpvt_section_unittest.cpp, core/fpdfdoc/cpvt_stub_provider.cpp, core/fpdfdoc/cpvt_stub_provider.h, core/fpdfdoc/cpvt_variabletext_unittest.cpp, core/fpdfdoc/cpvt_word.cpp, core/fxcodec/bmp/rust_bmp_context.cpp, core/fxcodec/bmp/rust_bmp_context.h, core/fxcodec/brotli/brotli_decoder.cpp, core/fxcodec/brotli/brotli_decoder.h, core/fxcodec/brotli/brotli_embeddertest.cpp, core/fxcodec/codec_memory_sk_stream.cpp, core/fxcodec/codec_memory_sk_stream.h, core/fxcodec/codec_memory_sk_stream_unittest.cpp, core/fxcodec/image_predictors.cpp, core/fxcodec/image_predictors.h, core/fxcodec/jpeg/jpegmodule_unittest.cpp, core/fxcodec/jpeg/libjpeg_jpeg_context.cpp, core/fxcodec/jpeg/libjpeg_jpeg_context.h, core/fxcodec/jpeg/libjpeg_scanline_decoder.h, core/fxcodec/jpeg/rust_jpeg_context.cpp, core/fxcodec/jpeg/rust_jpeg_context.h, core/fxcodec/jpeg/rust_jpeg_scanline_decoder.cpp, core/fxcodec/jpeg/rust_jpeg_scanline_decoder.h, core/fxcodec/png/libpng_png_context.cpp, core/fxcodec/png/libpng_png_context.h, core/fxcodec/png/rust_png_context.cpp, core/fxcodec/png/rust_png_context.h, core/fxcodec/progressive_decoder_context_delegate.h, core/fxcrt/cfx_bidi_resolver.cpp, core/fxcrt/cfx_bidi_resolver.h, core/fxcrt/cfx_bidi_resolver_unittest.cpp, core/fxcrt/cfx_fileaccess_stream.h, core/fxcrt/cfx_read_only_container_stream.cpp, core/fxcrt/cfx_read_only_container_stream.h, core/fxcrt/cfx_read_only_container_stream_unittest.cpp, core/fxcrt/containers/to_vector.h, core/fxcrt/containers/to_vector_unittest.cpp, core/fxcrt/data_vector_unittest.cpp, core/fxcrt/fx_ceil_div.h, core/fxcrt/fx_ceil_div_unittest.cpp, core/fxcrt/fx_ceil_log2.h, core/fxcrt/mapped_data_bytes.cpp, core/fxcrt/mapped_data_bytes.h, core/fxcrt/mapped_data_bytes_unittest.cpp, core/fxcrt/maybe_owned_data_vector.h, core/fxcrt/maybe_owned_data_vector_unittest.cpp, core/fxcrt/span_io.h, core/fxcrt/span_io_unittest.cpp, core/fxcrt/stream_write_utils_unittest.cpp, core/fxcrt/to_underlying.h, core/fxcrt/to_underlying_unittest.cpp, core/fxge/cfx_color_unittest.cpp, core/fxge/cfx_cttnametable.cpp, core/fxge/cfx_cttnametable.h, core/fxge/cfx_face_unittest.cpp, core/fxge/cfx_font_unittest.cpp, core/fxge/cfx_renderdevice_unittest.cpp, core/fxge/cfx_standardfont.cpp, core/fxge/cfx_standardfont.h, core/fxge/cfx_standardfont_unittest.cpp, core/fxge/cfx_substfont_unittest.cpp, core/fxge/skrifa/fx_skrifa_unittest.cpp, fpdfsdk/fpdfxfa/cpdfxfa_formfillenv_embeddertest.cpp
+
+// Copyright 2026 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: constants/font_encodings.h, core/fpdfapi/page/cpdf_indexedcs.cpp, core/fpdfapi/page/cpdf_indexedcs.h, core/fpdfapi/page/test_with_page_module.cpp, core/fpdfapi/page/test_with_page_module.h, core/fpdfapi/parser/cpdf_dictionary_unittest.cpp, core/fpdfapi/parser/cpdf_test_document.cpp, core/fpdfapi/parser/cpdf_test_document.h, core/fpdfdoc/cpdf_bafontmap_unittest.cpp, core/fxcrt/binary_buffer_unittest.cpp, core/fxcrt/css/cfx_cssdata_unittest.cpp, core/fxcrt/data_vector.h, core/fxcrt/fake_time_test.cpp, core/fxcrt/fake_time_test.h, core/fxcrt/fixed_size_data_vector.h, core/fxcrt/fx_2d_size.h, core/fxcrt/fx_safe_types_unittest.cpp, core/fxcrt/fx_string_wrappers.h, core/fxcrt/fx_string_wrappers_unittest.cpp, core/fxge/calculate_pitch.cpp, core/fxge/calculate_pitch.h, fpdfsdk/formfiller/cffl_combobox_embeddertest.cpp, fpdfsdk/pwl/cpwl_combo_box_embeddertest.h
+
+// Copyright 2022 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: constants/form_flags.h, constants/page_object.h, constants/stream_dict_common.h, constants/transparency.h, core/fpdfapi/edit/cpdf_pagecontentmanager.cpp, core/fpdfapi/edit/cpdf_pagecontentmanager.h, core/fpdfapi/edit/cpdf_stringarchivestream.cpp, core/fpdfapi/edit/cpdf_stringarchivestream.h, core/fpdfapi/page/cpdf_pageobjectholder_unittest.cpp, core/fpdfapi/page/cpdf_transparency.cpp, core/fpdfapi/page/cpdf_transparency.h, core/fpdfapi/parser/cpdf_cross_ref_table.cpp, core/fpdfapi/parser/cpdf_cross_ref_table.h, core/fpdfapi/parser/cpdf_object_stream.cpp, core/fpdfapi/parser/cpdf_object_stream.h, core/fpdfapi/parser/cpdf_stream_acc_unittest.cpp, core/fpdfapi/parser/fpdf_parser_utility_unittest.cpp, core/fpdfapi/render/cpdf_docrenderdata_unittest.cpp, core/fpdfdoc/cpdf_annot_unittest.cpp, core/fpdfdoc/cpdf_defaultappearance_unittest.cpp, core/fpdfdoc/cpdf_metadata_unittest.cpp, core/fxcodec/cfx_codec_memory.cpp, core/fxcodec/cfx_codec_memory.h, core/fxcrt/autorestorer_unittest.cpp, core/fxcrt/cfx_bitstream_unittest.cpp, core/fxcrt/fx_number_unittest.cpp, core/fxcrt/pdfium_span_unittest.cpp, core/fxcrt/widetext_buffer_unittest.cpp, core/fxcrt/xml/cfx_xmlchardata_unittest.cpp, core/fxcrt/xml/cfx_xmldocument.cpp, core/fxcrt/xml/cfx_xmldocument.h, core/fxcrt/xml/cfx_xmldocument_unittest.cpp, core/fxcrt/xml/cfx_xmlelement_unittest.cpp, core/fxcrt/xml/cfx_xmlinstruction_unittest.cpp, core/fxcrt/xml/cfx_xmlnode_unittest.cpp, core/fxcrt/xml/cfx_xmltext_unittest.cpp, core/fxge/dib/cfx_dibitmap_unittest.cpp, core/fxge/fx_font.cpp, core/fxge/fx_font_unittest.cpp, fpdfsdk/fpdf_edit_unittest.cpp, fpdfsdk/fpdf_editpage_embeddertest.cpp, fpdfsdk/fpdf_transformpage_embeddertest.cpp, public/cpp/fpdf_scopers.h
+
+// Copyright 2018 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fdrm/fx_crypt.cpp, core/fdrm/fx_crypt.h, core/fdrm/fx_crypt_aes.cpp, core/fdrm/fx_crypt_sha.cpp, core/fpdfapi/cmaps/CNS1/Adobe-CNS1-UCS2_5.inc, core/fpdfapi/cmaps/CNS1/B5pc-H_0.cpp, core/fpdfapi/cmaps/CNS1/B5pc-V_0.cpp, core/fpdfapi/cmaps/CNS1/CNS-EUC-H_0.cpp, core/fpdfapi/cmaps/CNS1/CNS-EUC-V_0.cpp, core/fpdfapi/cmaps/CNS1/ETen-B5-H_0.cpp, core/fpdfapi/cmaps/CNS1/ETen-B5-V_0.cpp, core/fpdfapi/cmaps/CNS1/ETenms-B5-H_0.cpp, core/fpdfapi/cmaps/CNS1/ETenms-B5-V_0.cpp, core/fpdfapi/cmaps/CNS1/HKscs-B5-H_5.cpp, core/fpdfapi/cmaps/CNS1/HKscs-B5-V_5.cpp, core/fpdfapi/cmaps/CNS1/UniCNS-UCS2-H_3.cpp, core/fpdfapi/cmaps/CNS1/UniCNS-UCS2-V_3.cpp, core/fpdfapi/cmaps/CNS1/UniCNS-UTF16-H_0.cpp, core/fpdfapi/cmaps/CNS1/cmaps_cns1.inc, core/fpdfapi/cmaps/GB1/Adobe-GB1-UCS2_5.inc, core/fpdfapi/cmaps/GB1/GB-EUC-H_0.cpp, core/fpdfapi/cmaps/GB1/GB-EUC-V_0.cpp, core/fpdfapi/cmaps/GB1/GBK-EUC-H_2.cpp, core/fpdfapi/cmaps/GB1/GBK-EUC-V_2.cpp, core/fpdfapi/cmaps/GB1/GBK2K-H_5.cpp, core/fpdfapi/cmaps/GB1/GBK2K-V_5.cpp, core/fpdfapi/cmaps/GB1/GBKp-EUC-H_2.cpp, core/fpdfapi/cmaps/GB1/GBKp-EUC-V_2.cpp, core/fpdfapi/cmaps/GB1/GBpc-EUC-H_0.cpp, core/fpdfapi/cmaps/GB1/GBpc-EUC-V_0.cpp, core/fpdfapi/cmaps/GB1/UniGB-UCS2-H_4.cpp, core/fpdfapi/cmaps/GB1/UniGB-UCS2-V_4.cpp, core/fpdfapi/cmaps/GB1/cmaps_gb1.inc, core/fpdfapi/cmaps/Japan1/83pv-RKSJ-H_1.cpp, core/fpdfapi/cmaps/Japan1/90ms-RKSJ-H_2.cpp, core/fpdfapi/cmaps/Japan1/90ms-RKSJ-V_2.cpp, core/fpdfapi/cmaps/Japan1/90msp-RKSJ-H_2.cpp, core/fpdfapi/cmaps/Japan1/90msp-RKSJ-V_2.cpp, core/fpdfapi/cmaps/Japan1/90pv-RKSJ-H_1.cpp, core/fpdfapi/cmaps/Japan1/Add-RKSJ-H_1.cpp, core/fpdfapi/cmaps/Japan1/Add-RKSJ-V_1.cpp, core/fpdfapi/cmaps/Japan1/Adobe-Japan1-UCS2_4.inc, core/fpdfapi/cmaps/Japan1/EUC-H_1.cpp, core/fpdfapi/cmaps/Japan1/EUC-V_1.cpp, core/fpdfapi/cmaps/Japan1/Ext-RKSJ-H_2.cpp, core/fpdfapi/cmaps/Japan1/Ext-RKSJ-V_2.cpp, core/fpdfapi/cmaps/Japan1/H_1.cpp, core/fpdfapi/cmaps/Japan1/UniJIS-UCS2-HW-H_4.cpp, core/fpdfapi/cmaps/Japan1/UniJIS-UCS2-HW-V_4.cpp, core/fpdfapi/cmaps/Japan1/UniJIS-UCS2-H_4.cpp, core/fpdfapi/cmaps/Japan1/UniJIS-UCS2-V_4.cpp, core/fpdfapi/cmaps/Japan1/V_1.cpp, core/fpdfapi/cmaps/Japan1/cmaps_japan1.inc, core/fpdfapi/cmaps/Korea1/Adobe-Korea1-UCS2_2.inc, core/fpdfapi/cmaps/Korea1/KSC-EUC-H_0.cpp, core/fpdfapi/cmaps/Korea1/KSC-EUC-V_0.cpp, core/fpdfapi/cmaps/Korea1/KSCms-UHC-HW-H_1.cpp, core/fpdfapi/cmaps/Korea1/KSCms-UHC-HW-V_1.cpp, core/fpdfapi/cmaps/Korea1/KSCms-UHC-H_1.cpp, core/fpdfapi/cmaps/Korea1/KSCms-UHC-V_1.cpp, core/fpdfapi/cmaps/Korea1/KSCpc-EUC-H_0.cpp, core/fpdfapi/cmaps/Korea1/UniKS-UCS2-H_1.cpp, core/fpdfapi/cmaps/Korea1/UniKS-UCS2-V_1.cpp, core/fpdfapi/cmaps/Korea1/UniKS-UTF16-H_0.cpp, core/fpdfapi/cmaps/Korea1/cmaps_korea1.inc, core/fpdfapi/cmaps/fpdf_cmaps.cpp, core/fpdfapi/cmaps/fpdf_cmaps.h, core/fpdfapi/edit/cpdf_creator.cpp, core/fpdfapi/edit/cpdf_creator.h, core/fpdfapi/font/cpdf_cmapparser.cpp, core/fpdfapi/page/cpdf_devicecs.cpp, core/fpdfapi/page/cpdf_docpagedata.cpp, core/fpdfapi/page/cpdf_patterncs.cpp, core/fpdfapi/parser/cfdf_document.cpp, core/fpdfapi/parser/cpdf_crypto_handler.cpp, core/fpdfapi/parser/cpdf_document.cpp, core/fpdfapi/parser/cpdf_security_handler.cpp, core/fpdfapi/parser/fpdf_parser_decode.cpp, core/fpdfapi/parser/fpdf_parser_utility.cpp, core/fpdfdoc/cpdf_bafontmap.cpp, core/fpdfdoc/cpdf_bafontmap.h, core/fpdfdoc/cpdf_formfield.cpp, core/fpdftext/cpdf_linkextract.h, core/fpdftext/cpdf_textpage.cpp, core/fpdftext/unicodenormalizationdata.cpp, core/fxcodec/bmp/fx_bmp.h, core/fxcodec/fax/faxmodule.cpp, core/fxcodec/flate/flatemodule.cpp, core/fxcodec/fx_codec.cpp, core/fxcodec/fx_codec.h, core/fxcodec/fx_codec_def.h, core/fxcodec/gif/cfx_gif.cpp, core/fxcodec/gif/cfx_gif.h, core/fxcodec/icc/icc_transform.cpp, core/fxcodec/jbig2/jbig2_arith_decoder.cpp, core/fxcodec/jbig2/jbig2_arith_decoder.h, core/fxcodec/jbig2/jbig2_arith_int_decoder.cpp, core/fxcodec/jbig2/jbig2_arith_int_decoder.h, core/fxcodec/jbig2/jbig2_bit_stream.h, core/fxcodec/jbig2/jbig2_context.cpp, core/fxcodec/jbig2/jbig2_context.h, core/fxcodec/jbig2/jbig2_decoder.cpp, core/fxcodec/jbig2/jbig2_define.h, core/fxcodec/jbig2/jbig2_huffman_decoder.cpp, core/fxcodec/jbig2/jbig2_huffman_decoder.h, core/fxcodec/jbig2/jbig2_huffman_table.cpp, core/fxcodec/jbig2/jbig2_huffman_table.h, core/fxcodec/jbig2/jbig2_image.cpp, core/fxcodec/jbig2/jbig2_image.h, core/fxcodec/jbig2/jbig2_page.h, core/fxcodec/jbig2/jbig2_pattern_dict.cpp, core/fxcodec/jbig2/jbig2_pattern_dict.h, core/fxcodec/jbig2/jbig2_segment.cpp, core/fxcodec/jbig2/jbig2_segment.h, core/fxcodec/jbig2/jbig2_symbol_dict.cpp, core/fxcodec/jbig2/jbig2_symbol_dict.h, core/fxcodec/jpx/jpx_decode_utils.h, core/fxcodec/progressive_decoder.cpp, core/fxcodec/progressive_decoder.h, core/fxcodec/tiff/libtiff_tiff_context.cpp, core/fxcrt/bytestring.cpp, core/fxcrt/cfx_datetime.cpp, core/fxcrt/cfx_datetime.h, core/fxcrt/cfx_fileaccess_posix.cpp, core/fxcrt/cfx_fileaccess_posix.h, core/fxcrt/cfx_fileaccess_windows.cpp, core/fxcrt/cfx_fileaccess_windows.h, core/fxcrt/css/cfx_css.h, core/fxcrt/css/cfx_cssdeclaration.cpp, core/fxcrt/css/cfx_cssdeclaration.h, core/fxcrt/css/cfx_cssstyleselector.cpp, core/fxcrt/css/cfx_cssstylesheet.cpp, core/fxcrt/css/cfx_csssyntaxparser.cpp, core/fxcrt/fileaccess_iface.h, core/fxcrt/fx_bidi.cpp, core/fxcrt/fx_bidi.h, core/fxcrt/fx_codepage.h, core/fxcrt/fx_coordinates.cpp, core/fxcrt/fx_coordinates.h, core/fxcrt/fx_extension.cpp, core/fxcrt/fx_extension.h, core/fxcrt/fx_memory.cpp, core/fxcrt/fx_memory.h, core/fxcrt/fx_stream.h, core/fxcrt/fx_string.h, core/fxcrt/fx_system.h, core/fxcrt/fx_unicode.cpp, core/fxcrt/fx_unicode.h, core/fxcrt/widestring.cpp, core/fxge/agg/cfx_agg_devicedriver.cpp, core/fxge/agg/cfx_agg_devicedriver.h, core/fxge/android/fx_android_impl.cpp, core/fxge/apple/capple_platform.cpp, core/fxge/apple/cquartz_2d.cpp, core/fxge/apple/cquartz_2d.h, core/fxge/apple/fx_apple_impl.cpp, core/fxge/cfx_cttgsubtable.cpp, core/fxge/cfx_cttgsubtable.h, core/fxge/cfx_font.cpp, core/fxge/dib/fx_dib.cpp, core/fxge/dib/fx_dib.h, core/fxge/fontdata/chromefontdata/FoxitDingbats.cpp, core/fxge/fontdata/chromefontdata/FoxitFixed.cpp, core/fxge/fontdata/chromefontdata/FoxitFixedBold.cpp, core/fxge/fontdata/chromefontdata/FoxitFixedBoldItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitFixedItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitSans.cpp, core/fxge/fontdata/chromefontdata/FoxitSansBold.cpp, core/fxge/fontdata/chromefontdata/FoxitSansBoldItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitSansItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitSansMM.cpp, core/fxge/fontdata/chromefontdata/FoxitSerif.cpp, core/fxge/fontdata/chromefontdata/FoxitSerifBold.cpp, core/fxge/fontdata/chromefontdata/FoxitSerifBoldItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitSerifItalic.cpp, core/fxge/fontdata/chromefontdata/FoxitSerifMM.cpp, core/fxge/fontdata/chromefontdata/FoxitSymbol.cpp, core/fxge/freetype/fx_freetype.cpp, core/fxge/freetype/fx_freetype.h, core/fxge/fx_font.h, core/fxge/linux/fx_linux_impl.cpp, core/fxge/win32/cfx_psrenderer.cpp, core/fxge/win32/cgdi_plus_ext.cpp, core/fxge/win32/cgdi_printer_driver.cpp, fpdfsdk/cpdfsdk_baannot.h, fpdfsdk/cpdfsdk_helpers.h, fpdfsdk/formfiller/cffl_checkbox.cpp, fpdfsdk/formfiller/cffl_checkbox.h, fpdfsdk/formfiller/cffl_combobox.cpp, fpdfsdk/formfiller/cffl_combobox.h, fpdfsdk/formfiller/cffl_formfield.cpp, fpdfsdk/formfiller/cffl_formfield.h, fpdfsdk/formfiller/cffl_interactiveformfiller.cpp, fpdfsdk/formfiller/cffl_interactiveformfiller.h, fpdfsdk/formfiller/cffl_listbox.cpp, fpdfsdk/formfiller/cffl_listbox.h, fpdfsdk/formfiller/cffl_pushbutton.cpp, fpdfsdk/formfiller/cffl_pushbutton.h, fpdfsdk/formfiller/cffl_radiobutton.cpp, fpdfsdk/formfiller/cffl_radiobutton.h, fpdfsdk/formfiller/cffl_textfield.cpp, fpdfsdk/formfiller/cffl_textfield.h, fpdfsdk/fpdf_dataavail.cpp, fpdfsdk/fpdf_doc.cpp, fpdfsdk/fpdf_editimg.cpp, fpdfsdk/fpdf_editpage.cpp, fpdfsdk/fpdf_ext.cpp, fpdfsdk/fpdf_flatten.cpp, fpdfsdk/fpdf_formfill.cpp, fpdfsdk/fpdf_ppo.cpp, fpdfsdk/fpdf_progressive.cpp, fpdfsdk/fpdf_save.cpp, fpdfsdk/fpdf_searchex.cpp, fpdfsdk/fpdf_sysfontinfo.cpp, fpdfsdk/fpdf_text.cpp, fpdfsdk/fpdf_transformpage.cpp, fpdfsdk/fpdf_view.cpp, fpdfsdk/fpdfxfa/cpdfxfa_context.cpp, fpdfsdk/fpdfxfa/cpdfxfa_context.h, fpdfsdk/fpdfxfa/cpdfxfa_page.cpp, fpdfsdk/fpdfxfa/cpdfxfa_page.h, fpdfsdk/pwl/cpwl_button.cpp, fpdfsdk/pwl/cpwl_button.h, fpdfsdk/pwl/cpwl_caret.cpp, fpdfsdk/pwl/cpwl_caret.h, fpdfsdk/pwl/cpwl_combo_box.cpp, fpdfsdk/pwl/cpwl_combo_box.h, fpdfsdk/pwl/cpwl_edit.cpp, fpdfsdk/pwl/cpwl_edit.h, fpdfsdk/pwl/cpwl_edit_impl.cpp, fpdfsdk/pwl/cpwl_edit_impl.h, fpdfsdk/pwl/cpwl_list_box.cpp, fpdfsdk/pwl/cpwl_list_box.h, fpdfsdk/pwl/cpwl_list_ctrl.cpp, fpdfsdk/pwl/cpwl_list_ctrl.h, fpdfsdk/pwl/cpwl_scroll_bar.cpp, fpdfsdk/pwl/cpwl_scroll_bar.h, fpdfsdk/pwl/cpwl_special_button.cpp, fpdfsdk/pwl/cpwl_special_button.h, fpdfsdk/pwl/cpwl_wnd.cpp, fpdfsdk/pwl/cpwl_wnd.h, public/fpdf_dataavail.h, public/fpdf_doc.h, public/fpdf_edit.h, public/fpdf_ext.h, public/fpdf_flatten.h, public/fpdf_formfill.h, public/fpdf_fwlevent.h, public/fpdf_ppo.h, public/fpdf_progressive.h, public/fpdf_save.h, public/fpdf_searchex.h, public/fpdf_sysfontinfo.h, public/fpdf_text.h, public/fpdf_transformpage.h
+
+// Copyright 2014 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fdrm/fx_crypt_aes.h, core/fdrm/fx_crypt_sha.h, core/fpdfapi/edit/cpdf_npagetooneexporter.cpp, core/fpdfapi/edit/cpdf_npagetooneexporter.h, core/fpdfapi/edit/cpdf_pageexporter.cpp, core/fpdfapi/edit/cpdf_pageexporter.h, core/fpdfapi/edit/cpdf_pageorganizer.cpp, core/fpdfapi/edit/cpdf_pageorganizer.h, core/fxcrt/fx_coordinates_test_support.h, core/fxcrt/string_template.cpp, core/fxcrt/string_template.h
+
+// Copyright 2024 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fdrm/fx_crypt_unittest.cpp, core/fpdfapi/page/cpdf_streamcontentparser_unittest.cpp, core/fpdfapi/parser/cpdf_array_unittest.cpp, core/fpdfapi/parser/cpdf_document_unittest.cpp, core/fpdfapi/parser/cpdf_object_unittest.cpp, core/fpdfapi/parser/cpdf_security_handler_embeddertest.cpp, core/fpdfapi/parser/cpdf_seekablemultistream_unittest.cpp, core/fpdfapi/parser/cpdf_simple_parser_unittest.cpp, core/fpdfapi/parser/cpdf_syntax_parser_unittest.cpp, core/fpdfdoc/cpdf_dest_unittest.cpp, core/fpdfdoc/cpdf_filespec_unittest.cpp, core/fpdfdoc/cpdf_formfield_unittest.cpp, core/fxcodec/basic/a85_unittest.cpp, core/fxcodec/basic/rle_unittest.cpp, core/fxcodec/jbig2/jbig2_embeddertest.cpp, core/fxcrt/bytestring_pool_unittest.cpp, core/fxcrt/fx_string_unittest.cpp, core/fxcrt/maybe_owned.h, core/fxcrt/maybe_owned_unittest.cpp, core/fxcrt/observed_ptr.h, core/fxcrt/observed_ptr_unittest.cpp, core/fxcrt/retain_ptr.h, core/fxcrt/retain_ptr_unittest.cpp, core/fxcrt/shared_copy_on_write_unittest.cpp, core/fxcrt/weak_ptr_unittest.cpp, core/fxcrt/xml/cfx_xmlparser_unittest.cpp, core/fxge/fx_ge_text_embeddertest.cpp, core/fxge/skia/fx_skia_device_embeddertest.cpp, fpdfsdk/cpdfsdk_annotiterator_embeddertest.cpp, fpdfsdk/fpdf_doc_unittest.cpp, fpdfsdk/fpdf_edit_embeddertest.cpp, fpdfsdk/fpdf_editimg_embeddertest.cpp, fpdfsdk/fpdf_ext_embeddertest.cpp, fpdfsdk/fpdf_flatten_embeddertest.cpp, fpdfsdk/fpdf_ppo_embeddertest.cpp, fpdfsdk/fpdf_save_embeddertest.cpp, fpdfsdk/fpdf_structtree.cpp, fpdfsdk/fpdf_structtree_embeddertest.cpp
+
+// Copyright 2016 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/cmaps/CNS1/cmaps_cns1.h, core/fpdfapi/cmaps/GB1/cmaps_gb1.h, core/fpdfapi/cmaps/Japan1/cmaps_japan1.h, core/fpdfapi/cmaps/Korea1/cmaps_korea1.h, core/fpdftext/unicodenormalizationdata.h, core/fxcodec/jbig2/jbig2_bit_stream.cpp, core/fxcodec/jbig2/jbig2_grd_proc.cpp, core/fxcodec/jbig2/jbig2_grd_proc.h, core/fxcodec/jbig2/jbig2_grrd_proc.cpp, core/fxcodec/jbig2/jbig2_grrd_proc.h, core/fxcodec/jbig2/jbig2_htrd_proc.cpp, core/fxcodec/jbig2/jbig2_htrd_proc.h, core/fxcodec/jbig2/jbig2_pdd_proc.cpp, core/fxcodec/jbig2/jbig2_pdd_proc.h, core/fxcodec/jbig2/jbig2_sdd_proc.cpp, core/fxcodec/jbig2/jbig2_sdd_proc.h, core/fxcodec/jbig2/jbig2_trd_proc.cpp, core/fxcodec/jbig2/jbig2_trd_proc.h, core/fxge/fontdata/chromefontdata/chromefontdata.h
+
+// Copyright 2015 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/edit/cpdf_creator_embeddertest.cpp, core/fpdfapi/edit/cpdf_pagecontentgenerator_unittest.cpp, core/fpdfapi/page/cpdf_psengine_unittest.cpp, core/fpdfapi/parser/cpdf_cross_ref_avail.cpp, core/fpdfapi/parser/cpdf_cross_ref_avail.h, core/fpdfapi/parser/cpdf_cross_ref_avail_unittest.cpp, core/fpdfapi/parser/cpdf_hint_tables_unittest.cpp, core/fpdfapi/parser/cpdf_indirect_object_holder_unittest.cpp, core/fpdfapi/parser/cpdf_object_avail.cpp, core/fpdfapi/parser/cpdf_object_avail.h, core/fpdfapi/parser/cpdf_object_avail_unittest.cpp, core/fpdfapi/parser/cpdf_object_walker.cpp, core/fpdfapi/parser/cpdf_object_walker.h, core/fpdfapi/parser/cpdf_object_walker_unittest.cpp, core/fpdfapi/parser/cpdf_page_object_avail.cpp, core/fpdfapi/parser/cpdf_page_object_avail.h, core/fpdfapi/parser/cpdf_page_object_avail_unittest.cpp, core/fpdfapi/parser/cpdf_read_validator.cpp, core/fpdfapi/parser/cpdf_read_validator.h, core/fpdfapi/parser/cpdf_read_validator_unittest.cpp, core/fpdfdoc/cpdf_nametree_unittest.cpp, core/fxcodec/gif/cfx_gifcontext_unittest.cpp, core/fxcodec/gif/lzw_decompressor_unittest.cpp, core/fxcodec/jbig2/jbig2_bit_stream_unittest.cpp, core/fxcrt/autorestorer.h, core/fxcrt/css/cfx_csscustomproperty.cpp, core/fxcrt/css/cfx_cssdeclaration_unittest.cpp, core/fxcrt/fx_coordinates_unittest.cpp, core/fxcrt/fx_random_unittest.cpp, core/fxcrt/unowned_ptr.h, core/fxcrt/unowned_ptr_unittest.cpp, core/fxge/dib/cstretchengine_unittest.cpp, fpdfsdk/fpdf_annot.cpp, fpdfsdk/fpdf_annot_embeddertest.cpp, fpdfsdk/fpdf_attachment.cpp, fpdfsdk/fpdf_attachment_embeddertest.cpp, fpdfsdk/fpdf_catalog.cpp, fpdfsdk/fpdf_catalog_unittest.cpp, fpdfsdk/fpdf_editpath.cpp, fpdfsdk/fpdf_editpath_embeddertest.cpp, fpdfsdk/fpdf_edittext.cpp, fpdfsdk/pwl/cpwl_combo_box_edit_embeddertest.cpp, fpdfsdk/pwl/cpwl_combo_box_embeddertest.cpp, fpdfsdk/pwl/cpwl_edit_embeddertest.cpp, public/cpp/fpdf_deleters.h, public/fpdf_annot.h, public/fpdf_attachment.h, public/fpdf_catalog.h
+
+// Copyright 2017 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/edit/cpdf_npagetooneexporter_unittest.cpp, core/fpdfapi/parser/cpdf_number_unittest.cpp, core/fpdfdoc/cpdf_interactiveform_unittest.cpp, core/fpdfdoc/cpdf_pagelabel_unittest.cpp, core/fxcodec/data_and_bytes_consumed.cpp, core/fxcodec/data_and_bytes_consumed.h, core/fxcrt/check.h, core/fxcrt/check_op.h, core/fxcrt/code_point_view.cpp, core/fxcrt/compiler_specific.h, core/fxcrt/component_export.h, core/fxcrt/containers/adapters.h, core/fxcrt/containers/contains.h, core/fxcrt/debug/alias.cc, core/fxcrt/debug/alias.h, core/fxcrt/fixed_size_data_vector_unittest.cpp, core/fxcrt/fx_coordinates_test_support.cpp, core/fxcrt/immediate_crash.h, core/fxcrt/notreached.h, core/fxcrt/numerics/checked_math.h, core/fxcrt/numerics/checked_math_impl.h, core/fxcrt/numerics/clamped_math.h, core/fxcrt/numerics/clamped_math_impl.h, core/fxcrt/numerics/safe_conversions.h, core/fxcrt/numerics/safe_conversions_arm_impl.h, core/fxcrt/numerics/safe_conversions_impl.h, core/fxcrt/numerics/safe_math.h, core/fxcrt/numerics/safe_math_arm_impl.h, core/fxcrt/numerics/safe_math_clang_gcc_impl.h, core/fxcrt/numerics/safe_math_shared_impl.h, core/fxcrt/ptr_util.h, core/fxcrt/raw_span.h, core/fxcrt/stl_util_unittest.cpp, core/fxcrt/win/scoped_select_object.h, core/fxcrt/win/win_util.cc, core/fxcrt/win/win_util.h, core/fxcrt/zip.h, core/fxcrt/zip_unittest.cpp, core/fxge/dib/cfx_scanlinecompositor_unittest.cpp, core/fxge/dib/fx_dib_unittest.cpp, fpdfsdk/fpdf_catalog_embeddertest.cpp
+
+// Copyright 2024 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/edit/cpdf_pagecontentgenerator.cpp, core/fpdfapi/edit/cpdf_pagecontentgenerator.h, core/fpdfapi/font/cpdf_cidfont.cpp, core/fpdfapi/font/cpdf_cidfont.h, core/fpdfapi/font/cpdf_font.cpp, core/fpdfapi/font/cpdf_font.h, core/fpdfapi/font/cpdf_fontencoding.cpp, core/fpdfapi/font/cpdf_fontencoding.h, core/fpdfapi/font/cpdf_simplefont.cpp, core/fpdfapi/font/cpdf_simplefont.h, core/fpdfapi/font/cpdf_truetypefont.cpp, core/fpdfapi/font/cpdf_truetypefont.h, core/fpdfapi/font/cpdf_type1font.cpp, core/fpdfapi/font/cpdf_type1font.h, core/fpdfapi/font/cpdf_type3char.cpp, core/fpdfapi/font/cpdf_type3char.h, core/fpdfapi/font/cpdf_type3font.cpp, core/fpdfapi/font/cpdf_type3font.h, core/fpdfapi/page/cpdf_allstates.cpp, core/fpdfapi/page/cpdf_allstates.h, core/fpdfapi/page/cpdf_clippath.cpp, core/fpdfapi/page/cpdf_clippath.h, core/fpdfapi/page/cpdf_color.cpp, core/fpdfapi/page/cpdf_color.h, core/fpdfapi/page/cpdf_colorspace.cpp, core/fpdfapi/page/cpdf_colorspace.h, core/fpdfapi/page/cpdf_colorstate.cpp, core/fpdfapi/page/cpdf_colorstate.h, core/fpdfapi/page/cpdf_contentmarkitem.cpp, core/fpdfapi/page/cpdf_contentmarkitem.h, core/fpdfapi/page/cpdf_contentmarks.cpp, core/fpdfapi/page/cpdf_contentmarks.h, core/fpdfapi/page/cpdf_contentparser.cpp, core/fpdfapi/page/cpdf_contentparser.h, core/fpdfapi/page/cpdf_docpagedata.h, core/fpdfapi/page/cpdf_form.cpp, core/fpdfapi/page/cpdf_form.h, core/fpdfapi/page/cpdf_formobject.cpp, core/fpdfapi/page/cpdf_formobject.h, core/fpdfapi/page/cpdf_generalstate.cpp, core/fpdfapi/page/cpdf_generalstate.h, core/fpdfapi/page/cpdf_graphicstates.cpp, core/fpdfapi/page/cpdf_graphicstates.h, core/fpdfapi/page/cpdf_image.cpp, core/fpdfapi/page/cpdf_image.h, core/fpdfapi/page/cpdf_imageloader.cpp, core/fpdfapi/page/cpdf_imageloader.h, core/fpdfapi/page/cpdf_imageobject.cpp, core/fpdfapi/page/cpdf_imageobject.h, core/fpdfapi/page/cpdf_meshstream.cpp, core/fpdfapi/page/cpdf_meshstream.h, core/fpdfapi/page/cpdf_occontext.cpp, core/fpdfapi/page/cpdf_occontext.h, core/fpdfapi/page/cpdf_page.cpp, core/fpdfapi/page/cpdf_page.h, core/fpdfapi/page/cpdf_pageimagecache.cpp, core/fpdfapi/page/cpdf_pageimagecache.h, core/fpdfapi/page/cpdf_pagemodule.cpp, core/fpdfapi/page/cpdf_pagemodule.h, core/fpdfapi/page/cpdf_pageobject.cpp, core/fpdfapi/page/cpdf_pageobject.h, core/fpdfapi/page/cpdf_pageobjectholder.cpp, core/fpdfapi/page/cpdf_pageobjectholder.h, core/fpdfapi/page/cpdf_path.cpp, core/fpdfapi/page/cpdf_path.h, core/fpdfapi/page/cpdf_pathobject.cpp, core/fpdfapi/page/cpdf_pathobject.h, core/fpdfapi/page/cpdf_pattern.cpp, core/fpdfapi/page/cpdf_pattern.h, core/fpdfapi/page/cpdf_psengine.h, core/fpdfapi/page/cpdf_shadingobject.cpp, core/fpdfapi/page/cpdf_shadingobject.h, core/fpdfapi/page/cpdf_shadingpattern.cpp, core/fpdfapi/page/cpdf_shadingpattern.h, core/fpdfapi/page/cpdf_streamcontentparser.cpp, core/fpdfapi/page/cpdf_streamcontentparser.h, core/fpdfapi/page/cpdf_streamparser.cpp, core/fpdfapi/page/cpdf_streamparser.h, core/fpdfapi/page/cpdf_textobject.cpp, core/fpdfapi/page/cpdf_textobject.h, core/fpdfapi/page/cpdf_textstate.cpp, core/fpdfapi/page/cpdf_textstate.h, core/fpdfapi/page/cpdf_tilingpattern.cpp, core/fpdfapi/page/cpdf_tilingpattern.h, core/fpdfapi/page/cpdf_transferfunc.cpp, core/fpdfapi/page/cpdf_transferfunc.h, core/fpdfapi/page/cpdf_transferfuncdib.cpp, core/fpdfapi/page/cpdf_transferfuncdib.h, core/fpdfapi/parser/cfdf_document.h, core/fpdfapi/parser/cpdf_array.cpp, core/fpdfapi/parser/cpdf_array.h, core/fpdfapi/parser/cpdf_boolean.cpp, core/fpdfapi/parser/cpdf_boolean.h, core/fpdfapi/parser/cpdf_crypto_handler.h, core/fpdfapi/parser/cpdf_data_avail.cpp, core/fpdfapi/parser/cpdf_data_avail.h, core/fpdfapi/parser/cpdf_dictionary.cpp, core/fpdfapi/parser/cpdf_dictionary.h, core/fpdfapi/parser/cpdf_document.h, core/fpdfapi/parser/cpdf_hint_tables.cpp, core/fpdfapi/parser/cpdf_hint_tables.h, core/fpdfapi/parser/cpdf_indirect_object_holder.cpp, core/fpdfapi/parser/cpdf_indirect_object_holder.h, core/fpdfapi/parser/cpdf_linearized_header.cpp, core/fpdfapi/parser/cpdf_linearized_header.h, core/fpdfapi/parser/cpdf_name.cpp, core/fpdfapi/parser/cpdf_name.h, core/fpdfapi/parser/cpdf_null.cpp, core/fpdfapi/parser/cpdf_null.h, core/fpdfapi/parser/cpdf_number.cpp, core/fpdfapi/parser/cpdf_number.h, core/fpdfapi/parser/cpdf_object.cpp, core/fpdfapi/parser/cpdf_object.h, core/fpdfapi/parser/cpdf_parser.cpp, core/fpdfapi/parser/cpdf_parser.h, core/fpdfapi/parser/cpdf_reference.cpp, core/fpdfapi/parser/cpdf_reference.h, core/fpdfapi/parser/cpdf_security_handler.h, core/fpdfapi/parser/cpdf_simple_parser.cpp, core/fpdfapi/parser/cpdf_simple_parser.h, core/fpdfapi/parser/cpdf_stream.cpp, core/fpdfapi/parser/cpdf_stream.h, core/fpdfapi/parser/cpdf_stream_acc.cpp, core/fpdfapi/parser/cpdf_stream_acc.h, core/fpdfapi/parser/cpdf_string.cpp, core/fpdfapi/parser/cpdf_string.h, core/fpdfapi/parser/cpdf_syntax_parser.cpp, core/fpdfapi/parser/cpdf_syntax_parser.h, core/fpdfapi/parser/fpdf_parser_decode.h, core/fpdfapi/parser/fpdf_parser_utility.h, core/fpdfapi/render/cpdf_devicebuffer.cpp, core/fpdfapi/render/cpdf_devicebuffer.h, core/fpdfapi/render/cpdf_docrenderdata.cpp, core/fpdfapi/render/cpdf_docrenderdata.h, core/fpdfapi/render/cpdf_imagerenderer.cpp, core/fpdfapi/render/cpdf_imagerenderer.h, core/fpdfapi/render/cpdf_pagerendercontext.cpp, core/fpdfapi/render/cpdf_pagerendercontext.h, core/fpdfapi/render/cpdf_progressiverenderer.cpp, core/fpdfapi/render/cpdf_progressiverenderer.h, core/fpdfapi/render/cpdf_rendercontext.cpp, core/fpdfapi/render/cpdf_rendercontext.h, core/fpdfapi/render/cpdf_renderoptions.cpp, core/fpdfapi/render/cpdf_renderoptions.h, core/fpdfapi/render/cpdf_renderstatus.cpp, core/fpdfapi/render/cpdf_renderstatus.h, core/fpdfapi/render/cpdf_scaledrenderbuffer.cpp, core/fpdfapi/render/cpdf_scaledrenderbuffer.h, core/fpdfapi/render/cpdf_textrenderer.cpp, core/fpdfapi/render/cpdf_textrenderer.h, core/fpdfapi/render/cpdf_type3cache.cpp, core/fpdfapi/render/cpdf_type3cache.h, core/fpdfapi/render/cpdf_type3glyphmap.cpp, core/fpdfapi/render/cpdf_type3glyphmap.h, core/fpdfdoc/cpdf_aaction.cpp, core/fpdfdoc/cpdf_aaction.h, core/fpdfdoc/cpdf_action.cpp, core/fpdfdoc/cpdf_action.h, core/fpdfdoc/cpdf_annot.cpp, core/fpdfdoc/cpdf_annot.h, core/fpdfdoc/cpdf_annotlist.cpp, core/fpdfdoc/cpdf_annotlist.h, core/fpdfdoc/cpdf_apsettings.cpp, core/fpdfdoc/cpdf_apsettings.h, core/fpdfdoc/cpdf_bookmark.cpp, core/fpdfdoc/cpdf_bookmark.h, core/fpdfdoc/cpdf_bookmarktree.cpp, core/fpdfdoc/cpdf_bookmarktree.h, core/fpdfdoc/cpdf_defaultappearance.cpp, core/fpdfdoc/cpdf_defaultappearance.h, core/fpdfdoc/cpdf_dest.cpp, core/fpdfdoc/cpdf_dest.h, core/fpdfdoc/cpdf_filespec.cpp, core/fpdfdoc/cpdf_filespec.h, core/fpdfdoc/cpdf_formcontrol.cpp, core/fpdfdoc/cpdf_formcontrol.h, core/fpdfdoc/cpdf_formfield.h, core/fpdfdoc/cpdf_generateap.cpp, core/fpdfdoc/cpdf_generateap.h, core/fpdfdoc/cpdf_iconfit.cpp, core/fpdfdoc/cpdf_iconfit.h, core/fpdfdoc/cpdf_interactiveform.cpp, core/fpdfdoc/cpdf_interactiveform.h, core/fpdfdoc/cpdf_link.cpp, core/fpdfdoc/cpdf_link.h, core/fpdfdoc/cpdf_linklist.cpp, core/fpdfdoc/cpdf_linklist.h, core/fpdfdoc/cpdf_metadata.cpp, core/fpdfdoc/cpdf_metadata.h, core/fpdfdoc/cpdf_nametree.cpp, core/fpdfdoc/cpdf_nametree.h, core/fpdfdoc/cpdf_numbertree.cpp, core/fpdfdoc/cpdf_numbertree.h, core/fpdfdoc/cpdf_pagelabel.cpp, core/fpdfdoc/cpdf_pagelabel.h, core/fpdfdoc/cpdf_viewerpreferences.cpp, core/fpdfdoc/cpdf_viewerpreferences.h, core/fpdfdoc/cpvt_floatrect.h, core/fpdfdoc/cpvt_fontmap.cpp, core/fpdfdoc/cpvt_fontmap.h, core/fpdfdoc/cpvt_line.h, core/fpdfdoc/cpvt_lineinfo.h, core/fpdfdoc/cpvt_section.cpp, core/fpdfdoc/cpvt_section.h, core/fpdfdoc/cpvt_variabletext.cpp, core/fpdfdoc/cpvt_variabletext.h, core/fpdfdoc/cpvt_word.h, core/fpdfdoc/cpvt_wordinfo.h, core/fpdfdoc/cpvt_wordplace.h, core/fpdfdoc/cpvt_wordrange.h, core/fpdfdoc/ipvt_fontmap.h, core/fpdftext/cpdf_linkextract.cpp, core/fpdftext/cpdf_textpage.h, core/fpdftext/cpdf_textpagefind.cpp, core/fpdftext/cpdf_textpagefind.h, core/fxcodec/basic/basicmodule.h, core/fxcodec/fax/faxmodule.h, core/fxcodec/flate/flatemodule.h, core/fxcodec/icc/icc_transform.h, core/fxcodec/jbig2/jbig2_decoder.h, core/fxcodec/jpeg/jpegmodule.h, core/fxcodec/scanlinedecoder.h, core/fxcodec/tiff/libtiff_tiff_context.h, core/fxcrt/bytestring_pool.cpp, core/fxcrt/bytestring_pool.h, core/fxcrt/css/cfx_cssrulecollection.cpp, core/fxcrt/shared_copy_on_write.h, core/fxcrt/string_data_template.h, core/fxcrt/string_view_template.h, core/fxcrt/weak_ptr.h, core/fxcrt/xml/cfx_xmlparser.cpp, core/fxcrt/xml/cfx_xmlparser.h, core/fxge/agg/cfx_agg_cliprgn.cpp, core/fxge/agg/cfx_agg_cliprgn.h, core/fxge/android/cfx_androidfontinfo.cpp, core/fxge/android/cfx_androidfontinfo.h, core/fxge/cfx_charmap_resolver.cpp, core/fxge/cfx_charmap_resolver.h, core/fxge/cfx_folderfontinfo.cpp, core/fxge/cfx_folderfontinfo.h, core/fxge/cfx_fontmapper.cpp, core/fxge/cfx_fontmapper.h, core/fxge/cfx_fontmgr.cpp, core/fxge/cfx_fontmgr.h, core/fxge/cfx_gemodule.cpp, core/fxge/cfx_gemodule.h, core/fxge/cfx_glyphcache.cpp, core/fxge/cfx_glyphcache.h, core/fxge/cfx_graphstate.cpp, core/fxge/cfx_graphstate.h, core/fxge/cfx_graphstatedata.cpp, core/fxge/cfx_graphstatedata.h, core/fxge/cfx_path.cpp, core/fxge/cfx_path.h, core/fxge/cfx_renderdevice.cpp, core/fxge/cfx_renderdevice.h, core/fxge/cfx_substfont.cpp, core/fxge/cfx_substfont.h, core/fxge/renderdevicedriver_iface.cpp, core/fxge/renderdevicedriver_iface.h, core/fxge/systemfontinfo_iface.h, core/fxge/win32/cfx_psrenderer.h, core/fxge/win32/cpsoutput.cpp, core/fxge/win32/cpsoutput.h, fpdfsdk/cpdfsdk_annot.cpp, fpdfsdk/cpdfsdk_annot.h, fpdfsdk/cpdfsdk_annotiterator.cpp, fpdfsdk/cpdfsdk_annotiterator.h, fpdfsdk/cpdfsdk_baannot.cpp, fpdfsdk/cpdfsdk_formfillenvironment.cpp, fpdfsdk/cpdfsdk_formfillenvironment.h, fpdfsdk/cpdfsdk_interactiveform.cpp, fpdfsdk/cpdfsdk_interactiveform.h, fpdfsdk/cpdfsdk_pageview.cpp, fpdfsdk/cpdfsdk_pageview.h, fpdfsdk/cpdfsdk_pauseadapter.cpp, fpdfsdk/cpdfsdk_pauseadapter.h, fpdfsdk/cpdfsdk_widget.cpp, fpdfsdk/cpdfsdk_widget.h, fpdfsdk/formfiller/cffl_fieldaction.cpp, fpdfsdk/formfiller/cffl_fieldaction.h, fpdfsdk/fpdfxfa/cpdfxfa_docenvironment.cpp, fpdfsdk/fpdfxfa/cpdfxfa_docenvironment.h, fpdfsdk/fpdfxfa/cpdfxfa_widget.cpp, fpdfsdk/fpdfxfa/cpdfxfa_widget.h, public/fpdf_structtree.h
+
+// Copyright 2016 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/font/cpdf_cid2unicodemap.cpp, core/fpdfapi/font/cpdf_cid2unicodemap.h, core/fpdfapi/font/cpdf_cmap.cpp, core/fpdfapi/font/cpdf_cmap.h, core/fpdfapi/font/cpdf_cmapparser.h, core/fpdfapi/font/cpdf_fontglobals.cpp, core/fpdfapi/font/cpdf_fontglobals.h, core/fpdfapi/font/cpdf_stockfontarray.cpp, core/fpdfapi/font/cpdf_stockfontarray.h, core/fpdfapi/font/cpdf_tounicodemap.cpp, core/fpdfapi/font/cpdf_tounicodemap.h, core/fpdfapi/page/cpdf_devicecs.h, core/fpdfapi/page/cpdf_devicecs_unittest.cpp, core/fpdfapi/page/cpdf_dib.cpp, core/fpdfapi/page/cpdf_dib.h, core/fpdfapi/page/cpdf_expintfunc.cpp, core/fpdfapi/page/cpdf_expintfunc.h, core/fpdfapi/page/cpdf_function.cpp, core/fpdfapi/page/cpdf_function.h, core/fpdfapi/page/cpdf_iccprofile.cpp, core/fpdfapi/page/cpdf_iccprofile.h, core/fpdfapi/page/cpdf_patterncs.h, core/fpdfapi/page/cpdf_psengine.cpp, core/fpdfapi/page/cpdf_psfunc.cpp, core/fpdfapi/page/cpdf_psfunc.h, core/fpdfapi/page/cpdf_sampledfunc.cpp, core/fpdfapi/page/cpdf_sampledfunc.h, core/fpdfapi/page/cpdf_stitchfunc.cpp, core/fpdfapi/page/cpdf_stitchfunc.h, core/fpdfapi/parser/cpdf_encryptor.cpp, core/fpdfapi/parser/cpdf_encryptor.h, core/fpdfapi/parser/cpdf_flateencoder.cpp, core/fpdfapi/parser/cpdf_flateencoder.h, core/fpdfapi/parser/cpdf_seekablemultistream.cpp, core/fpdfapi/parser/cpdf_seekablemultistream.h, core/fpdfdoc/cpdf_structelement.cpp, core/fpdfdoc/cpdf_structelement.h, core/fpdfdoc/cpdf_structtree.cpp, core/fpdfdoc/cpdf_structtree.h, core/fxcodec/gif/cfx_gifcontext.cpp, core/fxcodec/gif/cfx_gifcontext.h, core/fxcodec/gif/lzw_decompressor.cpp, core/fxcodec/gif/lzw_decompressor.h, core/fxcodec/jpx/cjpx_decoder.h, core/fxcodec/scanlinedecoder.cpp, core/fxcrt/binary_buffer.cpp, core/fxcrt/binary_buffer.h, core/fxcrt/bytestring.h, core/fxcrt/cfx_bitstream.cpp, core/fxcrt/cfx_bitstream.h, core/fxcrt/cfx_memorystream.cpp, core/fxcrt/cfx_memorystream.h, core/fxcrt/cfx_seekablestreamproxy.cpp, core/fxcrt/cfx_seekablestreamproxy.h, core/fxcrt/cfx_timer.cpp, core/fxcrt/cfx_timer.h, core/fxcrt/css/cfx_csscolorvalue.cpp, core/fxcrt/css/cfx_csscolorvalue.h, core/fxcrt/css/cfx_csscomputedstyle.cpp, core/fxcrt/css/cfx_csscomputedstyle.h, core/fxcrt/css/cfx_csscustomproperty.h, core/fxcrt/css/cfx_cssenumvalue.cpp, core/fxcrt/css/cfx_cssenumvalue.h, core/fxcrt/css/cfx_cssinputtextbuf.cpp, core/fxcrt/css/cfx_cssinputtextbuf.h, core/fxcrt/css/cfx_cssnumbervalue.cpp, core/fxcrt/css/cfx_cssnumbervalue.h, core/fxcrt/css/cfx_cssoutputtextbuf.cpp, core/fxcrt/css/cfx_cssoutputtextbuf.h, core/fxcrt/css/cfx_csspropertyholder.cpp, core/fxcrt/css/cfx_csspropertyholder.h, core/fxcrt/css/cfx_cssrulecollection.h, core/fxcrt/css/cfx_cssselector.cpp, core/fxcrt/css/cfx_cssselector.h, core/fxcrt/css/cfx_cssstringvalue.cpp, core/fxcrt/css/cfx_cssstringvalue.h, core/fxcrt/css/cfx_cssstylerule.cpp, core/fxcrt/css/cfx_cssstylerule.h, core/fxcrt/css/cfx_cssstyleselector.h, core/fxcrt/css/cfx_cssstylesheet.h, core/fxcrt/css/cfx_cssstylesheet_unittest.cpp, core/fxcrt/css/cfx_csssyntaxparser.h, core/fxcrt/css/cfx_cssvalue.cpp, core/fxcrt/css/cfx_cssvalue.h, core/fxcrt/css/cfx_cssvaluelist.cpp, core/fxcrt/css/cfx_cssvaluelist.h, core/fxcrt/css/cfx_cssvaluelistparser.cpp, core/fxcrt/css/cfx_cssvaluelistparser.h, core/fxcrt/css/cfx_cssvaluelistparser_unittest.cpp, core/fxcrt/fx_random.cpp, core/fxcrt/fx_random.h, core/fxcrt/fx_stream.cpp, core/fxcrt/fx_string.cpp, core/fxcrt/fx_system.cpp, core/fxcrt/pauseindicator_iface.h, core/fxcrt/widestring.h, core/fxcrt/widetext_buffer.cpp, core/fxcrt/widetext_buffer.h, core/fxcrt/xml/cfx_xmlchardata.cpp, core/fxcrt/xml/cfx_xmlchardata.h, core/fxcrt/xml/cfx_xmlelement.cpp, core/fxcrt/xml/cfx_xmlelement.h, core/fxcrt/xml/cfx_xmlinstruction.cpp, core/fxcrt/xml/cfx_xmlinstruction.h, core/fxcrt/xml/cfx_xmlnode.cpp, core/fxcrt/xml/cfx_xmlnode.h, core/fxcrt/xml/cfx_xmltext.cpp, core/fxcrt/xml/cfx_xmltext.h, core/fxge/agg/cfx_agg_bitmapcomposer.cpp, core/fxge/agg/cfx_agg_bitmapcomposer.h, core/fxge/agg/cfx_agg_imagerenderer.cpp, core/fxge/agg/cfx_agg_imagerenderer.h, core/fxge/cfx_color.cpp, core/fxge/cfx_color.h, core/fxge/cfx_font.h, core/fxge/dib/cfx_bitmapstorer.cpp, core/fxge/dib/cfx_bitmapstorer.h, core/fxge/dib/cfx_dibbase.cpp, core/fxge/dib/cfx_dibbase.h, core/fxge/dib/cfx_dibitmap.cpp, core/fxge/dib/cfx_dibitmap.h, core/fxge/dib/cfx_imagestretcher.cpp, core/fxge/dib/cfx_imagestretcher.h, core/fxge/dib/cfx_imagetransformer.cpp, core/fxge/dib/cfx_imagetransformer.h, core/fxge/dib/cfx_scanlinecompositor.cpp, core/fxge/dib/cfx_scanlinecompositor.h, core/fxge/dib/cstretchengine.cpp, core/fxge/dib/cstretchengine.h, core/fxge/dib/scanlinecomposer_iface.h, fpdfsdk/cpdfsdk_annotiteration.cpp, fpdfsdk/cpdfsdk_annotiteration.h, fpdfsdk/cpdfsdk_appstream.cpp, fpdfsdk/cpdfsdk_appstream.h, fpdfsdk/cpdfsdk_filewriteadapter.cpp, fpdfsdk/cpdfsdk_filewriteadapter.h, fpdfsdk/formfiller/cffl_button.cpp, fpdfsdk/formfiller/cffl_button.h, fpdfsdk/formfiller/cffl_textobject.cpp, fpdfsdk/formfiller/cffl_textobject.h
+
+// Copyright 2017 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/font/cpdf_cmapparser_unittest.cpp, core/fpdfapi/font/cpdf_tounicodemap_unittest.cpp, core/fpdfapi/page/cpdf_streamparser_unittest.cpp, core/fpdfapi/parser/cpdf_parser_embeddertest.cpp, core/fpdfapi/parser/cpdf_parser_unittest.cpp, core/fpdfapi/parser/fpdf_parser_decode_embeddertest.cpp, core/fpdfapi/parser/fpdf_parser_decode_unittest.cpp, core/fpdfapi/render/fpdf_render_pattern_embeddertest.cpp, core/fpdftext/cpdf_linkextract_unittest.cpp, core/fxcrt/fx_bidi_unittest.cpp, core/fxcrt/fx_extension_unittest.cpp, core/fxcrt/fx_memory_unittest.cpp, core/fxcrt/fx_system_unittest.cpp, core/fxcrt/stl_util.h, fpdfsdk/fpdf_dataavail_embeddertest.cpp, fpdfsdk/fpdf_doc_embeddertest.cpp, fpdfsdk/fpdf_formfill_embeddertest.cpp, fpdfsdk/fpdf_text_embeddertest.cpp, fpdfsdk/fpdf_view_c_api_test.h, fpdfsdk/fpdf_view_embeddertest.cpp
+
+// Copyright 2015 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/font/cpdf_simplefont_unittest.cpp, core/fpdfapi/page/cpdf_pageimagecache_unittest.cpp, core/fpdfapi/parser/object_tree_traversal_util.cpp, core/fpdfapi/parser/object_tree_traversal_util.h, core/fpdfapi/parser/object_tree_traversal_util_embeddertest.cpp, core/fpdfdoc/cpdf_annotlist_unittest.cpp, core/fxcodec/flate/flatemodule_unittest.cpp, core/fxcrt/code_point_view.h, core/fxcrt/code_point_view_unittest.cpp, core/fxcrt/fx_memcpy_wrappers_unittest.cpp, core/fxcrt/string_test_support.cpp, core/fxcrt/unowned_ptr_exclusion.h, core/fxcrt/utf16.h, core/fxcrt/utf16_unittest.cpp, core/fxge/dib/blend_unittest.cpp, core/fxge/fx_fontencoding.h, core/fxge/skia/cfx_dibbase_skia.cpp
+
+// Copyright 2023 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/font/cpdf_truetypefont_unittest.cpp, core/fpdfapi/page/jpx_decode_conversion.cpp, core/fpdfapi/page/jpx_decode_conversion.h, core/fxcrt/containers/unique_ptr_adapters.h, core/fxcrt/numerics/integral_constant_like.h
+
+// Copyright 2025 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fpdfapi/page/cpdf_annotcontext.cpp, core/fpdfapi/page/cpdf_annotcontext.h, core/fpdfapi/page/ipdf_page.h, core/fxcodec/bmp/cfx_bmpcontext.cpp, core/fxcodec/bmp/cfx_bmpcontext.h, core/fxcodec/bmp/cfx_bmpdecompressor.cpp, core/fxcodec/bmp/cfx_bmpdecompressor.h, core/fxcrt/css/cfx_cssdata.cpp, core/fxcrt/css/cfx_cssdata.h, core/fxcrt/fx_codepage.cpp, core/fxcrt/fx_number.cpp, core/fxcrt/fx_number.h, fpdfsdk/cpdfsdk_customaccess.cpp, fpdfsdk/cpdfsdk_customaccess.h, fpdfsdk/cpdfsdk_helpers.cpp
+
+// Copyright 2018 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/page/cpdf_basedcs.cpp, core/fpdfapi/page/cpdf_basedcs.h, core/fxcrt/fx_codepage_forward.h, core/fxcrt/fx_folder.h, core/fxcrt/fx_folder_posix.cpp, core/fxcrt/fx_folder_windows.cpp, core/fxcrt/fx_types.h, fpdfsdk/pwl/cpwl_sbbutton.cpp, fpdfsdk/pwl/cpwl_sbbutton.h
+
+// Copyright 2021 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/render/cpdf_rendershading.cpp, core/fpdfapi/render/cpdf_rendershading.h, core/fpdfdoc/cpdf_color_utils.cpp, core/fpdfdoc/cpdf_color_utils.h, core/fpdfdoc/cpdf_icon.cpp, core/fpdfdoc/cpdf_icon.h, core/fxcodec/jpx/cjpx_decoder.cpp, core/fxcodec/jpx/jpx_decode_utils.cpp, core/fxge/cfx_glyphbitmap.h, core/fxge/dib/cfx_cmyk_to_srgb.cpp, core/fxge/dib/cfx_cmyk_to_srgb.h, core/fxge/text_char_pos.cpp, core/fxge/text_char_pos.h, core/fxge/text_glyph_pos.cpp, core/fxge/text_glyph_pos.h
+
+// Copyright 2019 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfapi/render/cpdf_rendertiling.cpp, core/fpdfapi/render/cpdf_rendertiling.h, core/fxcodec/jpeg/jpeg_common.c, core/fxcodec/jpeg/jpeg_common.h, core/fxcrt/string_data_template.cpp, core/fxge/apple/capple_platform.h, core/fxge/cfx_drawutils.cpp, core/fxge/cfx_drawutils.h, core/fxge/win32/cgdi_device_driver.cpp, core/fxge/win32/cgdi_device_driver.h, core/fxge/win32/cgdi_display_driver.cpp, core/fxge/win32/cgdi_display_driver.h, core/fxge/win32/cgdi_plus_ext.h, core/fxge/win32/cgdi_printer_driver.h, core/fxge/win32/cps_printer_driver.cpp, core/fxge/win32/cps_printer_driver.h, core/fxge/win32/cwin32_platform.cpp, core/fxge/win32/cwin32_platform.h, fpdfsdk/cpdfsdk_renderpage.cpp, fpdfsdk/cpdfsdk_renderpage.h, fpdfsdk/formfiller/cffl_perwindowdata.cpp, fpdfsdk/formfiller/cffl_perwindowdata.h, fpdfsdk/pwl/cpwl_cbbutton.cpp, fpdfsdk/pwl/cpwl_cbbutton.h, fpdfsdk/pwl/cpwl_cblistbox.cpp, fpdfsdk/pwl/cpwl_cblistbox.h, fpdfsdk/pwl/ipwl_fillernotify.h
+
+// Copyright 2020 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fpdfdoc/cpvt_wordinfo.cpp, core/fxcodec/jbig2/jbig2_document_context.h
+
+// Copyright 2016 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcodec/jbig2/jbig2_document_context.cpp
+
+// Copyright 2019 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcodec/jbig2/jbig2_image_unittest.cpp
+
+// Copyright 2016 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// TODO(tsepez) this requires a lot more testing.
+
+========================================================================
+
+Files: core/fxcodec/jpeg/jpegmodule.cpp, core/fxcodec/jpeg/libjpeg_scanline_decoder.cpp, core/fxcodec/progressive_decoder_context.cpp, core/fxcrt/cfx_fileaccess_stream.cpp
+
+// Copyright 2026 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcodec/jpx/jpx_unittest.cpp, core/fxcrt/bytestring_unittest.cpp, core/fxcrt/fx_safe_types.h, core/fxcrt/widestring_unittest.cpp, core/fxge/skia/fx_skia_device.cpp, core/fxge/skia/fx_skia_device.h
+
+// Copyright 2014 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+========================================================================
+
+Files: core/fxcodec/progressive_decoder_context.h
+
+// Copyright 2025 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcrt/cfx_read_only_span_stream.cpp, core/fxcrt/cfx_read_only_span_stream.h, core/fxcrt/css/properties.inc, core/fxcrt/css/property_values.inc, core/fxcrt/fx_memory_malloc.cpp, core/fxcrt/fx_memory_pa.cpp
+
+// Copyright 2022 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcrt/fx_memcpy_wrappers.h, core/fxge/dib/blend.cpp, core/fxge/dib/blend.h
+
+// Copyright 2023 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+========================================================================
+
+Files: core/fxcrt/span.h
+
+// Copyright 2024 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This is Chromium's span.h with the following modificiations:
+// - namespace changed to pdfium.
+// - include removed for <span>.
+// - include paths changed for check.h, compiler_specific.h,
+//   integral_constant_like.h, and safe_conversions.h.
+// - include removed for checked_iterators.h, cstring_view.h, to_string.h,
+//   and to_address.h.
+// - span_forward_internal.h contents inlined in this file.
+// - iterator types changed from checked iterators to ordinary pointers,
+//   and adjusted begin(), end().
+// - removed to_address() calls as iterators are now pointers.
+// - removed operator<<() that pretty-prints to std::stream.
+// - removed any code that references to std::span.
+// - removed any references to std::string_view.
+// - removed any references to base::cstring_view<>.
+// - Added reinterpret_span() helper.
+// - DCHECK() verbose logging message not supported and removed.
+
+// This file intentionally uses the `CHECK()` macro instead of the `CHECK_op()`
+// macros, as `CHECK()` generates significantly less code and is more likely to
+// optimize reasonably, even in non-official release builds. Please do not
+// change the `CHECK()` calls back to `CHECK_op()` calls.
+
+========================================================================
+
+Files: core/fxge/android/cfx_androidfontinfo_unittest.cpp
+
+// Copyright 2026 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This file tests the cross-platform font mapping and selection logic of
+// CFX_AndroidFontInfo. It is compiled and run on Linux host tests as the
+// logic does not depend on Android-specific system APIs.
+
+========================================================================
+
+Files: core/fxge/skrifa/src/outlines.cpp, core/fxge/skrifa/src/outlines.h
+
+// Copyright 2026 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// Based on https://github.com/googlefonts/fontations/pull/1820
+
+========================================================================
+
+Files: fpdfsdk/fpdf_view_c_api_test.c
+
+// Copyright 2015 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This "C" (not "C++") file ensures that the public headers compile
+// and link for "C" (and not just "C++").
+
+========================================================================
+
+Files: public/fpdfview.h
+
+// Copyright 2014 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+// This is the main header file for embedders of PDFium. It provides APIs to
+// initialize the library, load documents, and render pages, amongst other
+// things.
+//
+// NOTE: None of the PDFium APIs are thread-safe. They expect to be called
+// from a single thread. Barring that, embedders are required to ensure (via
+// a mutex or similar) that only a single PDFium call can be made at a time.
+//
+// NOTE: External docs refer to this file as "fpdfview.h", so do not rename
+// despite lack of consistency with other public files.
+
+========================================================================
+
+Files: third_party/agg23/agg_array.h, third_party/agg23/agg_basics.h, third_party/agg23/agg_conv_adaptor_vcgen.h, third_party/agg23/agg_path_storage.h, third_party/agg23/agg_render_scanlines.h, third_party/agg23/agg_renderer_scanline.h, third_party/agg23/agg_shorten_path.h, third_party/agg23/agg_vcgen_stroke.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_clip_liang_barsky.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Liang-Barsky clipping
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_color_gray.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Adaptation for high precision colors has been sponsored by
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+//----------------------------------------------------------------------------
+//
+// color types gray8, gray16
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_conv_dash.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// conv_dash
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_conv_stroke.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// conv_stroke
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_curves.cpp
+
+//----------------------------------------------------------------------------
+// XYQ: 2006-01-22 Copied from AGG project.
+// TODO: This file uses intensive floating point operations, so it's NOT suitable
+// for platforms like Symbian OS. We need to change to FIX format.
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_curves.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+// Copyright (C) 2005 Tony Juricic (tonygeek@yahoo.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_math.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+// Bessel function (besj) was adapted for use in AGG library by Andy Wilk
+// Contact: castor.vulgaris@gmail.com
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_math_stroke.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Stroke math
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_path_storage.cpp
+
+//----------------------------------------------------------------------------
+// XYQ: 2006-01-22 Copied from AGG project.
+// TODO: This file uses intensive floating point operations, so it's NOT suitable
+// for platforms like Symbian OS. We need to change to FIX format.
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Class path_storage
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_pixfmt_gray.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Adaptation for high precision colors has been sponsored by
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_rasterizer_scanline_aa.cpp
+
+//----------------------------------------------------------------------------
+// XYQ: 2006-01-22 Copied from AGG project.
+// This file uses only integer data, so it's suitable for all platforms.
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+//
+// The author gratefully acknowleges the support of David Turner,
+// Robert Wilhelm, and Werner Lemberg - the authors of the FreeType
+// libray - in producing this work. See http://www.freetype.org for details.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Adaptation for 32-bit screen coordinates has been sponsored by
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+//----------------------------------------------------------------------------
+//
+// Class outline_aa - implementation.
+//
+// Initially the rendering algorithm was designed by David Turner and the
+// other authors of the FreeType library - see the above notice. I nearly
+// created a similar renderer, but still I was far from David's work.
+// I completely redesigned the original code and adapted it for Anti-Grain
+// ideas. Two functions - render_line and render_hline are the core of
+// the algorithm - they calculate the exact coverage of each pixel cell
+// of the polygon. I left these functions almost as is, because there's
+// no way to improve the perfection - hats off to David and his group!
+//
+// All other code is very different from the original.
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_rasterizer_scanline_aa.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+//
+// The author gratefully acknowleges the support of David Turner,
+// Robert Wilhelm, and Werner Lemberg - the authors of the FreeType
+// libray - in producing this work. See http://www.freetype.org for details.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Adaptation for 32-bit screen coordinates has been sponsored by
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_renderer_base.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// class renderer_base
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_rendering_buffer.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// class rendering_buffer
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_scanline_u.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Adaptation for 32-bit screen coordinates (scanline32_u) has been sponsored by
+// Liberty Technology Systems, Inc., visit http://lib-sys.com
+//
+// Liberty Technology Systems, Inc. is the provider of
+// PostScript and PDF technology for software developers.
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_vcgen_dash.cpp, third_party/agg23/agg_vcgen_dash.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Line dash generator
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_vcgen_stroke.cpp
+
+//----------------------------------------------------------------------------
+// XYQ: 2006-01-22 Copied from AGG project.
+// TODO: This file uses intensive floating point operations, so it's NOT suitable
+// for platforms like Symbian OS. We need to change to FIX format.
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// Stroke generator
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/agg23/agg_vertex_sequence.h
+
+//----------------------------------------------------------------------------
+// Anti-Grain Geometry - Version 2.3
+// Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
+//
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
+// This software is provided "as is" without express or implied
+// warranty, and with no claim as to its suitability for any purpose.
+//
+//----------------------------------------------------------------------------
+// Contact: mcseem@antigrain.com
+//          mcseemagg@yahoo.com
+//          http://www.antigrain.com
+//----------------------------------------------------------------------------
+//
+// vertex_sequence container and vertex_dist struct
+//
+//----------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/freetype/include/freetype-custom-config/ftoption.h
+
+/***************************************************************************/
+/*                                                                         */
+/*  ftoption.h                                                             */
+/*                                                                         */
+/*    User-selectable configuration macros (specification only).           */
+/*                                                                         */
+/*  Copyright 1996-2017 by                                                 */
+/*  David Turner, Robert Wilhelm, and Werner Lemberg.                      */
+/*                                                                         */
+/*  This file is part of the FreeType project, and may only be used,       */
+/*  modified, and distributed under the terms of the FreeType project      */
+/*  license, LICENSE.TXT.  By continuing to use, modify, or distribute     */
+/*  this file you indicate that you have read the license and              */
+/*  understand and accept it fully.                                        */
+/*                                                                         */
+/***************************************************************************/
+
+========================================================================
+
+Files: third_party/freetype/include/freetype-custom-config/ftoption.h
+
+/*************************************************************************/
+  /*                                                                       */
+  /* Define TT_CONFIG_OPTION_SFNT_NAMES if your applications need to       */
+  /* access the internal name table in a SFNT-based format like TrueType   */
+  /* or OpenType.  The name table contains various strings used to         */
+  /* describe the font, like family name, copyright, version, etc.  It     */
+  /* does not contain any glyph name though.                               */
+  /*                                                                       */
+  /* Accessing SFNT names is done through the functions declared in        */
+  /* `ftsnames.h'.                                                         */
+  /*                                                                       */
+
+========================================================================
+
+Files: third_party/freetype/include/pstables.h
+
+/****************************************************************************
+ *
+ * pstables.h
+ *
+ *   PostScript glyph names.
+ *
+ * Copyright (C) 2005-2026 by
+ * David Turner, Robert Wilhelm, and Werner Lemberg.
+ *
+ * This file is part of the FreeType project, and may only be used,
+ * modified, and distributed under the terms of the FreeType project
+ * license, LICENSE.TXT.  By continuing to use, modify, or distribute
+ * this file you indicate that you have read the license and
+ * understand and accept it fully.
+ *
+ */
+
+
+  /* This file has been generated automatically -- do not edit! */
+
+========================================================================
+
+Files: third_party/lcms/include/lcms2.h
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+//
+// Version 2.19
+//
+
+========================================================================
+
+Files: third_party/lcms/include/lcms2_plugin.h
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+//
+// This is the plug-in header file. Normal LittleCMS clients should not use it.
+// It is provided for plug-in writers that may want to access the support
+// functions to do low level operations. All plug-in related structures
+// are defined here. Including this file forces to include the standard API too.
+
+========================================================================
+
+Files: third_party/lcms/src/cmsalpha.c, third_party/lcms/src/cmscam02.c, third_party/lcms/src/cmscgats.c, third_party/lcms/src/cmscnvrt.c, third_party/lcms/src/cmsgamma.c, third_party/lcms/src/cmsgmt.c, third_party/lcms/src/cmsintrp.c, third_party/lcms/src/cmsio0.c, third_party/lcms/src/cmsio1.c, third_party/lcms/src/cmslut.c, third_party/lcms/src/cmsmtrx.c, third_party/lcms/src/cmsnamed.c, third_party/lcms/src/cmsopt.c, third_party/lcms/src/cmspack.c, third_party/lcms/src/cmspcs.c, third_party/lcms/src/cmsplugin.c, third_party/lcms/src/cmsps2.c, third_party/lcms/src/cmssamp.c, third_party/lcms/src/cmssm.c, third_party/lcms/src/cmstypes.c, third_party/lcms/src/cmsvirt.c, third_party/lcms/src/cmswtpnt.c, third_party/lcms/src/cmsxform.c
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+//
+
+========================================================================
+
+Files: third_party/lcms/src/cmscgats.c
+
+// Propagate the description. We put no copyright because we know
+    // nothing on the copyrighted state of the .cube
+
+========================================================================
+
+Files: third_party/lcms/src/cmserr.c
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2023 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/lcms/src/cmshalf.c
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+//
+//
+
+========================================================================
+
+Files: third_party/lcms/src/cmsmd5.c
+
+//---------------------------------------------------------------------------------
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+
+========================================================================
+
+Files: third_party/lcms/src/cmssm.c
+
+/*
+    Closest point in sector line1 to sector line2 (both are defined as 0 <=t <= 1)
+    http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+
+    Copyright 2001, softSurfer (www.softsurfer.com)
+    This code may be freely used and modified for any purpose
+    providing that this copyright notice is included with it.
+    SoftSurfer makes no warranty for this code, and cannot be held
+    liable for any real or imagined damage resulting from its use.
+    Users of this code must verify correctness for their application.
+
+*/
+
+========================================================================
+
+Files: third_party/lcms/src/lcms2_internal.h
+
+//
+//  Little Color Management System
+//  Copyright (c) 1998-2026 Marti Maria Saguer
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the "Software"),
+// to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//---------------------------------------------------------------------------------
+//
+
+========================================================================
+
+Files: third_party/libopenjpeg/bio.c, third_party/libopenjpeg/bio.h, third_party/libopenjpeg/dwt.h, third_party/libopenjpeg/opj_intmath.h, third_party/libopenjpeg/pi.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/cio.c, third_party/libopenjpeg/cio.h, third_party/libopenjpeg/mct.c, third_party/libopenjpeg/mct.h, third_party/libopenjpeg/tgt.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/dwt.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2007, Jonathan Ballard <dzonatas@dzonux.net>
+ * Copyright (c) 2007, Callum Lerwick <seg@haxxed.com>
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/event.c, third_party/libopenjpeg/event.h, third_party/libopenjpeg/openjpeg.c, third_party/libopenjpeg/opj_includes.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/function_list.c, third_party/libopenjpeg/function_list.h, third_party/libopenjpeg/invert.c, third_party/libopenjpeg/invert.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/ht_dec.c
+
+//***************************************************************************/
+// This software is released under the 2-Clause BSD license, included
+// below.
+//
+// Copyright (c) 2021, Aous Naman
+// Copyright (c) 2021, Kakadu Software Pty Ltd, Australia
+// Copyright (c) 2021, The University of New South Wales, Australia
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+// 1. Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+// IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+// TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+// PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+// TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//***************************************************************************/
+// This file is part of the OpenJpeg software implementation.
+// File: ht_dec.c
+// Author: Aous Naman
+// Date: 01 September 2021
+//***************************************************************************/
+
+//***************************************************************************/
+/** @file ht_dec.c
+ *  @brief implements HTJ2K block decoder
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/image.c, third_party/libopenjpeg/image.h, third_party/libopenjpeg/opj_clock.c, third_party/libopenjpeg/opj_clock.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/j2k.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+ * Copyright (c) 2006-2007, Parvatha Elangovan
+ * Copyright (c) 2010-2011, Kaori Hagihara
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/j2k.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2006-2007, Parvatha Elangovan
+ * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/jp2.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2010-2011, Kaori Hagihara
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/jp2.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/mqc.c, third_party/libopenjpeg/mqc.h, third_party/libopenjpeg/mqc_inl.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/openjpeg.h
+
+/*
+* The copyright in this software is being made available under the 2-clauses
+* BSD License, included below. This software may be subject to other third
+* party and contributor rights, including patent rights, and no such rights
+* are granted under this license.
+*
+* Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+* Copyright (c) 2002-2014, Professor Benoit Macq
+* Copyright (c) 2001-2003, David Janssens
+* Copyright (c) 2002-2003, Yannick Verschueren
+* Copyright (c) 2003-2007, Francois-Olivier Devaux
+* Copyright (c) 2003-2014, Antonin Descampe
+* Copyright (c) 2005, Herve Drolon, FreeImage Team
+* Copyright (c) 2006-2007, Parvatha Elangovan
+* Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+* Copyright (c) 2010-2011, Kaori Hagihara
+* Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
+* Copyright (c) 2012, CS Systemes d'Information, France
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions
+* are met:
+* 1. Redistributions of source code must retain the above copyright
+*    notice, this list of conditions and the following disclaimer.
+* 2. Redistributions in binary form must reproduce the above copyright
+*    notice, this list of conditions and the following disclaimer in the
+*    documentation and/or other materials provided with the distribution.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_codec.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_common.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_config.h
+
+// Copyright 2014 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+/* create opj_config.h for CMake */
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_config_private.h
+
+// Copyright 2014 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Original code copyright 2014 Foxit Software Inc. http://www.foxitsoftware.com
+
+/* create opj_config_private.h for CMake */
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_malloc.cc
+
+// Copyright 2020 The PDFium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Deliberately not including opj_malloc.h, which has poisoned malloc and
+// friends.
+
+========================================================================
+
+Files: third_party/libopenjpeg/opj_malloc.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2007, Callum Lerwick <seg@haxxed.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/pi.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2006-2007, Parvatha Elangovan
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/sparse_array.c, third_party/libopenjpeg/sparse_array.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2017, IntoPix SA <contact@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/t1.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2007, Callum Lerwick <seg@haxxed.com>
+ * Copyright (c) 2012, Carl Hetherington
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/t1.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2012, Carl Hetherington
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/t1_generate_luts.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2007, Callum Lerwick <seg@haxxed.com>
+ * Copyright (c) 2012, Carl Hetherington
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/t2.c, third_party/libopenjpeg/t2.h, third_party/libopenjpeg/tcd.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/tcd.c
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2006-2007, Parvatha Elangovan
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * Copyright (c) 2017, IntoPIX SA <support@intopix.com>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/tgt.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
+ * Copyright (c) 2002-2014, Professor Benoit Macq
+ * Copyright (c) 2001-2003, David Janssens
+ * Copyright (c) 2002-2003, Yannick Verschueren
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
+ * Copyright (c) 2003-2014, Antonin Descampe
+ * Copyright (c) 2005, Herve Drolon, FreeImage Team
+ * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
+ * Copyright (c) 2012, CS Systemes d'Information, France
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+
+Files: third_party/libopenjpeg/thread.c, third_party/libopenjpeg/thread.h, third_party/libopenjpeg/tls_keys.h
+
+/*
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
+ * party and contributor rights, including patent rights, and no such rights
+ * are granted under this license.
+ *
+ * Copyright (c) 2016, Even Rouault
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS `AS IS'
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+========================================================================
+

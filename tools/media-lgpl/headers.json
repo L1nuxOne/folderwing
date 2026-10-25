@@ -1,0 +1,15 @@
+{
+  "schema": "folderwing-lgpl-header-lock/v1",
+  "sources": [
+    {
+      "name": "vulkan-headers",
+      "repository": "https://github.com/KhronosGroup/Vulkan-Headers",
+      "commit": "450bd2232225d6c7728a4108055ac2e37cef6475",
+      "ref": "libplacebo 3rdparty/Vulkan-Headers gitlink",
+      "url": "https://codeload.github.com/KhronosGroup/Vulkan-Headers/tar.gz/450bd2232225d6c7728a4108055ac2e37cef6475",
+      "archive": "vulkan-headers-450bd2232225d6c7728a4108055ac2e37cef6475.tar.gz",
+      "sha256": "26df9841c30806a994e2fdf42f7c87bcb1ced9db9a06033469123939fb3fa075",
+      "bytes": 2940820
+    }
+  ]
+}

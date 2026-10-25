@@ -1,0 +1,14 @@
+{
+  "tool": "built-in image_gen",
+  "prompts": [
+    {
+      "key": "icon",
+      "prompt": "Edit the supplied Folderwing concept reference into a production app icon. Preserve the folder-becoming-wing emblem from the LARGE upper-left main logo: coral folder-tab left surface, midnight-plum right folded wing, elegant curved white negative-space seam. Preserve its distinctive proportions and direction. Remove all words and presentation-board elements. Deliver ONE square app icon only: a warm cream rounded-square tile (#FFF7EF) with the two-colour emblem generously centred inside, filling around 72% of the tile width. The tile itself fills 94% of the canvas. Outside its rounded corners use genuine alpha transparency. Make the emblem pure flat coral (#FF6655) and deep plum (#30213C), with no gradient, texture, bevel, glow or shadow. Crisp clean vector-like edges and solid silhouette that can be downsampled to 16/24/32 pixels. Avoid thin details, text, repeated marks or additional shapes. This is the final icon export for a Windows desktop file manager now named Folderwing, and it needs to work on light and dark taskbars. Exact one emblem, no mockup, no alternate treatments, no checkerboard backdrop. Transparent background."
+    },
+    {
+      "key": "wordmark",
+      "prompt": "Edit the supplied concept reference into the final Folderwing horizontal brand lockup. Preserve the emblem from the LARGE upper-left main logo: coral folder-tab left shape and midnight-plum folded right wing separated by the elegant curved negative-space seam. Replace the main 'OpenPilot' wordmark with the exact text 'Folderwing', capital F and all remaining letters lowercase. Use the same carefully spaced humanist rounded sans character of the reference. Emblem on the left and Folderwing wordmark to its right on one line. Wordmark deep plum #30213C, emblem flat coral #FF6655 and deep plum #30213C. No gradients or textures, impeccable flat vector-like shapes, optically balanced. Only one lockup, tightly framed with sensible clear space, wide horizontal composition. Remove the concept number/label, all small examples, all app-icon tiles and the entire cream board background. Genuine transparent background, including negative space. No tagline, extra text, new geometry or decorative elements. This is a production identity asset for a Windows/Linux file manager."
+    }
+  ],
+  "production_icon": "Reconstructed as the checked-in native SVG master and exported by tools/build-branding.py for exact edges and DPI sizes. Generated icon drafts are retained in build/branding/20261024."
+}

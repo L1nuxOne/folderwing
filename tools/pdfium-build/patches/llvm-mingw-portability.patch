@@ -1,0 +1,41 @@
+--- a/core/fxcrt/fx_memory.cpp
++++ b/core/fxcrt/fx_memory.cpp
+@@ -90,7 +90,7 @@
+   DCHECK(std::has_single_bit(alignment));
+   DCHECK_EQ(alignment % sizeof(void*), 0u);
+   void* ptr = nullptr;
+-#if defined(COMPILER_MSVC)
++#if BUILDFLAG(IS_WIN)
+   ptr = _aligned_malloc(size, alignment);
+ #elif BUILDFLAG(IS_ANDROID)
+   // Android technically supports posix_memalign(), but does not expose it in
+--- a/core/fxcrt/fx_memory.h
++++ b/core/fxcrt/fx_memory.h
+@@ -24,7 +24,7 @@
+ 
+ #include "core/fxcrt/compiler_specific.h"
+ 
+-#if defined(COMPILER_MSVC)
++#if BUILDFLAG(IS_WIN)
+ #include <malloc.h>
+ #else
+ #include <stdlib.h>
+@@ -80,7 +80,7 @@
+ void* FX_AlignedAlloc(size_t size, size_t alignment);
+ 
+ inline void FX_AlignedFree(void* ptr) {
+-#if defined(COMPILER_MSVC)
++#if BUILDFLAG(IS_WIN)
+   _aligned_free(ptr);
+ #else
+   free(ptr);
+--- a/core/fxge/win32/cgdi_display_driver.h
++++ b/core/fxge/win32/cgdi_display_driver.h
+@@ -16,7 +16,6 @@
+ #include "core/fxge/win32/cgdi_device_driver.h"
+ 
+ class CFX_DIBBase;
+-struct FXDIB_ResampleOptions;
+ struct FX_RECT;
+ 
+ class CGdiDisplayDriver final : public CGdiDeviceDriver {

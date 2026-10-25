@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.ps1 text eol=lf
+*.png binary
+
+# Preserve verified upstream notices and fixture bytes through Git checkout.
+licenses/** -text
+tests/fixtures/** -text

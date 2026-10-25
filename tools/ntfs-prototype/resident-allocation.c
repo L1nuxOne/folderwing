@@ -1,0 +1,4 @@
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <stdio.h>
+int wmain(int argc,wchar_t **argv){if(argc!=2)return 2;HANDLE h=CreateFileW(argv[1],FILE_READ_ATTRIBUTES,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,NULL,OPEN_EXISTING,0,NULL);FILE_STANDARD_INFO s;FILE_COMPRESSION_INFO c;BOOL a=GetFileInformationByHandleEx(h,FileStandardInfo,&s,sizeof s),b=GetFileInformationByHandleEx(h,FileCompressionInfo,&c,sizeof c);DWORD hi=0;SetLastError(0);DWORD lo=GetCompressedFileSizeW(argv[1],&hi),e=GetLastError();printf("{\"standard_ok\":%d,\"standard_allocation\":%lld,\"compression_ok\":%d,\"compression_allocation\":%lld,\"compressed_file_size\":%llu,\"error\":%lu}\n",a,(long long)s.AllocationSize.QuadPart,b,(long long)c.CompressedFileSize.QuadPart,((unsigned long long)hi<<32)|lo,e);CloseHandle(h);return 0;}
