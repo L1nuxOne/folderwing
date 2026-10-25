@@ -173,7 +173,9 @@ def audit(repo, registry):
     for module, item in modules.items():
         require(item.get("inventory") == inventory[module], f"sealed inventory changed: {module}")
         require(item.get("execution") and item.get("resources"), f"missing execution/fixture contract: {module}")
-        require(isinstance(item.get("executable"), str) and item["executable"].endswith(".exe"),
+        executable = item.get("executable")
+        require(isinstance(executable, str) and executable and '/' not in executable and '\\' not in executable
+                and (executable.endswith(".exe") or item.get("platform") == "linux"),
                 f"invalid native executable: {module}")
         built = re.search(r"Invoke-Zig\s+'" + re.escape(item["executable"]) + "'", build)
         recipe = item.get("build_recipe")
@@ -252,6 +254,10 @@ def self_check():
         def mutate(action):
             model_copy = copy.deepcopy(model); action(model_copy); return audit(repo, model_copy)
         check("valid_complete_mapping", lambda: audit(repo, model))
+        check("linux_fixture_build_route", lambda: mutate(lambda d: d["modules"]["tests/a.c"].update(
+            executable="a-linux", platform="linux", build_recipe={"compiler":"cc", "arguments":["tests/a.c", "src/x.c"]})))
+        check("extensionless_requires_linux_platform", lambda: mutate(lambda d: d["modules"]["tests/a.c"].update(executable="a-linux")), "invalid native executable")
+        check("linux_executable_path_rejected", lambda: mutate(lambda d: d["modules"]["tests/a.c"].update(executable="../a-linux", platform="linux")), "invalid native executable")
         check("missing_selector", lambda: mutate(lambda d: d["selectors"].clear()), "missing=")
         check("stale_selector", lambda: mutate(lambda d: d["selectors"].update({"tests/a.c::test_old": d["selectors"]["tests/a.c::test_a"]})), "stale=")
         check("missing_owner", lambda: mutate(lambda d: d["selectors"]["tests/a.c::test_a"].update(owner="")), "owner")

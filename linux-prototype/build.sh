@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+out="$PWD/build/linux-prototype"
+mkdir -p "$out"
+compiler="${CC:-cc}"
+pkg-config --atleast-version=4.8 gtk4
+pkg-config --exists sqlite3
+# Native build of the SAME full helper sources used by build.ps1. System SQLite
+# is a prototype build dependency; this is not a public redistribution package.
+helper_sources=(linux/fpwsl.c linux/fppath.c linux/fppermissions.c linux/fpsizes.c
+ linux/fpspace.c linux/fpduplicate.c linux/fpgit.c linux/fpcontent.c
+ app/contentmatch.c app/textutil.c linux/fpsearch.c linux/fpindex.c linux/fphash.c
+ linux/fpguard.c linux/fprename.c linux/fpjobs.c linux/fptransfer.c linux/fpshell.c)
+read -r -a sqlite_flags <<< "$(pkg-config --cflags --libs sqlite3)"
+"$compiler" -std=c11 -O2 -g -Isrc -Wall -Wextra -Wno-unused-parameter \
+ -Wno-missing-field-initializers -Wno-misleading-indentation \
+ "${helper_sources[@]}" "${sqlite_flags[@]}" -lm -lpthread -o "$out/folderwing-linux-helper"
+read -r -a gtk_flags <<< "$(pkg-config --cflags --libs gtk4)"
+"$compiler" -std=c11 -O2 -g -Wall -Wextra -Werror \
+ linux-prototype/model.c linux-prototype/browser.c "${gtk_flags[@]}" -o "$out/folderwing-linux"
+cp docs/branding/folderwing-icon.svg "$out/folderwing.svg"
+if [[ "${1:-}" == --tests ]]; then
+ "$compiler" -std=c11 -O2 -g -Wall -Wextra -Werror \
+ tests/linux_browser_tests.c linux-prototype/model.c "${gtk_flags[@]}" -o "$out/folderwing-linux-browser-tests"
+fi
+printf 'Built %s\n' "$out/folderwing-linux"
