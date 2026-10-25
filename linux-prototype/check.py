@@ -22,7 +22,8 @@ def command(args):
 
 def source_snapshot():
     paths = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'], cwd=ROOT).split(b'\0')
-    return digest({os.fsdecode(p): hashlib.sha256((ROOT/os.fsdecode(p)).read_bytes()).hexdigest()
+    return digest({os.fsdecode(p): {'sha256': hashlib.sha256((ROOT/os.fsdecode(p)).read_bytes()).hexdigest(),
+                                  'executable': bool((ROOT/os.fsdecode(p)).stat().st_mode & 0o111)}
                    for p in sorted(set(paths)) if p and (ROOT/os.fsdecode(p)).is_file()})
 
 def main():
