@@ -1034,7 +1034,7 @@ static void tab_closed(GtkButton *button,gpointer data)
 static Tab *tab_record(Pane *pane,const char *path)
 {
     Tab *tab=g_new0(Tab,1);tab->id=++pane->app->tab_serial;tab->path=g_strdup(path);tab->history=g_ptr_array_new_with_free_func(g_free);tab->page=gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
-    GtkWidget *header=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,4);tab->label=gtk_label_new("");gtk_label_set_ellipsize(GTK_LABEL(tab->label),PANGO_ELLIPSIZE_MIDDLE);gtk_label_set_max_width_chars(GTK_LABEL(tab->label),18);
+    GtkWidget *header=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,4);tab->label=gtk_label_new("");gtk_label_set_ellipsize(GTK_LABEL(tab->label),PANGO_ELLIPSIZE_MIDDLE);gtk_label_set_max_width_chars(GTK_LABEL(tab->label),18);gtk_label_set_width_chars(GTK_LABEL(tab->label),12);
     tab->close=gtk_button_new_from_icon_name("window-close-symbolic");gtk_widget_add_css_class(tab->close,"flat");gtk_widget_set_tooltip_text(tab->close,"Close tab (Ctrl+W in the file list)");
     gtk_box_append(GTK_BOX(header),tab->label);gtk_box_append(GTK_BOX(header),tab->close);g_object_set_data(G_OBJECT(tab->page),"tab",tab);g_object_set_data(G_OBJECT(tab->page),"pane",pane);
     g_signal_connect(tab->close,"clicked",G_CALLBACK(tab_closed),tab);g_ptr_array_add(pane->tabs,tab);gtk_notebook_append_page(GTK_NOTEBOOK(pane->notebook),tab->page,header);
