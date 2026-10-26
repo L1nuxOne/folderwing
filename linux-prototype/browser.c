@@ -537,7 +537,7 @@ static void edit_submit(GtkWidget *widget,gpointer data)
 static GtkWidget *find_name_cell(GtkWidget *widget,const char *name)
 {
     const char *bound=g_object_get_data(G_OBJECT(widget),"fw-name");
-    if(bound&&!strcmp(bound,name)&&gtk_widget_get_mapped(widget))return widget;
+    if(bound&&!strcmp(bound,name)&&gtk_widget_get_mapped(widget)&&gtk_widget_get_width(widget)>0&&gtk_widget_get_height(widget)>0)return widget;
     for(GtkWidget *child=gtk_widget_get_first_child(widget);child;child=gtk_widget_get_next_sibling(child)){
         GtkWidget *found=find_name_cell(child,name);if(found)return found;
     }

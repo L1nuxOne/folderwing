@@ -529,7 +529,9 @@ static guint check_context_cells(Pane *pane,GtkWidget *widget,const char *name)
     guint count=0;const char *bound=g_object_get_data(G_OBJECT(widget),"fw-row");
     if(bound&&!strcmp(bound,name)&&gtk_widget_get_mapped(widget)){
         graphene_rect_t bounds;CHECK(gtk_widget_compute_bounds(widget,pane->view,&bounds));
+        if(bounds.size.width<=0||bounds.size.height<=0)return 0;
         const char *picked=context_row_at(pane,bounds.origin.x+bounds.size.width/2,bounds.origin.y+bounds.size.height/2);
+        if(!picked||strcmp(picked,name))g_printerr("HIT expected=%s actual=%s cell=%s bounds=%.1f,%.1f %.1fx%.1f view=%dx%d\n",name,picked?picked:"(none)",gtk_widget_get_css_name(widget),bounds.origin.x,bounds.origin.y,bounds.size.width,bounds.size.height,gtk_widget_get_width(pane->view),gtk_widget_get_height(pane->view));
         CHECK(picked&&!strcmp(picked,name));count++;
     }
     for(GtkWidget *child=gtk_widget_get_first_child(widget);child;child=gtk_widget_get_next_sibling(child))count+=check_context_cells(pane,child,name);
@@ -537,7 +539,9 @@ static guint check_context_cells(Pane *pane,GtkWidget *widget,const char *name)
 }
 static void context_click(Pane *pane,const char *name)
 {
-    CHECK(check_context_cells(pane,pane->view,name)==3);
+    /* Wayland can map virtualized cells before allocating the next frame. */
+    gint64 end=g_get_monotonic_time()+5000000;
+    while(check_context_cells(pane,pane->view,name)!=3){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
     GtkWidget *cell=find_name_cell(pane->view,name);CHECK(cell);graphene_rect_t bounds;CHECK(gtk_widget_compute_bounds(cell,pane->view,&bounds));
     double x=bounds.origin.x+bounds.size.width/2,y=bounds.origin.y+bounds.size.height/2;
     CHECK(!strcmp(context_row_at(pane,x,y),name));
