@@ -26,7 +26,7 @@ fallback overhead on the current WSLg host; it is a launch option, not a global
 GTK setting.
 
 The Linux helper is rebuilt from the same full source list as the WSL target in
-`build.ps1`, without modifying that helper or its wire protocol. This prototype
+`build.ps1`, using the existing wire protocol. This prototype
 uses the distribution's SQLite/GTK shared libraries; no public binary package
 or cross-distribution dependency/license closure is claimed yet.
 

@@ -417,6 +417,7 @@ static void test_names_desktop_rename(void)
     char *left=directory("names-ui-left"),*right=directory("names-ui-right");file(left,"old.txt","rename bytes");file(left,"existing.txt","original");
     App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);Pane *pane=app->panes;app->active=pane;select_named(pane,"old.txt",TRUE);gtk_widget_grab_focus(pane->view);
     CHECK(key_pressed(NULL,GDK_KEY_F2,0,0,app));CHECK(app->edit);CHECK(!app->job);gtk_popover_popdown(GTK_POPOVER(app->edit->popover));settle(20);CHECK(!app->edit);
+    GtkWidget *focus=gtk_window_get_focus(app->window);CHECK(focus&&(focus==pane->view||gtk_widget_is_ancestor(focus,pane->view)));
     char *old=g_build_filename(left,"old.txt",NULL);bytes_equal(old,"rename bytes");
     begin_name_edit(pane,FW_RENAME,TRUE);submit_name(app,"existing.txt");FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(app->edit);CHECK(gtk_widget_get_sensitive(app->edit->entry));CHECK(*gtk_label_get_text(GTK_LABEL(app->edit->error)));
     submit_name(app,"renamed-\\xFF.txt");p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(!app->edit);wait_visible_count(pane,2);

@@ -438,16 +438,37 @@ struct NameEdit {
     App *app; Pane *pane; GtkWidget *button,*popover,*entry,*error,*save,*cancel;
     char *root,*source,*target; FwOperation operation; gboolean pending,dismissed;
 };
+typedef struct EditCleanup { GtkWidget *button,*popover,*view; } EditCleanup;
+static gboolean edit_cleanup(gpointer data)
+{
+    EditCleanup *cleanup=data;
+    /* A closed handler runs inside GTK's popover/focus dispatch. Detach only
+       after that dispatch unwinds, and never detach a newer editor. */
+    if(gtk_menu_button_get_popover(GTK_MENU_BUTTON(cleanup->button))==GTK_POPOVER(cleanup->popover))
+        gtk_menu_button_set_popover(GTK_MENU_BUTTON(cleanup->button),NULL);
+    GtkRoot *root=cleanup->view?gtk_widget_get_root(cleanup->view):NULL;
+    App *app=root?g_object_get_data(G_OBJECT(root),"browser-state"):NULL;
+    if(app&&!app->closing&&!app->edit&&!app->draft&&gtk_widget_get_mapped(cleanup->view))
+        gtk_widget_grab_focus(cleanup->view);
+    g_object_unref(cleanup->button);g_object_unref(cleanup->popover);
+    if(cleanup->view)g_object_unref(cleanup->view);
+    g_free(cleanup);return G_SOURCE_REMOVE;
+}
 static void edit_discard(App *app)
 {
     NameEdit *edit=app->edit;if(!edit)return;
     app->edit=NULL;g_signal_handlers_disconnect_by_data(edit->popover,edit);
+    g_signal_handlers_disconnect_by_data(edit->entry,edit);
+    g_signal_handlers_disconnect_by_data(edit->save,edit);
+    g_signal_handlers_disconnect_by_data(edit->cancel,edit);
+    EditCleanup *cleanup=g_new0(EditCleanup,1);
+    cleanup->button=g_object_ref(edit->button);cleanup->popover=g_object_ref(edit->popover);
+    if(!app->closing)cleanup->view=g_object_ref(edit->pane->view);
     GtkWidget *focus=gtk_window_get_focus(app->window);
     if(focus&&(focus==edit->entry||gtk_widget_is_ancestor(focus,edit->popover)))gtk_window_set_focus(app->window,NULL);
     gtk_popover_popdown(GTK_POPOVER(edit->popover));
     g_object_set_data(G_OBJECT(edit->button),"editing",NULL);
-    gtk_menu_button_set_popover(GTK_MENU_BUTTON(edit->button),NULL);
-    if(!app->closing)gtk_widget_grab_focus(edit->pane->view);
+    g_idle_add(edit_cleanup,cleanup);
     g_free(edit->root);g_free(edit->source);g_free(edit->target);g_free(edit);update_actions(app);
 }
 static void edit_closed(GtkPopover *popover,gpointer data)
