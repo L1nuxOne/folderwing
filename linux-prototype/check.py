@@ -33,7 +33,7 @@ def main():
     evidence = ROOT/'build/linux-prototype'/('check-'+args.backend)
     evidence.mkdir(parents=True, exist_ok=True)
     changes = ['linux-prototype/model.c', 'linux-prototype/model.h', 'linux-prototype/browser.c',
-               'linux-prototype/desktop.c', 'linux-prototype/desktop.h',
+               'linux-prototype/desktop.c', 'linux-prototype/desktop.h', 'linux-prototype/clipboard.c', 'linux-prototype/clipboard.h',
                'linux-prototype/build.sh', 'linux-prototype/check.py', 'linux-prototype/operations.c', 'linux-prototype/operations.h', 'tests/fixtures/linux_ops_faults.c', 'tests/linux_browser_tests.c']
     for name, tail in [('audit', ['audit']), ('self-check', ['self-check']), ('selection', ['select', '--changed', *changes])]:
         result = subprocess.run([sys.executable, 'tools/native-impact.py', *tail], cwd=ROOT, capture_output=True, text=True)
@@ -45,13 +45,14 @@ def main():
     plan = json.loads((evidence/'selection.json').read_text())
     selected = plan['selected_nodeids']
     expected = sorted(x.split('::')[1] for x in selected)
-    assert len(expected) == 23 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
+    assert len(expected) == 28 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
     binary = ROOT/'build/linux-prototype/folderwing-linux-browser-tests'
     helper = ROOT/'build/linux-prototype/folderwing-linux-helper'
     icon = ROOT/'build/linux-prototype/folderwing.svg'
     run = ['dbus-run-session', '--']
-    if args.backend == 'x11':
-        run += ['xvfb-run', '-a', '--server-args=-screen 0 1400x900x24']
+    # Both profiles get a private clipboard server. Wayland widgets still use
+    # WSLg; only clipboard transport is directed to this owned X11 display.
+    run += ['xvfb-run', '-a', '--server-args=-screen 0 1400x900x24']
     run += [str(binary), str(helper), str(icon)]
     snapshot = source_snapshot()
     inputs = {
@@ -60,13 +61,13 @@ def main():
         'inventory_sha256': audit['inventory_digest'], 'bindings_sha256': audit['bindings_digest'],
         'selection_sha256': digest(plan), 'selected_nodeids': selected,
         'build_command': ['./linux-prototype/build.sh', '--tests'], 'run_command': run,
-        'workers': 1, 'profile': {'backend': args.backend, 'renderer': 'cairo', 'fatal_criticals': True,
+        'workers': 1, 'profile': {'backend': args.backend, 'clipboard_backend': 'isolated X11; two GDK connections', 'renderer': 'cairo', 'fatal_criticals': True,
             'gtk': command(['pkg-config', '--modversion', 'gtk4']), 'sqlite': command(['pkg-config', '--modversion', 'sqlite3']),
             'compiler': command([os.environ.get('CC', 'cc'), '--version']).splitlines()[0],
             'kernel': platform.release(), 'machine': platform.machine(), 'cpu_count': os.cpu_count(),
             'load_average': os.getloadavg(),
             'memory_available_kib': int(re.search(r'^MemAvailable:\s+(\d+)', Path('/proc/meminfo').read_text(), re.M)[1]),
-            'fixture': 'owned temporary trees/trash, native helper + link-time fsync fault helper, owned desktop associations/capture apps, distinct /tmp and /dev/shm, 10000-file desktop case',
+            'fixture': 'owned temporary trees/trash, native helper + link-time fsync fault helper, owned desktop associations/capture apps and isolated file clipboard, distinct /tmp and /dev/shm, 10000-file desktop case',
             'network': 'none', 'windows_input': False, 'wsl_shutdown': False},
     }
     key = digest(inputs)
@@ -76,7 +77,8 @@ def main():
         built = subprocess.run(inputs['build_command'], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
     built_seconds = time.monotonic()-started
     env = os.environ.copy()
-    env.update(G_DEBUG='fatal-criticals', GTK_A11Y='none', GSK_RENDERER='cairo', GDK_BACKEND=args.backend,
+    env.update(G_DEBUG='fatal-criticals', GTK_A11Y='none', GSK_RENDERER='cairo', GDK_BACKEND='wayland,x11' if args.backend == 'wayland' else 'x11',
+               FW_CLIPBOARD_TEST_ISOLATED='1', FW_CLIPBOARD_EXPECT_BACKEND=args.backend,
                FW_LINUX_SCREENSHOT=str(evidence/'desktop.png'))
     called = time.monotonic()
     with (evidence/'acceptance.log').open('w') as log:

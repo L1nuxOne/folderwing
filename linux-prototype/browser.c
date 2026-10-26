@@ -5,6 +5,7 @@
 #include "model.h"
 #include "operations.h"
 #include "desktop.h"
+#include "clipboard.h"
 
 typedef struct App App;
 typedef struct Draft Draft;
@@ -30,6 +31,8 @@ struct App {
     char *helper, **job_env; FwJob *job; Draft *draft; NameEdit *edit;
     GtkWidget *copy, *move, *trash, *cancel, *job_status, *job_progress, *job_details, *details;
     GCancellable *launch_cancel; GtkWindow *chooser; GtkWidget *desktop_status;gboolean opening;
+    GdkClipboard *clipboard;GdkContentProvider *owned_clipboard;GHashTable *cut_paths;
+    GCancellable *paste_cancel;guint64 clipboard_epoch,job_clipboard_epoch;gboolean job_clipboard_cut;
 };
 static void update_actions(App *app);
 static void draft_discard(App *app);
@@ -41,10 +44,18 @@ static void pane_navigate(Pane *pane, const char *path);
 static void context_discard(Pane *pane);
 static void show_context(Pane *pane,const char *name,double x,double y);
 static void open_path(Pane *pane,const char *path,guint purpose);
+static void clipboard_copy(Pane *pane,gboolean cut);
+static void clipboard_paste(Pane *pane);
+static void clipboard_job_finished(App *app,const FwJobProgress *progress);
+static void clipboard_set(App *app,GdkClipboard *clipboard);
+static gboolean cut_path(Pane *pane,const char *name);
+static void clipboard_notice(App *app,const char *message,gboolean error);
 static void app_stop(App *app)
 {
     app->closing = TRUE;
     draft_discard(app); edit_discard(app);
+    if(app->paste_cancel)g_cancellable_cancel(app->paste_cancel);
+    if(app->clipboard)g_signal_handlers_disconnect_by_data(app->clipboard,app);
     if(app->launch_cancel)g_cancellable_cancel(app->launch_cancel);
     if(app->chooser){GtkWindow *chooser=app->chooser;app->chooser=NULL;gtk_window_destroy(chooser);}
     if (app->job) { g_signal_handlers_disconnect_by_data(app->job, app); fw_job_cancel(app->job); }
@@ -73,6 +84,7 @@ static void app_free(gpointer data)
         if (pane->history) g_ptr_array_unref(pane->history);
         g_clear_pointer(&pane->selected_names, g_hash_table_unref); g_free(pane->select_after); g_free(pane->select_root);
     }
+    g_clear_object(&app->paste_cancel);g_clear_object(&app->owned_clipboard);g_clear_object(&app->clipboard);g_clear_pointer(&app->cut_paths,g_hash_table_unref);
     g_clear_object(&app->launch_cancel);g_clear_object(&app->job); g_free(app->helper); g_strfreev(app->job_env); g_free(app);
 }
 static gint compare_name(gconstpointer a, gconstpointer b, gpointer unused)
@@ -120,10 +132,11 @@ static void setup_cell(GtkSignalListItemFactory *factory, GtkListItem *item, gpo
 }
 static void bind_cell(GtkSignalListItemFactory *factory, GtkListItem *item, gpointer field)
 {
-    (void)factory;
+    Pane *pane=g_object_get_data(G_OBJECT(factory),"pane");
     GFileInfo *info = gtk_list_item_get_item(item);
     GtkWidget *child = gtk_list_item_get_child(item), *label = child;
     g_object_set_data_full(G_OBJECT(child),"fw-row",g_strdup(g_file_info_get_name(info)),g_free);
+    if(cut_path(pane,g_file_info_get_name(info)))gtk_widget_add_css_class(child,"cut-item");else gtk_widget_remove_css_class(child,"cut-item");
     guint column = GPOINTER_TO_UINT(field);
     if (!column) {
         GtkWidget *icon = gtk_widget_get_first_child(child); label = gtk_widget_get_next_sibling(icon);
@@ -156,6 +169,7 @@ static void unbind_cell(GtkSignalListItemFactory *factory,GtkListItem *item,gpoi
 static GtkColumnViewColumn *make_column(Pane *pane, const char *name, guint field)
 {
     GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
+    g_object_set_data(G_OBJECT(factory),"pane",pane);
     g_signal_connect(factory, "setup", G_CALLBACK(setup_cell), GUINT_TO_POINTER(field));
     g_signal_connect(factory, "bind", G_CALLBACK(bind_cell), GUINT_TO_POINTER(field));
     g_signal_connect(factory,"unbind",G_CALLBACK(unbind_cell),NULL);
@@ -248,6 +262,7 @@ static void pending_changed(GObject *object, GParamSpec *spec, gpointer data) { 
 static void pane_navigate(Pane *pane, const char *path)
 {
     context_discard(pane);
+    if(pane->app->paste_cancel)g_cancellable_cancel(pane->app->paste_cancel);
     if (!*fw_browser_path(pane->browser)) {
         char *display = fw_display_bytes(path);
         gtk_editable_set_text(GTK_EDITABLE(pane->address), display); g_free(display);
@@ -309,6 +324,7 @@ static GtkWidget *toolbar_button(Pane *pane, const char *icon, const char *tip, 
 struct Draft {
     App *app; GtkWindow *window; GtkWidget *policy;
     char **sources, *destination; guint count; FwOperation operation;
+    gboolean clipboard,started;guint64 clipboard_epoch;
 };
 static gboolean job_active(App *app)
 {
@@ -319,7 +335,7 @@ static gboolean job_active(App *app)
 static void update_actions(App *app)
 {
     if (!app->copy || app->closing) return;
-    gboolean ready = app->active && !app->draft && !app->edit && !job_active(app) && !fw_browser_busy(app->active->browser) &&
+    gboolean ready = app->active && !app->draft && !app->edit && !app->paste_cancel && !job_active(app) && !fw_browser_busy(app->active->browser) &&
         !*fw_browser_error(app->active->browser) && !gtk_sort_list_model_get_pending(app->active->sorted) && !gtk_filter_list_model_get_pending(app->active->filtered);
     GtkBitset *selection = app->active ? gtk_selection_model_get_selection(app->active->selection) : NULL;
     guint64 selected = selection ? gtk_bitset_get_size(selection) : 0; if (selection) gtk_bitset_unref(selection);
@@ -330,7 +346,7 @@ static void update_actions(App *app)
     gboolean destination = other->browser && *fw_browser_path(other->browser) && !fw_browser_busy(other->browser) && !*fw_browser_error(other->browser);
     for(guint i=0;i<2;i++) {
         Pane *pane=&app->panes[i];GtkBitset *items=gtk_selection_model_get_selection(pane->selection);guint64 n=gtk_bitset_get_size(items);gtk_bitset_unref(items);
-        gboolean can_name=!app->draft&&!app->edit&&!job_active(app)&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
+        gboolean can_name=!app->draft&&!app->edit&&!app->paste_cancel&&!job_active(app)&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
         if(pane->rename_button)gtk_widget_set_sensitive(pane->rename_button,(can_name&&n==1)||g_object_get_data(G_OBJECT(pane->rename_button),"editing")!=NULL);
         if(pane->new_button)gtk_widget_set_sensitive(pane->new_button,can_name||g_object_get_data(G_OBJECT(pane->new_button),"editing")!=NULL);
     }
@@ -344,6 +360,7 @@ static void draft_discard(App *app)
 {
     Draft *draft = app->draft; if (!draft) return;
     app->draft = NULL;
+    if(draft->clipboard&&!draft->started)clipboard_notice(app,"Paste cancelled; clipboard files were kept.",FALSE);
     g_signal_handlers_disconnect_by_data(draft->window, draft);
     gtk_window_destroy(draft->window); g_strfreev(draft->sources); g_free(draft->destination); g_free(draft);
     update_actions(app);
@@ -368,6 +385,7 @@ static void operation_changed(FwJob *job, gpointer data)
     if (p.state == FW_JOB_ERRORS || p.state == FW_JOB_UNCONFIRMED) gtk_widget_add_css_class(app->job_status, "error"); else gtk_widget_remove_css_class(app->job_status, "error");
     if (!p.active && !app->job_reported) {
         app->job_reported = TRUE; edit_finished(app,&p);
+        clipboard_job_finished(app,&p);
         for (guint i = 0; i < 2; i++) fw_browser_refresh(app->panes[i].browser);
         if (app->close_wait && !app->close_queued) {
             app->close_queued = TRUE;
@@ -379,32 +397,22 @@ static void operation_changed(FwJob *job, gpointer data)
 static void draft_start(GtkButton *button, gpointer data)
 {
     (void)button; Draft *draft = data; App *app = draft->app; GError *error = NULL;
+    if(draft->clipboard&&draft->clipboard_epoch!=app->clipboard_epoch){draft_discard(app);return;}
     FwConflict policy = draft->policy ? (FwConflict)gtk_drop_down_get_selected(GTK_DROP_DOWN(draft->policy)) : FW_FAIL_CONFLICT;
     FwJob *job = fw_job_new(app->helper, draft->operation, (const char *const *)draft->sources, draft->count,
         draft->destination, policy, (const char *const *)app->job_env, &error);
     if (!job) { gtk_label_set_text(GTK_LABEL(app->job_status), error->message); g_error_free(error); return; }
     if (app->job) g_signal_handlers_disconnect_by_data(app->job, app);
     g_clear_object(&app->job); app->job = job; app->job_reported = FALSE;
+    app->job_clipboard_cut=draft->clipboard&&draft->operation==FW_MOVE;app->job_clipboard_epoch=draft->clipboard_epoch;
+    draft->started=TRUE;
     draft_discard(app); g_signal_connect(job, "changed", G_CALLBACK(operation_changed), app);
     fw_job_start(job); operation_changed(job, app);
 }
-static void prepare_operation(App *app, FwOperation operation)
+static void present_draft(App *app,FwOperation operation,char **sources,guint count,const char *destination,gboolean clipboard,guint64 epoch)
 {
-    update_actions(app);
-    GtkWidget *action = operation == FW_COPY ? app->copy : operation == FW_MOVE ? app->move : app->trash;
-    if (!gtk_widget_get_sensitive(action)) return;
-    Pane *source = app->active, *other = source == app->panes ? app->panes+1 : app->panes;
-    GtkBitset *selected = gtk_selection_model_get_selection(source->selection);
-    guint64 count = gtk_bitset_get_size(selected);
-    if (!count || count > 4096) { gtk_bitset_unref(selected); return; }
     Draft *draft = g_new0(Draft, 1); draft->app = app; draft->count = (guint)count; draft->operation = operation;
-    draft->sources = g_new0(char *, count+1); draft->destination = g_strdup(operation == FW_TRASH ? "" : fw_browser_path(other->browser));
-    GtkBitsetIter iter; guint position, index = 0;
-    for (gboolean more = gtk_bitset_iter_init_first(&iter, selected, &position); more; more = gtk_bitset_iter_next(&iter, &position)) {
-        GFileInfo *info = g_list_model_get_item(G_LIST_MODEL(source->sorted), position);
-        if (info) { draft->sources[index++] = g_build_filename(fw_browser_path(source->browser), g_file_info_get_name(info), NULL); g_object_unref(info); }
-    }
-    gtk_bitset_unref(selected); draft->count = index;
+    draft->sources=g_strdupv(sources);draft->destination=g_strdup(destination);draft->clipboard=clipboard;draft->clipboard_epoch=epoch;
     app->draft = draft; draft->window = GTK_WINDOW(gtk_window_new());
     gtk_window_set_transient_for(draft->window, app->window); gtk_window_set_modal(draft->window, TRUE); gtk_window_set_default_size(draft->window, 600, -1);
     const char *verb = operation == FW_COPY ? "Copy" : operation == FW_MOVE ? "Move" : "Move to Trash";
@@ -431,6 +439,20 @@ static void prepare_operation(App *app, FwOperation operation)
     gtk_box_append(GTK_BOX(buttons), cancel); gtk_box_append(GTK_BOX(buttons), start); gtk_box_append(GTK_BOX(box), buttons);
     gtk_window_set_child(draft->window, box); g_signal_connect(draft->window, "close-request", G_CALLBACK(draft_close), draft);
     gtk_window_present(draft->window); gtk_widget_grab_focus(cancel); update_actions(app);
+}
+static void prepare_operation(App *app,FwOperation operation)
+{
+    update_actions(app);GtkWidget *action=operation==FW_COPY?app->copy:operation==FW_MOVE?app->move:app->trash;
+    if(!gtk_widget_get_sensitive(action))return;
+    Pane *pane=app->active,*other=pane==app->panes?app->panes+1:app->panes;
+    GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);guint64 count=gtk_bitset_get_size(selected);
+    if(!count||count>4096){gtk_bitset_unref(selected);return;}
+    char **sources=g_new0(char *,count+1);GtkBitsetIter iter;guint position,index=0;
+    for(gboolean more=gtk_bitset_iter_init_first(&iter,selected,&position);more;more=gtk_bitset_iter_next(&iter,&position)){
+        GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),position);
+        if(info){sources[index++]=g_build_filename(fw_browser_path(pane->browser),g_file_info_get_name(info),NULL);g_object_unref(info);}
+    }
+    gtk_bitset_unref(selected);present_draft(app,operation,sources,index,operation==FW_TRASH?"":fw_browser_path(other->browser),FALSE,0);g_strfreev(sources);
 }
 static void operation_clicked(GtkButton *button, gpointer data)
 {
@@ -555,7 +577,7 @@ static char *new_folder_name(Pane *pane)
 }
 static void begin_name_edit(Pane *pane,FwOperation operation,gboolean popup)
 {
-    App *app=pane->app;if(app->closing||app->draft||app->edit||job_active(app)||fw_browser_busy(pane->browser)||!*fw_browser_path(pane->browser)||*fw_browser_error(pane->browser)||gtk_sort_list_model_get_pending(pane->sorted)||gtk_filter_list_model_get_pending(pane->filtered))return;
+    App *app=pane->app;if(app->closing||app->draft||app->edit||app->paste_cancel||job_active(app)||fw_browser_busy(pane->browser)||!*fw_browser_path(pane->browser)||*fw_browser_error(pane->browser)||gtk_sort_list_model_get_pending(pane->sorted)||gtk_filter_list_model_get_pending(pane->filtered))return;
     char *name=NULL;GtkWidget *cell=NULL;
     if(operation==FW_RENAME){
         GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);
@@ -695,14 +717,14 @@ static void open_queried(GObject *source,GAsyncResult *result,gpointer data)
 }
 static void open_path(Pane *pane,const char *path,guint purpose)
 {
-    App *app=pane->app;if(app->closing||app->opening||app->edit||app->draft)return;
+    App *app=pane->app;if(app->closing||app->opening||app->edit||app->draft||app->paste_cancel)return;
     Launch *launch=g_new0(Launch,1);launch->window=g_object_ref(app->window);launch->pane=(guint)(pane-app->panes);launch->purpose=purpose;
     app->opening=TRUE;gtk_widget_set_visible(app->desktop_status,TRUE);gtk_widget_remove_css_class(app->desktop_status,"error");
     gtk_label_set_text(GTK_LABEL(app->desktop_status),purpose==1?"Finding applications…":"Opening…");
     fw_desktop_query_async(path,purpose==2,purpose==1,app->launch_cancel,open_queried,launch);
 }
 
-enum { MENU_OPEN,MENU_OPEN_WITH,MENU_COPY,MENU_MOVE,MENU_RENAME,MENU_TRASH,MENU_PATH,MENU_NEW,MENU_TERMINAL,MENU_REFRESH,MENU_COUNT };
+enum { MENU_OPEN,MENU_OPEN_WITH,MENU_COPY,MENU_MOVE,MENU_RENAME,MENU_TRASH,MENU_PATH,MENU_NEW,MENU_TERMINAL,MENU_REFRESH,MENU_CLIP_COPY,MENU_CUT,MENU_PASTE,MENU_COUNT };
 struct ContextMenu {
     Pane *pane;GtkWidget *popover,*buttons[MENU_COUNT];char *root,**names;guint count,revision;gboolean directory;
 };
@@ -728,6 +750,94 @@ static gboolean pane_ready(Pane *pane)
 {
     return !pane->app->closing&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&*fw_browser_path(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
 }
+static void clipboard_notice(App *app,const char *message,gboolean error)
+{
+    if(app->closing)return;
+    gtk_label_set_text(GTK_LABEL(app->desktop_status),message);gtk_widget_set_tooltip_text(app->desktop_status,message);gtk_widget_set_visible(app->desktop_status,TRUE);
+    if(error)gtk_widget_add_css_class(app->desktop_status,"error");else gtk_widget_remove_css_class(app->desktop_status,"error");
+}
+static gboolean cut_path(Pane *pane,const char *name)
+{
+    if(!pane->app->cut_paths)return FALSE;
+    char *path=g_build_filename(fw_browser_path(pane->browser),name,NULL);gboolean cut=g_hash_table_contains(pane->app->cut_paths,path);g_free(path);return cut;
+}
+static void cut_style(Pane *pane,GtkWidget *widget)
+{
+    const char *name=g_object_get_data(G_OBJECT(widget),"fw-row");
+    if(name){if(cut_path(pane,name))gtk_widget_add_css_class(widget,"cut-item");else gtk_widget_remove_css_class(widget,"cut-item");}
+    for(GtkWidget *child=gtk_widget_get_first_child(widget);child;child=gtk_widget_get_next_sibling(child))cut_style(pane,child);
+}
+static void cut_styles(App *app)
+{
+    for(guint i=0;i<2;i++)if(app->panes[i].view)cut_style(app->panes+i,app->panes[i].view);
+}
+static void clipboard_changed(GdkClipboard *clipboard,gpointer data)
+{
+    App *app=data;if(app->closing)return;app->clipboard_epoch++;
+    if(gdk_clipboard_get_content(clipboard)!=app->owned_clipboard){g_clear_object(&app->owned_clipboard);g_clear_pointer(&app->cut_paths,g_hash_table_unref);cut_styles(app);}
+    for(guint i=0;i<2;i++)context_discard(app->panes+i);
+    if(app->draft&&app->draft->clipboard){draft_discard(app);clipboard_notice(app,"Clipboard changed; paste again.",FALSE);}
+    update_actions(app);
+}
+static void clipboard_set(App *app,GdkClipboard *clipboard)
+{
+    if(app->clipboard)g_signal_handlers_disconnect_by_data(app->clipboard,app);
+    g_set_object(&app->clipboard,clipboard);g_clear_object(&app->owned_clipboard);g_clear_pointer(&app->cut_paths,g_hash_table_unref);app->clipboard_epoch++;
+    g_signal_connect(clipboard,"changed",G_CALLBACK(clipboard_changed),app);cut_styles(app);
+}
+static void clipboard_copy(Pane *pane,gboolean cut)
+{
+    App *app=pane->app;if(!pane_ready(pane)||app->draft||app->edit)return;
+    GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);guint64 count=gtk_bitset_get_size(selected);
+    if(!count||count>4096){gtk_bitset_unref(selected);clipboard_notice(app,"Choose 1–4096 files to copy or cut.",TRUE);return;}
+    char **paths=g_new0(char *,count+1);GtkBitsetIter iter;guint pos,index=0;
+    for(gboolean more=gtk_bitset_iter_init_first(&iter,selected,&pos);more;more=gtk_bitset_iter_next(&iter,&pos)){
+        GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),pos);paths[index++]=g_build_filename(fw_browser_path(pane->browser),g_file_info_get_name(info),NULL);g_object_unref(info);
+    }
+    gtk_bitset_unref(selected);GError *error=NULL;GdkContentProvider *provider=fw_clipboard_provider((const char *const *)paths,index,cut,&error);
+    if(provider){
+        if(gdk_clipboard_set_content(app->clipboard,provider)){
+            g_set_object(&app->owned_clipboard,provider);g_clear_pointer(&app->cut_paths,g_hash_table_unref);
+            if(cut){app->cut_paths=g_hash_table_new_full(g_str_hash,g_str_equal,g_free,NULL);for(guint i=0;i<index;i++)g_hash_table_add(app->cut_paths,g_strdup(paths[i]));}
+            cut_styles(app);char *message=g_strdup_printf("%u item%s %s · choose a destination and Paste.",index,index==1?"":"s",cut?"cut":"copied");clipboard_notice(app,message,FALSE);g_free(message);
+        }else clipboard_notice(app,"Could not take ownership of the file clipboard.",TRUE);
+        g_object_unref(provider);
+    }else{clipboard_notice(app,error->message,TRUE);g_error_free(error);}
+    g_strfreev(paths);
+}
+typedef struct Paste { GtkWindow *window;GCancellable *cancel;char *root;guint pane;guint64 epoch; } Paste;
+static void paste_read(GObject *source,GAsyncResult *result,gpointer data)
+{
+    (void)source;Paste *paste=data;App *app=g_object_get_data(G_OBJECT(paste->window),"browser-state");GError *error=NULL;
+    FwClipboardData *files=fw_clipboard_read_finish(result,&error);Pane *pane=app->panes+paste->pane;
+    if(app->paste_cancel==paste->cancel)g_clear_object(&app->paste_cancel);
+    if(!app->closing){
+        if(error)clipboard_notice(app,error->message,TRUE);
+        else if(app->clipboard_epoch!=paste->epoch)clipboard_notice(app,"Clipboard changed; paste again.",FALSE);
+        else if(!pane_ready(pane)||strcmp(paste->root,fw_browser_path(pane->browser))||app->draft||app->edit||job_active(app))clipboard_notice(app,"Destination changed or is busy; paste again when it is ready.",TRUE);
+        else{app->active=pane;present_draft(app,files->cut?FW_MOVE:FW_COPY,files->paths,files->count,paste->root,TRUE,paste->epoch);clipboard_notice(app,"Review the pasted files and destination before starting.",FALSE);}
+        update_actions(app);
+    }
+    fw_clipboard_data_free(files);g_clear_error(&error);g_object_unref(paste->cancel);g_object_unref(paste->window);g_free(paste->root);g_free(paste);
+}
+static void clipboard_paste(Pane *pane)
+{
+    App *app=pane->app;if(!pane_ready(pane)||app->draft||app->edit||app->opening||job_active(app)||app->paste_cancel)return;
+    if(!fw_clipboard_has_files(app->clipboard)){clipboard_notice(app,"The clipboard does not contain files to paste.",FALSE);return;}
+    for(guint i=0;i<2;i++)context_discard(app->panes+i);
+    Paste *paste=g_new0(Paste,1);paste->window=g_object_ref(app->window);paste->pane=(guint)(pane-app->panes);paste->root=g_strdup(fw_browser_path(pane->browser));paste->epoch=app->clipboard_epoch;
+    app->paste_cancel=g_cancellable_new();paste->cancel=g_object_ref(app->paste_cancel);clipboard_notice(app,"Reading clipboard files…",FALSE);
+    fw_clipboard_read_async(app->clipboard,app->paste_cancel,paste_read,paste);update_actions(app);
+}
+static void clipboard_job_finished(App *app,const FwJobProgress *progress)
+{
+    if(!app->job_clipboard_cut)return;
+    if(progress->state==FW_JOB_COMPLETE&&!progress->errors&&!progress->skipped&&app->clipboard_epoch==app->job_clipboard_epoch){
+        gdk_clipboard_set_content(app->clipboard,NULL);clipboard_notice(app,"Clipboard move completed.",FALSE);
+    }
+    app->job_clipboard_cut=FALSE;
+}
+
 static GdkContentProvider *path_content(ContextMenu *menu)
 {
     GString *text=g_string_new(NULL),*uris=g_string_new(NULL);guint count=MAX(menu->count,1u);
@@ -747,7 +857,7 @@ static void context_action(GtkButton *button,gpointer data)
 {
     ContextMenu *menu=data;Pane *pane=menu->pane;App *app=pane->app;guint action=GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button),"menu-action"));
     if(!pane_ready(pane)||menu->revision!=fw_browser_revision(pane->browser)||strcmp(menu->root,fw_browser_path(pane->browser))){context_discard(pane);return;}
-    if(action==MENU_PATH){GdkContentProvider *content=path_content(menu);gdk_clipboard_set_content(gtk_widget_get_clipboard(pane->view),content);g_object_unref(content);}
+    if(action==MENU_PATH){GdkContentProvider *content=path_content(menu);gdk_clipboard_set_content(app->clipboard,content);g_object_unref(content);}
     char *path=menu->count?g_build_filename(menu->root,menu->names[0],NULL):g_strdup(menu->root);gboolean directory=menu->directory;
     app->active=pane;context_discard(pane);
     switch(action){
@@ -760,6 +870,9 @@ static void context_action(GtkButton *button,gpointer data)
     case MENU_NEW:begin_name_edit(pane,FW_MKDIR,TRUE);break;
     case MENU_TERMINAL:open_path(pane,path,2);break;
     case MENU_REFRESH:fw_browser_refresh(pane->browser);break;
+    case MENU_CLIP_COPY:clipboard_copy(pane,FALSE);break;
+    case MENU_CUT:clipboard_copy(pane,TRUE);break;
+    case MENU_PASTE:clipboard_paste(pane);break;
     default:break;
     }
     g_free(path);
@@ -794,13 +907,15 @@ static void show_context(Pane *pane,const char *name,double x,double y)
     gtk_bitset_unref(selected);menu->directory=clicked&&fw_entry_directory(clicked);g_clear_object(&clicked);pane->context=menu;update_actions(app);
     menu->popover=gtk_popover_new();gtk_popover_set_has_arrow(GTK_POPOVER(menu->popover),FALSE);gtk_widget_set_parent(menu->popover,pane->view);
     GtkWidget *box=gtk_box_new(GTK_ORIENTATION_VERTICAL,0);gtk_popover_set_child(GTK_POPOVER(menu->popover),box);
-    gboolean idle=!job_active(app),one=count==1;
+    gboolean idle=!job_active(app)&&!app->paste_cancel,one=count==1;
     if(count){
-        menu_item(menu,MENU_OPEN,"Open",one&&!app->opening);
-        if(!menu->directory)menu_item(menu,MENU_OPEN_WITH,"Open With…",one&&!app->opening);
+        menu_item(menu,MENU_OPEN,"Open",one&&!app->opening&&!app->paste_cancel);
+        if(!menu->directory)menu_item(menu,MENU_OPEN_WITH,"Open With…",one&&!app->opening&&!app->paste_cancel);
+        menu_item(menu,MENU_CLIP_COPY,"Copy",TRUE);menu_item(menu,MENU_CUT,"Cut",TRUE);
         menu_item(menu,MENU_COPY,"Copy to Other Pane…",gtk_widget_get_sensitive(app->copy));menu_item(menu,MENU_MOVE,"Move to Other Pane…",gtk_widget_get_sensitive(app->move));
         menu_item(menu,MENU_RENAME,"Rename…",one&&idle);menu_item(menu,MENU_TRASH,"Move to Trash…",idle);
     }else menu_item(menu,MENU_NEW,"New Folder…",idle);
+    menu_item(menu,MENU_PASTE,"Paste into This Pane…",idle&&!app->opening&&fw_clipboard_has_files(app->clipboard));
     menu_item(menu,MENU_PATH,count>1?"Copy Paths":"Copy Path",TRUE);
     if(!count||menu->directory)menu_item(menu,MENU_TERMINAL,"Open Terminal Here",(count<=1)&&!app->opening);
     if(!count)menu_item(menu,MENU_REFRESH,"Refresh",TRUE);
@@ -915,6 +1030,11 @@ static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint 
     }
     GtkWidget *focus = gtk_window_get_focus(app->window);
     gboolean in_files = focus && (focus == pane->view || gtk_widget_is_ancestor(focus, pane->view));
+    if(in_files&&(mods&GDK_CONTROL_MASK)&&!(mods&(GDK_ALT_MASK|GDK_SHIFT_MASK))){
+        if(key==GDK_KEY_c||key==GDK_KEY_C){clipboard_copy(pane,FALSE);return TRUE;}
+        if(key==GDK_KEY_x||key==GDK_KEY_X){clipboard_copy(pane,TRUE);return TRUE;}
+        if(key==GDK_KEY_v||key==GDK_KEY_V){clipboard_paste(pane);return TRUE;}
+    }
     if(in_files&&(key==GDK_KEY_Menu||(key==GDK_KEY_F10&&(mods&GDK_SHIFT_MASK)))){
         GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);guint pos=gtk_bitset_is_empty(selected)?G_MAXUINT:gtk_bitset_get_minimum(selected);gtk_bitset_unref(selected);
         GFileInfo *info=pos==G_MAXUINT?NULL:g_list_model_get_item(G_LIST_MODEL(pane->sorted),pos);
@@ -945,7 +1065,7 @@ static void configure_style(void)
     GtkCssProvider *css = gtk_css_provider_new();
     const char *rules =
         "headerbar {background:#fff7ef; color:#30213c;} .pane-toolbar {padding:8px; border-bottom:1px solid alpha(currentColor,.15);}" 
-        ".pane-status {padding:7px 10px; border-top:1px solid alpha(currentColor,.15); font-size:11px;} .active-pane .pane-toolbar {border-bottom:2px solid #ff6655;} .subtitle {font-size:10px;} .error {color:#ac332b;}";
+        ".cut-item {opacity:0.45;} .pane-status {padding:7px 10px; border-top:1px solid alpha(currentColor,.15); font-size:11px;} .active-pane .pane-toolbar {border-bottom:2px solid #ff6655;} .subtitle {font-size:10px;} .error {color:#ac332b;}";
 #if GTK_CHECK_VERSION(4, 12, 0)
     gtk_css_provider_load_from_string(css, rules);
 #else
@@ -984,6 +1104,7 @@ static App *create_window(GtkApplication *application, const char *helper, const
     GtkEventController *keys = gtk_event_controller_key_new(); gtk_event_controller_set_propagation_phase(keys, GTK_PHASE_CAPTURE);
     g_signal_connect(keys, "key-pressed", G_CALLBACK(key_pressed), app); gtk_widget_add_controller(GTK_WIDGET(app->window), keys);
     g_signal_connect(app->window, "close-request", G_CALLBACK(window_close), app);
+    clipboard_set(app,gtk_widget_get_clipboard(GTK_WIDGET(app->window)));
     pane_navigate(app->panes, left); pane_navigate(app->panes+1, right); return app;
 }
 #ifndef FW_BROWSER_TEST

@@ -91,20 +91,27 @@ prototype's acceptance claims.
 
 ```sh
 ./linux-prototype/build.sh --tests
-G_DEBUG=fatal-criticals GTK_A11Y=none GSK_RENDERER=cairo GDK_BACKEND=x11 \
+G_DEBUG=fatal-criticals FW_CLIPBOARD_TEST_ISOLATED=1 GTK_A11Y=none GSK_RENDERER=cairo GDK_BACKEND=x11 \
   dbus-run-session -- xvfb-run -a \
   build/linux-prototype/folderwing-linux-browser-tests \
   "$PWD/build/linux-prototype/folderwing-linux-helper" \
   "$PWD/build/linux-prototype/folderwing.svg"
 ```
 
-Requires Xvfb and dbus-run-session for the isolated lane. Set
-`FW_LINUX_SCREENSHOT` to an absolute PNG path to capture the real rendered test
-window. `GDK_BACKEND=wayland` can run the same desktop acceptance against an
-available Wayland display; it opens only owned test windows and needs no user
-input. GTK environment configuration remains local to the launched process.
+Requires Xvfb and dbus-run-session for both checked profiles. Clipboard tests
+use two explicit GDK connections to that private X11 server, so real clipboard
+transport is exercised without reading or replacing the user's clipboard.
+The test refuses to run these cases without `FW_CLIPBOARD_TEST_ISOLATED=1` and
+an explicit X11 display other than WSLg's `:0`.
 
-Twenty-three selectors cover byte-exact paths and metadata, independent/same-folder
+Set `FW_LINUX_SCREENSHOT` to an absolute PNG path to capture the rendered test
+window. For Wayland widgets use the receipt runner below: it sets
+`GDK_BACKEND=wayland,x11`, asserts that the widget display is Wayland, and uses
+its owned Xvfb only for the clipboard. Wayland clipboard transport itself is
+not covered by that profile. No user input automation or distro shutdown is
+needed; GTK environment configuration stays local to the launched process.
+
+Twenty-eight selectors cover byte-exact paths and metadata, independent/same-folder
 watches, failed/rapid navigation, malformed/truncated/disconnected peers,
 close-during-request cleanup, real two-pane widgets/history/sorting/filtering,
 a 10,000-file load, multi-selection review/cancel/refresh, copy conflict policies,
@@ -112,8 +119,11 @@ same/cross-filesystem moves, trash recovery records, injected persistence errors
 cancellation before publication and close-during-job draining. Desktop checks
 exercise default/chosen application launches, file types and symlink/byte-exact
 paths, context-menu hit testing/selection/actions, clipboard content generation,
-and asynchronous close/cancel. Application registration uses owned XDG fixtures;
-tests neither launch user applications nor overwrite the user clipboard.
+and asynchronous close/cancel. Application registration uses owned XDG fixtures. Clipboard checks cover
+GNOME/Nautilus and KDE offers, bounded URI decoding/streaming, real native
+Copy/Move through Paste review, cut styling/refresh, cancellation, clipboard
+replacement, partial/failed completion and text-field shortcut guards. Tests
+neither launch user applications nor overwrite the user clipboard.
 The test creates its own temporary root and removes
 only those fixtures, using lstat so fixture symlinks are never followed.
 Selectors and helper/source dependencies are in `tests/native-impact.json`.
@@ -211,3 +221,41 @@ the folder and starts the user's Bash configuration. A Linux terminal emulator
 must be installed; a missing launcher is reported without changing settings.
 This uses the [GIO application launch APIs](https://docs.gtk.org/gio/method.AppInfo.launch_uris_async.html)
 and [terminal launch flag](https://docs.gtk.org/gio/flags.AppInfoCreateFlags.html).
+
+
+## Clipboard Copy, Cut and Paste
+
+With a file list focused, **Ctrl+C** copies the selection, **Ctrl+X** cuts it,
+and **Ctrl+V** pastes into that pane's current folder. The row menu has Copy
+and Cut; both row and background menus offer **Paste into This Pane…**.
+Copy/Move to Other Pane remain available separately. Shortcuts in the address,
+rename and new-folder fields keep their normal text-editing behavior.
+
+Copy/Cut put file references on the clipboard and do not modify source files.
+Cut dims matching rows in both panes and survives live refresh. Paste reads the
+clipboard asynchronously, captures the destination, then opens the existing
+Copy/Move review with Keep Both selected. Cancel before Start changes no files
+and keeps the clipboard. Navigation or a busy destination prevents a delayed
+read from opening a review for another folder. Clipboard replacement invalidates
+an existing Paste review before Start.
+
+A cut clipboard is cleared only after a fully confirmed move with zero errors
+and zero skips, provided the clipboard offer still matches the reviewed one.
+Cancelled, failed, skipped or unconfirmed moves retain it for review; completed
+items are not rolled back. A newer clipboard is preserved when an older move
+finishes. Replacing the clipboard also removes Folderwing's old cut marks.
+
+The provider offers `text/uri-list`, `x-special/gnome-copied-files`,
+`x-special/nautilus-clipboard`, and `application/x-kde-cutselection`, plus text.
+It accepts local `file:` URIs, including `localhost`, preserves raw filename
+bytes through percent encoding, and refuses remote schemes/hosts, conflicting
+cut markers, malformed lists, duplicate sources and oversized input. Plain text
+alone never starts file operations. Limits match the coordinator: 4096 sources,
+16 KiB per path and a 16 MiB clipboard read. A stalled read is cancelled after
+15 seconds. Mounted Windows/9P mutation restrictions still apply.
+
+The exchange formats follow the upstream
+[GNOME file clipboard format](https://github.com/GNOME/nautilus/blob/master/src/nautilus-clipboard.c)
+and [KDE cut marker](https://github.com/KDE/kio/blob/master/src/widgets/paste.cpp).
+Acceptance uses protocol fixtures and two GDK connections; it does not claim
+an interactive Nautilus/Dolphin or Wayland-transport interoperability run.

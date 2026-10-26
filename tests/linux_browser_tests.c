@@ -201,9 +201,9 @@ static void test_large_listing_and_cleanup(void)
     for(guint i=0;i<2;i++) {
         Pane *p=&app->panes[i];
         if(g_list_model_get_n_items(G_LIST_MODEL(p->sorted))!=10000)
-            g_printerr("READINESS pane %u snapshot=%u filtered=%u sorted=%u filter-pending=%u sort-pending=%u revision=%u error=%s\n", i,
+            g_printerr("READINESS pane %u snapshot=%u filtered=%u sorted=%u filter-pending=%u sort-pending=%u revision=%u path=%s expected=%s error=%s\n", i,
                 g_list_model_get_n_items(fw_browser_entries(p->browser)),g_list_model_get_n_items(G_LIST_MODEL(p->filtered)),g_list_model_get_n_items(G_LIST_MODEL(p->sorted)),
-                gtk_filter_list_model_get_pending(p->filtered),gtk_sort_list_model_get_pending(p->sorted),fw_browser_revision(p->browser),fw_browser_error(p->browser));
+                gtk_filter_list_model_get_pending(p->filtered),gtk_sort_list_model_get_pending(p->sorted),fw_browser_revision(p->browser),fw_browser_path(p->browser),root,fw_browser_error(p->browser));
         wait_visible_count(p,10000);
         CHECK(g_list_model_get_n_items(G_LIST_MODEL(p->sorted))==10000);
     }
@@ -585,6 +585,126 @@ static void test_context_background_and_paths(void)
     g_free(expected);g_free(uri);g_free(display);g_free(path);g_free(folder);g_free(left);g_free(right);
 }
 
+static GdkDisplay *clipboard_display,*clipboard_producer_display;
+static GdkClipboard *test_clipboard,*producer_clipboard;
+static GBytes *provider_bytes(GdkContentProvider *provider,const char *mime)
+{
+    GOutputStream *stream=g_memory_output_stream_new_resizable();QueryResult q={0};gdk_content_provider_write_mime_type_async(provider,mime,stream,0,NULL,provider_written,&q);wait_flag(&q.done);CHECK(!q.error);CHECK(g_output_stream_close(stream,NULL,NULL));GBytes *bytes=g_memory_output_stream_steal_as_bytes(G_MEMORY_OUTPUT_STREAM(stream));g_object_unref(stream);return bytes;
+}
+static void test_clipboard_formats_and_limits(void)
+{
+    const char *paths[]={"/tmp/a b/é-\xff-\n-%-#-?", "/tmp/link/../literal\\name"};GError *error=NULL;
+    for(guint cut=0;cut<2;cut++){
+        GdkContentProvider *provider=fw_clipboard_provider(paths,2,cut,&error);CHECK(provider&&!error);
+        const char *mimes[]={FW_CLIPBOARD_GNOME,FW_CLIPBOARD_NAUTILUS,FW_CLIPBOARD_URIS};
+        for(guint i=0;i<G_N_ELEMENTS(mimes);i++){
+            GBytes *bytes=provider_bytes(provider,mimes[i]);gsize n;const void *p=g_bytes_get_data(bytes,&n);
+            FwClipboardData *data=fw_clipboard_parse(mimes[i],p,n,cut?"1":"0",1,&error);CHECK(data&&!error);CHECK(data->count==2&&data->cut==(gboolean)cut);
+            CHECK(!strcmp(paths[0],data->paths[0]));CHECK(!strcmp(paths[1],data->paths[1]));fw_clipboard_data_free(data);g_bytes_unref(bytes);
+        }
+        g_object_unref(provider);
+    }
+    const char *invalid_uris[]={"https://example.org/file","file://another-host/tmp/a","file:///tmp/a%00tail","file:///tmp/a%ZZ","file:///tmp/a?query","file:///tmp/a#fragment","file:///tmp/with space","file:///tmp/a\nfile:///tmp/a"};
+    for(guint i=0;i<G_N_ELEMENTS(invalid_uris);i++){
+        CHECK(!fw_clipboard_parse(FW_CLIPBOARD_URIS,invalid_uris[i],strlen(invalid_uris[i]),NULL,0,&error));CHECK(error);g_clear_error(&error);
+    }
+    const char *text="cut\nfile:///tmp/a";CHECK(!fw_clipboard_parse(FW_CLIPBOARD_GNOME,text,strlen(text),"0",1,&error));g_clear_error(&error);
+    CHECK(!fw_clipboard_parse("text/plain",text,strlen(text),NULL,0,&error));g_clear_error(&error);
+    CHECK(!fw_clipboard_parse(FW_CLIPBOARD_URIS,"a",FW_CLIPBOARD_LIMIT+1,NULL,0,&error));g_clear_error(&error);
+    const char nul[]="file:///tmp/a\0file:///tmp/b";CHECK(!fw_clipboard_parse(FW_CLIPBOARD_URIS,nul,sizeof nul-1,NULL,0,&error));g_clear_error(&error);
+    CHECK(!fw_clipboard_parse(FW_CLIPBOARD_URIS,"file:///tmp/a",13,"2",1,&error));g_clear_error(&error);
+    const char *local="# URI list comment\r\nfile://localhost/tmp/a%20b\r\n";FwClipboardData *data=fw_clipboard_parse(FW_CLIPBOARD_URIS,local,strlen(local),NULL,0,&error);CHECK(data&&!error);CHECK(!data->cut&&!strcmp(data->paths[0],"/tmp/a b"));fw_clipboard_data_free(data);
+    GString *many=g_string_new(NULL);for(guint i=0;i<4097;i++)g_string_append_printf(many,"file:///tmp/f%u\n",i);
+    CHECK(!fw_clipboard_parse(FW_CLIPBOARD_URIS,many->str,many->len,NULL,0,&error));g_clear_error(&error);g_string_free(many,TRUE);
+    CHECK(!fw_clipboard_provider(paths,4097,FALSE,&error));g_clear_error(&error);
+}
+typedef struct ClipboardResult { gboolean done;FwClipboardData *files;GError *error; } ClipboardResult;
+static void clipboard_result(GObject *source,GAsyncResult *result,gpointer data)
+{ (void)source;ClipboardResult *r=data;r->files=fw_clipboard_read_finish(result,&r->error);r->done=TRUE; }
+static void count_clipboard_change(GdkClipboard *clipboard,gpointer data) { (void)clipboard;(*(guint *)data)++; }
+static void external_offer(GdkContentProvider *provider,const char *mime)
+{
+    guint changes=0;gulong signal=g_signal_connect(test_clipboard,"changed",G_CALLBACK(count_clipboard_change),&changes);
+    CHECK(gdk_clipboard_set_content(producer_clipboard,provider));gint64 end=g_get_monotonic_time()+5000000;
+    while(!changes||!gdk_content_formats_contain_mime_type(gdk_clipboard_get_formats(test_clipboard),mime)){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+    g_signal_handler_disconnect(test_clipboard,signal);
+}
+static GdkContentProvider *raw_provider(const char *mime,const char *text)
+{
+    GBytes *bytes=g_bytes_new(text,strlen(text));GdkContentProvider *provider=gdk_content_provider_new_for_bytes(mime,bytes);g_bytes_unref(bytes);return provider;
+}
+static void test_clipboard_external_transport(void)
+{
+    const char *paths[]={"/tmp/clipboard-raw-\xff-\n"};GError *error=NULL;GdkContentProvider *provider=fw_clipboard_provider(paths,1,TRUE,&error);CHECK(provider&&!error);
+    external_offer(provider,FW_CLIPBOARD_GNOME);g_object_unref(provider);ClipboardResult result={0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);wait_flag(&result.done);CHECK(result.files&&!result.error);CHECK(result.files->cut&&!strcmp(result.files->paths[0],paths[0]));fw_clipboard_data_free(result.files);
+    GdkContentProvider *parts[]={raw_provider(FW_CLIPBOARD_URIS,"file:///tmp/kde-file\r\n"),raw_provider(FW_CLIPBOARD_KDE,"1")};provider=gdk_content_provider_new_union(parts,2);external_offer(provider,FW_CLIPBOARD_KDE);g_object_unref(provider);
+    result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);wait_flag(&result.done);CHECK(result.files&&!result.error);CHECK(result.files->cut&&!strcmp(result.files->paths[0],"/tmp/kde-file"));fw_clipboard_data_free(result.files);
+    provider=raw_provider(FW_CLIPBOARD_URIS,"file:///tmp/plain-file\r\n");external_offer(provider,FW_CLIPBOARD_URIS);g_object_unref(provider);result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);wait_flag(&result.done);CHECK(result.files&&!result.error);CHECK(!result.files->cut);fw_clipboard_data_free(result.files);
+    provider=raw_provider(FW_CLIPBOARD_NAUTILUS,"copy\nfile:///tmp/nautilus");external_offer(provider,FW_CLIPBOARD_NAUTILUS);g_object_unref(provider);result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);wait_flag(&result.done);CHECK(result.files&&!result.error);CHECK(!result.files->cut&&!strcmp(result.files->paths[0],"/tmp/nautilus"));fw_clipboard_data_free(result.files);
+    /* Local replacement is synchronous, so cancellation cannot depend on an X11 scheduling race. */
+    gdk_clipboard_set_text(test_clipboard,"owned test text");CHECK(!fw_clipboard_has_files(test_clipboard));
+    provider=fw_clipboard_provider(paths,1,FALSE,&error);CHECK(provider&&!error);CHECK(gdk_clipboard_set_content(test_clipboard,provider));g_object_unref(provider);
+    result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);gdk_clipboard_set_text(test_clipboard,"replacement");wait_flag(&result.done);CHECK(!result.files&&result.error);CHECK(strstr(result.error->message,"Clipboard changed"));g_clear_error(&result.error);
+    provider=fw_clipboard_provider(paths,1,FALSE,&error);CHECK(provider&&!error);CHECK(gdk_clipboard_set_content(test_clipboard,provider));g_object_unref(provider);
+    GCancellable *cancel=g_cancellable_new();result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,cancel,clipboard_result,&result);g_cancellable_cancel(cancel);wait_flag(&result.done);CHECK(!result.files&&g_error_matches(result.error,G_IO_ERROR,G_IO_ERROR_CANCELLED));g_clear_error(&result.error);g_object_unref(cancel);
+    GBytes *large=g_bytes_new_take(g_malloc0(FW_CLIPBOARD_LIMIT+1),FW_CLIPBOARD_LIMIT+1);provider=gdk_content_provider_new_for_bytes(FW_CLIPBOARD_URIS,large);g_bytes_unref(large);CHECK(gdk_clipboard_set_content(test_clipboard,provider));g_object_unref(provider);
+    result=(ClipboardResult){0};fw_clipboard_read_async(test_clipboard,NULL,clipboard_result,&result);wait_flag(&result.done);CHECK(!result.files&&result.error);CHECK(strstr(result.error->message,"size limit"));g_clear_error(&result.error);gdk_clipboard_set_content(test_clipboard,NULL);
+}
+static App *clipboard_window(const char *left,const char *right)
+{
+    App *app=create_window(NULL,helper,icon,left,right);clipboard_set(app,test_clipboard);gdk_clipboard_set_content(test_clipboard,NULL);gtk_window_present(app->window);wait_panes(app);settle(30);return app;
+}
+static void wait_paste(App *app)
+{
+    gint64 end=g_get_monotonic_time()+5000000;
+    while(app->paste_cancel){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+}
+static void paste_to(App *app,Pane *pane)
+{
+    app->active=pane;gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_v,0,GDK_CONTROL_MASK,app));wait_paste(app);CHECK(app->draft);
+}
+static void test_clipboard_copy_cut_paste_desktop(void)
+{
+    char *left=directory("clipboard-left"),*right=directory("clipboard-right");file(left,"raw-\xff.txt","clipboard copy");file(left,"move.txt","clipboard move");
+    char *source=g_build_filename(left,"raw-\xff.txt",NULL),*target=g_build_filename(right,"raw-\xff.txt",NULL),*move=g_build_filename(left,"move.txt",NULL),*moved=g_build_filename(right,"move.txt",NULL);
+    App *app=clipboard_window(left,right);Pane *pane=app->panes;select_named(pane,"raw-\xff.txt",TRUE);gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_c,0,GDK_CONTROL_MASK,app));CHECK(!app->cut_paths);CHECK(fw_clipboard_has_files(test_clipboard));
+    paste_to(app,app->panes+1);CHECK(app->draft->clipboard&&app->draft->operation==FW_COPY);CHECK(!strcmp(app->draft->destination,right));CHECK(!strcmp(app->draft->sources[0],source));CHECK(!g_file_test(target,G_FILE_TEST_EXISTS));confirm_draft(app);FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);bytes_equal(source,"clipboard copy");bytes_equal(target,"clipboard copy");CHECK(fw_clipboard_has_files(test_clipboard));wait_panes(app);
+    app->active=pane;select_named(pane,"move.txt",TRUE);show_context(pane,"move.txt",20,60);g_signal_emit_by_name(pane->context->buttons[MENU_CUT],"clicked");CHECK(app->cut_paths&&cut_path(pane,"move.txt"));
+    guint rev=fw_browser_revision(pane->browser);fw_browser_refresh(pane->browser);CHECK(wait_revision(pane->browser,rev));wait_panes(app);settle(30);GtkWidget *cell=find_name_cell(pane->view,"move.txt");CHECK(cell&&gtk_widget_has_css_class(cell,"cut-item"));
+    show_context(app->panes+1,NULL,20,100);CHECK(gtk_widget_get_sensitive(app->panes[1].context->buttons[MENU_PASTE]));g_signal_emit_by_name(app->panes[1].context->buttons[MENU_PASTE],"clicked");wait_paste(app);CHECK(app->draft&&app->draft->operation==FW_MOVE);draft_discard(app);CHECK(app->cut_paths);bytes_equal(move,"clipboard move");
+    paste_to(app,app->panes+1);confirm_draft(app);p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE&&!p.skipped&&!p.errors);fw_job_progress_clear(&p);CHECK(!g_file_test(move,G_FILE_TEST_EXISTS));bytes_equal(moved,"clipboard move");CHECK(!app->cut_paths);CHECK(!fw_clipboard_has_files(test_clipboard));
+    gtk_window_close(app->window);settle(50);g_free(left);g_free(right);g_free(source);g_free(target);g_free(move);g_free(moved);
+}
+static void test_clipboard_move_retention_and_replacement(void)
+{
+    char *left=directory("clipboard-retain"),*right=directory("clipboard-retain-right");file(left,"conflict.txt","source");file(right,"conflict.txt","existing");file(left,"other.txt","another clipboard");
+    App *app=clipboard_window(left,right);Pane *pane=app->panes;select_named(pane,"conflict.txt",TRUE);clipboard_copy(pane,TRUE);GdkContentProvider *owned=gdk_clipboard_get_content(test_clipboard);CHECK(owned);
+    paste_to(app,pane);confirm_draft(app);FwJobProgress same=wait_job(app->job);CHECK(same.state==FW_JOB_COMPLETE&&same.skipped==1);fw_job_progress_clear(&same);CHECK(app->cut_paths&&gdk_clipboard_get_content(test_clipboard)==owned);wait_panes(app);
+    paste_to(app,app->panes+1);gtk_drop_down_set_selected(GTK_DROP_DOWN(app->draft->policy),FW_SKIP);confirm_draft(app);FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE&&p.skipped==1);fw_job_progress_clear(&p);CHECK(app->cut_paths&&gdk_clipboard_get_content(test_clipboard)==owned);wait_panes(app);
+    paste_to(app,app->panes+1);gtk_drop_down_set_selected(GTK_DROP_DOWN(app->draft->policy),FW_FAIL_CONFLICT);confirm_draft(app);p=wait_job(app->job);CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(app->cut_paths&&gdk_clipboard_get_content(test_clipboard)==owned);wait_panes(app);
+    const FwJobState states[]={FW_JOB_CANCELLED,FW_JOB_UNCONFIRMED};
+    for(guint i=0;i<G_N_ELEMENTS(states);i++){app->job_clipboard_cut=TRUE;app->job_clipboard_epoch=app->clipboard_epoch;FwJobProgress failed={.state=states[i]};clipboard_job_finished(app,&failed);CHECK(app->cut_paths&&gdk_clipboard_get_content(test_clipboard)==owned);}
+    /* Replace the clipboard after dispatch, before processing the final job callback. */
+    paste_to(app,app->panes+1);gtk_drop_down_set_selected(GTK_DROP_DOWN(app->draft->policy),FW_REPLACE);confirm_draft(app);
+    select_named(pane,"other.txt",TRUE);clipboard_copy(pane,TRUE);GdkContentProvider *replacement=gdk_clipboard_get_content(test_clipboard);CHECK(replacement&&replacement!=owned);
+    p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(gdk_clipboard_get_content(test_clipboard)==replacement);CHECK(cut_path(pane,"other.txt"));
+    char *target=g_build_filename(right,"conflict.txt",NULL);bytes_equal(target,"source");g_free(target);
+    gdk_clipboard_set_text(test_clipboard,"ordinary text");CHECK(!app->cut_paths);gtk_window_close(app->window);settle(50);g_free(left);g_free(right);
+}
+static void test_clipboard_focus_navigation_and_close(void)
+{
+    char *left=directory("clipboard-focus"),*right=directory("clipboard-focus-right");file(left,"keep.txt","untouched");App *app=clipboard_window(left,right);Pane *pane=app->panes;select_named(pane,"keep.txt",TRUE);clipboard_copy(pane,TRUE);
+    GdkContentProvider *owned=gdk_clipboard_get_content(test_clipboard);gtk_widget_grab_focus(pane->address);
+    const guint keys[]={GDK_KEY_c,GDK_KEY_x,GDK_KEY_v};for(guint i=0;i<G_N_ELEMENTS(keys);i++)CHECK(!key_pressed(NULL,keys[i],0,GDK_CONTROL_MASK,app));CHECK(gdk_clipboard_get_content(test_clipboard)==owned);
+    begin_name_edit(pane,FW_RENAME,TRUE);CHECK(app->edit);for(guint i=0;i<G_N_ELEMENTS(keys);i++)CHECK(!key_pressed(NULL,keys[i],0,GDK_CONTROL_MASK,app));edit_discard(app);settle(30);
+    /* A review is invalidated by replacement, before any helper starts. */
+    paste_to(app,app->panes+1);CHECK(!app->job);gdk_clipboard_set_text(test_clipboard,"new text");CHECK(!app->draft&&!app->cut_paths);CHECK(!app->job);
+    clipboard_copy(pane,FALSE);clipboard_paste(app->panes+1);CHECK(app->paste_cancel);pane_navigate(app->panes+1,left);wait_paste(app);CHECK(!app->draft);wait_panes(app);
+    clipboard_paste(pane);CHECK(app->paste_cancel);gpointer weak=app->window;g_object_add_weak_pointer(G_OBJECT(app->window),&weak);gtk_window_close(app->window);
+    gint64 end=g_get_monotonic_time()+5000000;while(weak){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+    char *source=g_build_filename(left,"keep.txt",NULL);bytes_equal(source,"untouched");g_free(source);gdk_clipboard_set_content(test_clipboard,NULL);g_free(left);g_free(right);
+}
+
 static int peer_read(void *data,size_t size)
 {
     char *at=data;while(size){ssize_t n=read(0,at,size);if(n<=0)return 0;at+=n;size-=(size_t)n;}return 1;
@@ -623,6 +743,12 @@ int main(int argc, char **argv)
     desktop_capture=g_build_filename(fixture,"desktop-capture",NULL);g_setenv("FW_DESKTOP_CAPTURE",desktop_capture,TRUE);g_free(desktop_data);g_free(desktop_config);
     char *data=g_build_filename(fixture,"job-data",NULL);operation_env=g_environ_setenv(g_get_environ(),"XDG_DATA_HOME",data,TRUE);g_free(data);
     char *helper_dir=g_path_get_dirname(helper);fault_helper=g_build_filename(helper_dir,"folderwing-linux-helper-faults",NULL);g_free(helper_dir);gtk_init();
+    /* Clipboard transport always uses this gate's Xvfb, even for Wayland widgets. */
+    const char *display=g_getenv("DISPLAY");CHECK(g_strcmp0(g_getenv("FW_CLIPBOARD_TEST_ISOLATED"),"1")==0);CHECK(display&&strcmp(display,":0")&&strcmp(display,":0.0"));
+    const char *expected=g_getenv("FW_CLIPBOARD_EXPECT_BACKEND");
+    if(expected)CHECK(!strcmp(G_OBJECT_TYPE_NAME(gdk_display_get_default()),!strcmp(expected,"wayland")?"GdkWaylandDisplay":"GdkX11Display"));
+    clipboard_display=gdk_display_open(display);CHECK(clipboard_display);g_object_ref(clipboard_display);CHECK(!strcmp(G_OBJECT_TYPE_NAME(clipboard_display),"GdkX11Display"));
+    clipboard_producer_display=gdk_display_open(display);CHECK(clipboard_producer_display);g_object_ref(clipboard_producer_display);test_clipboard=gdk_display_get_clipboard(clipboard_display);producer_clipboard=gdk_display_get_clipboard(clipboard_producer_display);
     struct { const char *name; void (*run)(void); } cases[] = {
         {"test_literal_paths", test_literal_paths}, {"test_native_listing_metadata", test_native_listing_metadata},
         {"test_live_watches_independent", test_live_watches_independent}, {"test_navigation_failure_and_supersession", test_navigation_failure_and_supersession},
@@ -643,12 +769,18 @@ int main(int argc, char **argv)
         {"test_desktop_default_and_chosen_open",test_desktop_default_and_chosen_open},
         {"test_desktop_terminal_literal_command",test_desktop_terminal_literal_command},
         {"test_context_selection_and_operations",test_context_selection_and_operations},
-        {"test_context_background_and_paths",test_context_background_and_paths}
+        {"test_context_background_and_paths",test_context_background_and_paths},
+        {"test_clipboard_formats_and_limits",test_clipboard_formats_and_limits},
+        {"test_clipboard_external_transport",test_clipboard_external_transport},
+        {"test_clipboard_copy_cut_paste_desktop",test_clipboard_copy_cut_paste_desktop},
+        {"test_clipboard_move_retention_and_replacement",test_clipboard_move_retention_and_replacement},
+        {"test_clipboard_focus_navigation_and_close",test_clipboard_focus_navigation_and_close}
     };
     for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
         gint64 start = g_get_monotonic_time(); cases[i].run();
         g_print("PASS %s %.1f ms\n", cases[i].name, (g_get_monotonic_time()-start)/1000.0);
     }
+    gdk_clipboard_set_content(test_clipboard,NULL);gdk_clipboard_set_content(producer_clipboard,NULL);gdk_display_close(clipboard_producer_display);gdk_display_close(clipboard_display);g_object_unref(clipboard_producer_display);g_object_unref(clipboard_display);
     remove_owned_tree(fixture); g_free(fixture); g_free(self); g_free(fault_helper);g_free(desktop_capture);g_strfreev(operation_env);
     g_print("PASS %u selectors; %u assertions; zero skips\n", (guint)G_N_ELEMENTS(cases), assertions); return 0;
 }
