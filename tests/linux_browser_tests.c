@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/xattr.h>
+#include <gio/gdesktopappinfo.h>
 
 static const char *helper, *icon, *executable;
 static void wait_visible_count(Pane *pane,guint count);
@@ -440,6 +441,146 @@ static void test_names_desktop_new_folder(void)
     g_free(created);g_free(cancelled);g_free(existing);g_free(left);g_free(right);
 }
 
+typedef struct QueryResult { gboolean done;FwDesktopTarget *target;GError *error; } QueryResult;
+static void query_result(GObject *source,GAsyncResult *result,gpointer data)
+{
+    (void)source;QueryResult *q=data;q->target=fw_desktop_query_finish(result,&q->error);q->done=TRUE;
+}
+static void wait_flag(gboolean *done)
+{
+    gint64 end=g_get_monotonic_time()+5000000;
+    while(!*done){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+}
+static FwDesktopTarget *query_target(const char *path,gboolean dir,gboolean apps)
+{
+    QueryResult q={0};fw_desktop_query_async(path,dir,apps,NULL,query_result,&q);wait_flag(&q.done);
+    CHECK(!q.error);CHECK(q.target);return q.target;
+}
+static void test_desktop_target_paths_and_types(void)
+{
+    char *root=directory("desktop-targets"),*nested=g_build_filename(root,"nested",NULL),*inner=g_build_filename(nested,"inner",NULL);CHECK(!g_mkdir(nested,0700));CHECK(!g_mkdir(inner,0700));
+    file(nested,"raw-\xff-%-$().txt","kernel resolved\n");file(root,"raw-\xff-%-$().txt","wrong lexical target\n");
+    char *link=g_build_filename(root,"link",NULL);CHECK(!symlink("nested/inner",link));
+    char *path=g_build_filename(link,"..","raw-\xff-%-$().txt",NULL);FwDesktopTarget *t=query_target(path,FALSE,FALSE);
+    char *actual=g_build_filename(nested,"raw-\xff-%-$().txt",NULL),*uri=g_filename_to_uri(actual,NULL,NULL);
+    CHECK(!strcmp(t->path,path));CHECK(!strcmp(t->uri,uri));CHECK(g_utf8_validate(t->uri,-1,NULL));CHECK(!strcmp(t->content_type,"text/plain"));fw_desktop_target_free(t);
+    char *fifo=g_build_filename(root,"pipe",NULL);CHECK(!mkfifo(fifo,0600));
+    QueryResult q={0};fw_desktop_query_async(fifo,FALSE,FALSE,NULL,query_result,&q);wait_flag(&q.done);CHECK(!q.target);CHECK(g_error_matches(q.error,G_IO_ERROR,G_IO_ERROR_NOT_SUPPORTED));g_clear_error(&q.error);
+    q=(QueryResult){0};fw_desktop_query_async(root,FALSE,FALSE,NULL,query_result,&q);wait_flag(&q.done);CHECK(!q.target&&q.error);g_clear_error(&q.error);
+    char *broken=g_build_filename(root,"broken",NULL);CHECK(!symlink("missing",broken));q=(QueryResult){0};fw_desktop_query_async(broken,FALSE,FALSE,NULL,query_result,&q);wait_flag(&q.done);CHECK(!q.target&&q.error);g_clear_error(&q.error);
+    t=query_target(root,TRUE,FALSE);CHECK(!strcmp(t->path,root));fw_desktop_target_free(t);
+    GCancellable *cancel=g_cancellable_new();g_cancellable_cancel(cancel);q=(QueryResult){0};fw_desktop_query_async(path,FALSE,TRUE,cancel,query_result,&q);wait_flag(&q.done);CHECK(!q.target);CHECK(g_error_matches(q.error,G_IO_ERROR,G_IO_ERROR_CANCELLED));g_clear_error(&q.error);g_object_unref(cancel);
+    g_free(broken);g_free(fifo);g_free(actual);g_free(uri);g_free(path);g_free(link);g_free(inner);g_free(nested);g_free(root);
+}
+static char *desktop_capture;
+static GAppInfo *make_desktop_app(const char *id,const char *tag)
+{
+    char *dir=g_build_filename(g_get_user_data_dir(),"applications",NULL);CHECK(!g_mkdir_with_parents(dir,0700));char *path=g_build_filename(dir,id,NULL);
+    char *exec=g_strdup_printf("\"%s\" --desktop-capture %s %%f",executable,tag);
+    GKeyFile *key=g_key_file_new();g_key_file_set_string(key,"Desktop Entry","Type","Application");g_key_file_set_string(key,"Desktop Entry","Name",tag);
+    g_key_file_set_string(key,"Desktop Entry","Exec",exec);g_key_file_set_string(key,"Desktop Entry","MimeType","text/plain;");
+    GError *error=NULL;CHECK(g_key_file_save_to_file(key,path,&error));CHECK(!error);
+    GAppInfo *app=G_APP_INFO(g_desktop_app_info_new_from_filename(path));CHECK(app);
+    g_key_file_unref(key);g_free(exec);g_free(path);g_free(dir);return app;
+}
+static void wait_open(App *app)
+{
+    gint64 end=g_get_monotonic_time()+5000000;
+    while(app->opening&&!app->chooser){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+}
+static void expect_capture(const char *tag,const char *path)
+{
+    gint64 end=g_get_monotonic_time()+5000000;
+    while(!g_file_test(desktop_capture,G_FILE_TEST_EXISTS)){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+    char *data=NULL;gsize size=0;CHECK(g_file_get_contents(desktop_capture,&data,&size,NULL));
+    GString *expected=g_string_new(tag);g_string_append_c(expected,0);g_string_append(expected,path);g_string_append_c(expected,0);
+    CHECK(size==expected->len);CHECK(!memcmp(data,expected->str,size));g_free(data);g_string_free(expected,TRUE);CHECK(!g_unlink(desktop_capture));
+}
+static void test_desktop_default_and_chosen_open(void)
+{
+    GError *error=NULL;GAppInfo *standard=make_desktop_app("folderwing-test-default.desktop","default"),*chosen=make_desktop_app("folderwing-test-chosen.desktop","chosen");
+    CHECK(g_app_info_set_as_default_for_type(standard,"text/plain",&error));CHECK(!error);CHECK(g_app_info_add_supports_type(chosen,"text/plain",&error));CHECK(!error);
+    GAppInfo *current=g_app_info_get_default_for_type("text/plain",FALSE);CHECK(current);CHECK(g_app_info_equal(current,standard));g_object_unref(current);
+    char *left=directory("desktop-open"),*right=directory("desktop-other");file(left,"literal-\xff-%-$().txt","document\n");char *path=g_build_filename(left,"literal-\xff-%-$().txt",NULL);
+    App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);select_named(app->panes,"literal-\xff-%-$().txt",TRUE);
+    GtkBitset *selection=gtk_selection_model_get_selection(app->panes->selection);row_activate(GTK_COLUMN_VIEW(app->panes->view),gtk_bitset_get_minimum(selection),app->panes);gtk_bitset_unref(selection);wait_open(app);CHECK(!app->opening);CHECK(!gtk_widget_has_css_class(app->desktop_status,"error"));expect_capture("default",path);
+    show_context(app->panes,"literal-\xff-%-$().txt",20,60);CHECK(app->panes->context);g_signal_emit_by_name(app->panes->context->buttons[MENU_OPEN_WITH],"clicked");wait_open(app);CHECK(app->chooser);
+    GtkListBox *list=g_object_get_data(G_OBJECT(app->chooser),"applications");GtkListBoxRow *picked=NULL;
+    for(int i=0;;i++){GtkListBoxRow *row=gtk_list_box_get_row_at_index(list,i);if(!row)break;GAppInfo *candidate=g_object_get_data(G_OBJECT(row),"application");if(g_app_info_equal(candidate,chosen)){picked=row;break;}}
+    CHECK(picked);gtk_list_box_select_row(list,picked);chooser_open(NULL,app->chooser);wait_open(app);CHECK(!app->opening);expect_capture("chosen",path);
+    current=g_app_info_get_default_for_type("text/plain",FALSE);CHECK(current);CHECK(g_app_info_equal(current,standard));g_object_unref(current);
+    open_path(app->panes,path,1);wait_open(app);CHECK(app->chooser);gtk_window_close(app->chooser);settle(30);CHECK(!app->chooser&&!app->opening);CHECK(!strcmp(gtk_label_get_text(GTK_LABEL(app->desktop_status)),"Open cancelled."));CHECK(!g_file_test(desktop_capture,G_FILE_TEST_EXISTS));
+    /* Failure is visible and a pending discovery can be closed safely. */
+    char *missing=g_build_filename(left,"missing",NULL);open_path(app->panes,missing,0);wait_open(app);CHECK(gtk_widget_has_css_class(app->desktop_status,"error"));
+    open_path(app->panes,path,1);gtk_window_close(app->window);settle(80);CHECK(!g_file_test(desktop_capture,G_FILE_TEST_EXISTS));
+    g_free(missing);g_free(path);g_free(left);g_free(right);g_object_unref(chosen);g_object_unref(standard);
+}
+static void test_desktop_terminal_literal_command(void)
+{
+    const char *path="/tmp/a 'quote' % dollar$() \\ raw-\xff";GError *error=NULL;
+    GAppInfo *info=fw_desktop_terminal_app(helper,path,&error);CHECK(info&&!error);
+    int argc=0;char **argv=NULL;CHECK(g_shell_parse_argv(g_app_info_get_commandline(info),&argc,&argv,&error));CHECK(!error);CHECK(argc>=3);CHECK(!strcmp(argv[0],helper));CHECK(!strcmp(argv[1],"--shell"));
+    GString *hex=g_string_new("x");for(const unsigned char *at=(const unsigned char *)path;*at;at++)g_string_append_printf(hex,"%02x",*at);
+    CHECK(!strcmp(argv[2],hex->str));g_string_free(hex,TRUE);g_strfreev(argv);g_object_unref(info);
+    CHECK(!fw_desktop_terminal_app(helper,"relative",&error));CHECK(error);g_clear_error(&error);
+}
+static guint check_context_cells(Pane *pane,GtkWidget *widget,const char *name)
+{
+    guint count=0;const char *bound=g_object_get_data(G_OBJECT(widget),"fw-row");
+    if(bound&&!strcmp(bound,name)&&gtk_widget_get_mapped(widget)){
+        graphene_rect_t bounds;CHECK(gtk_widget_compute_bounds(widget,pane->view,&bounds));
+        const char *picked=context_row_at(pane,bounds.origin.x+bounds.size.width/2,bounds.origin.y+bounds.size.height/2);
+        CHECK(picked&&!strcmp(picked,name));count++;
+    }
+    for(GtkWidget *child=gtk_widget_get_first_child(widget);child;child=gtk_widget_get_next_sibling(child))count+=check_context_cells(pane,child,name);
+    return count;
+}
+static void context_click(Pane *pane,const char *name)
+{
+    CHECK(check_context_cells(pane,pane->view,name)==3);
+    GtkWidget *cell=find_name_cell(pane->view,name);CHECK(cell);graphene_rect_t bounds;CHECK(gtk_widget_compute_bounds(cell,pane->view,&bounds));
+    double x=bounds.origin.x+bounds.size.width/2,y=bounds.origin.y+bounds.size.height/2;
+    CHECK(!strcmp(context_row_at(pane,x,y),name));
+    GListModel *controllers=gtk_widget_observe_controllers(pane->view);gboolean emitted=FALSE;
+    for(guint i=0;i<g_list_model_get_n_items(controllers);i++){
+        GObject *controller=g_list_model_get_item(controllers,i);
+        if(GTK_IS_GESTURE_CLICK(controller)&&gtk_gesture_single_get_button(GTK_GESTURE_SINGLE(controller))==GDK_BUTTON_SECONDARY){g_signal_emit_by_name(controller,"pressed",1,x,y);emitted=TRUE;}
+        g_object_unref(controller);
+    }
+    g_object_unref(controllers);CHECK(emitted);CHECK(pane->context);
+}
+static void test_context_selection_and_operations(void)
+{
+    char *left=directory("context-left"),*right=directory("context-right");file(left,"a.txt","a");file(left,"b.txt","b");file(left,"raw-\xff","raw");
+    App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);Pane *pane=app->panes;settle(30);
+    select_named(pane,"a.txt",TRUE);select_named(pane,"b.txt",FALSE);context_click(pane,"a.txt");CHECK(pane->context->count==2);CHECK(!gtk_widget_get_sensitive(pane->context->buttons[MENU_RENAME]));CHECK(!gtk_widget_get_sensitive(pane->context->buttons[MENU_OPEN]));
+    g_signal_emit_by_name(pane->context->buttons[MENU_COPY],"clicked");CHECK(!pane->context);CHECK(app->draft&&app->draft->count==2);CHECK(!strcmp(app->draft->destination,right));draft_discard(app);settle(30);
+    context_click(pane,"raw-\xff");CHECK(pane->context->count==1);CHECK(!strcmp(pane->context->names[0],"raw-\xff"));g_signal_emit_by_name(pane->context->buttons[MENU_RENAME],"clicked");CHECK(app->edit);CHECK(!strcmp(gtk_editable_get_text(GTK_EDITABLE(app->edit->entry)),"raw-\\xFF"));edit_discard(app);settle(30);
+    show_context(pane,"a.txt",20,60);g_signal_emit_by_name(pane->context->buttons[MENU_MOVE],"clicked");CHECK(app->draft&&app->draft->operation==FW_MOVE);draft_discard(app);settle(30);
+    show_context(pane,"b.txt",20,60);g_signal_emit_by_name(pane->context->buttons[MENU_TRASH],"clicked");CHECK(app->draft&&app->draft->operation==FW_TRASH);draft_discard(app);settle(30);
+    show_context(pane,"b.txt",20,60);select_named(pane,"a.txt",TRUE);CHECK(!pane->context);
+    gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_F10,0,GDK_SHIFT_MASK,app));CHECK(pane->context);CHECK(!strcmp(pane->context->names[0],"a.txt"));
+    guint rev=fw_browser_revision(pane->browser);fw_browser_refresh(pane->browser);CHECK(wait_revision(pane->browser,rev));wait_panes(app);CHECK(!pane->context);
+    show_context(pane,"b.txt",20,60);pane_navigate(pane,right);CHECK(!pane->context);wait_panes(app);gtk_window_close(app->window);settle(50);g_free(left);g_free(right);
+}
+static void provider_written(GObject *source,GAsyncResult *result,gpointer data)
+{
+    QueryResult *q=data;CHECK(gdk_content_provider_write_mime_type_finish(GDK_CONTENT_PROVIDER(source),result,&q->error));q->done=TRUE;
+}
+static void test_context_background_and_paths(void)
+{
+    char *left=directory("context-background"),*right=directory("context-background-right");file(left,"raw-\xff-\n-%","literal");char *folder=g_build_filename(left,"folder",NULL);CHECK(!g_mkdir(folder,0700));
+    App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);Pane *pane=app->panes;select_named(pane,"raw-\xff-\n-%",TRUE);
+    show_context(pane,"raw-\xff-\n-%",20,60);CHECK(pane->context);GdkContentProvider *provider=path_content(pane->context);GValue value=G_VALUE_INIT;g_value_init(&value,G_TYPE_STRING);CHECK(gdk_content_provider_get_value(provider,&value,NULL));
+    char *path=g_build_filename(left,"raw-\xff-\n-%",NULL),*display=fw_display_bytes(path),*uri=g_filename_to_uri(path,NULL,NULL);CHECK(!strcmp(g_value_get_string(&value),display));g_value_unset(&value);
+    GOutputStream *output=g_memory_output_stream_new_resizable();QueryResult q={0};gdk_content_provider_write_mime_type_async(provider,"text/uri-list",output,0,NULL,provider_written,&q);wait_flag(&q.done);CHECK(!q.error);CHECK(g_output_stream_close(output,NULL,NULL));
+    GBytes *bytes=g_memory_output_stream_steal_as_bytes(G_MEMORY_OUTPUT_STREAM(output));gsize n;const void *data=g_bytes_get_data(bytes,&n);char *expected=g_strconcat(uri,"\r\n",NULL);CHECK(n==strlen(expected));CHECK(!memcmp(data,expected,n));g_bytes_unref(bytes);g_object_unref(output);g_object_unref(provider);
+    show_context(pane,NULL,30,180);CHECK(pane->context&&!pane->context->count);CHECK(!pane->context->buttons[MENU_TRASH]);CHECK(pane->context->buttons[MENU_TERMINAL]);g_signal_emit_by_name(pane->context->buttons[MENU_NEW],"clicked");CHECK(app->edit&&app->edit->operation==FW_MKDIR);edit_discard(app);settle(30);
+    show_context(pane,"folder",20,60);CHECK(pane->context->buttons[MENU_TERMINAL]);g_signal_emit_by_name(pane->context->buttons[MENU_OPEN],"clicked");wait_panes(app);CHECK(!strcmp(fw_browser_path(pane->browser),folder));
+    show_context(pane,NULL,30,180);CHECK(pane->context);gtk_window_close(app->window);settle(50);
+    g_free(expected);g_free(uri);g_free(display);g_free(path);g_free(folder);g_free(left);g_free(right);
+}
+
 static int peer_read(void *data,size_t size)
 {
     char *at=data;while(size){ssize_t n=read(0,at,size);if(n<=0)return 0;at+=n;size-=(size_t)n;}return 1;
@@ -459,6 +600,11 @@ static int job_peer(gboolean bad_exit)
 int main(int argc, char **argv)
 {
     signal(SIGPIPE, SIG_IGN);
+    if(argc>=3&&!strcmp(argv[1],"--desktop-capture")){
+        const char *capture=g_getenv("FW_DESKTOP_CAPTURE");if(!capture)return 2;
+        GString *record=g_string_new(NULL);for(int i=2;i<argc;i++){g_string_append(record,argv[i]);g_string_append_c(record,0);}
+        gboolean ok=g_file_set_contents(capture,record->str,record->len,NULL);g_string_free(record,TRUE);return ok?0:1;
+    }
     char *name = g_path_get_basename(argv[0]);
     if (!strcmp(name,"job-disconnect-helper")||!strcmp(name,"job-bad-exit-helper")) { gboolean bad=!strcmp(name,"job-bad-exit-helper");g_free(name);return job_peer(bad); }
     if (!strcmp(name, "bad-helper")) { wslp_head h = {WSLP_HELLO, WSLP_MAX+1, 0}; if (write(1, &h, sizeof h) != sizeof h) return 1; g_free(name); return 0; }
@@ -467,6 +613,10 @@ int main(int argc, char **argv)
     g_free(name); if (argc != 3) { g_printerr("Usage: tests HELPER ICON\n"); return 2; }
     helper = argv[1]; icon = argv[2]; char *self = g_file_read_link("/proc/self/exe", NULL); CHECK(self); executable = self;
     fixture = g_dir_make_tmp("folderwing-linux-tests-XXXXXX", NULL); CHECK(fixture);
+    /* Keep MIME defaults/desktop registration entirely inside owned fixtures. */
+    char *desktop_data=g_build_filename(fixture,"desktop-data",NULL),*desktop_config=g_build_filename(fixture,"desktop-config",NULL);
+    CHECK(!g_mkdir(desktop_data,0700));CHECK(!g_mkdir(desktop_config,0700));g_setenv("XDG_DATA_HOME",desktop_data,TRUE);g_setenv("XDG_CONFIG_HOME",desktop_config,TRUE);
+    desktop_capture=g_build_filename(fixture,"desktop-capture",NULL);g_setenv("FW_DESKTOP_CAPTURE",desktop_capture,TRUE);g_free(desktop_data);g_free(desktop_config);
     char *data=g_build_filename(fixture,"job-data",NULL);operation_env=g_environ_setenv(g_get_environ(),"XDG_DATA_HOME",data,TRUE);g_free(data);
     char *helper_dir=g_path_get_dirname(helper);fault_helper=g_build_filename(helper_dir,"folderwing-linux-helper-faults",NULL);g_free(helper_dir);gtk_init();
     struct { const char *name; void (*run)(void); } cases[] = {
@@ -484,12 +634,17 @@ int main(int argc, char **argv)
         {"test_names_helper_actions",test_names_helper_actions},
         {"test_names_helper_persistence_failures",test_names_helper_persistence_failures},
         {"test_names_desktop_rename",test_names_desktop_rename},
-        {"test_names_desktop_new_folder",test_names_desktop_new_folder}
+        {"test_names_desktop_new_folder",test_names_desktop_new_folder},
+        {"test_desktop_target_paths_and_types",test_desktop_target_paths_and_types},
+        {"test_desktop_default_and_chosen_open",test_desktop_default_and_chosen_open},
+        {"test_desktop_terminal_literal_command",test_desktop_terminal_literal_command},
+        {"test_context_selection_and_operations",test_context_selection_and_operations},
+        {"test_context_background_and_paths",test_context_background_and_paths}
     };
     for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
         gint64 start = g_get_monotonic_time(); cases[i].run();
         g_print("PASS %s %.1f ms\n", cases[i].name, (g_get_monotonic_time()-start)/1000.0);
     }
-    remove_owned_tree(fixture); g_free(fixture); g_free(self); g_free(fault_helper);g_strfreev(operation_env);
+    remove_owned_tree(fixture); g_free(fixture); g_free(self); g_free(fault_helper);g_free(desktop_capture);g_strfreev(operation_env);
     g_print("PASS %u selectors; %u assertions; zero skips\n", (guint)G_N_ELEMENTS(cases), assertions); return 0;
 }

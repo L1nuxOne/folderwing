@@ -44,7 +44,8 @@ or cross-distribution dependency/license closure is claimed yet.
 - Selection is restored by exact filename after a same-folder refresh.
 
 Keyboard: Ctrl+L address, Alt+Left/Right history, Alt+Up parent, F5 refresh,
-Ctrl+H hidden files, F6 other pane, Ctrl+Q close. Enter/double-click opens folders.
+Ctrl+H hidden files, F6 other pane, Ctrl+Q close. Enter/double-click opens folders
+and opens regular files with the default Linux application.
 Ctrl/Shift selection supports multiple files and folders. Copy/Move target the
 other pane: use the buttons, Shift+F5 for Copy, or Shift+F6 for Move. Delete opens
 a Trash review only while a file list has focus; it keeps normal text editing
@@ -60,8 +61,7 @@ cancellation; operations are not whole-batch rollback transactions. A disconnect
 or invalid result after mutation starts is **completion unconfirmed**, never
 success. There is no permanent-delete action or fallback.
 
-Launching files, previews, tabs, terminal and desktop/mount integration remain
-future steps. Mutation of mounted Windows/9P endpoints is refused: those need
+Previews, tabs and desktop/mount integration remain future steps. Mutation of mounted Windows/9P endpoints is refused: those need
 the Windows application's stream inventory and durability acknowledgements.
 
 The address bar uses a reversible display: `\\` represents a literal backslash,
@@ -104,12 +104,17 @@ window. `GDK_BACKEND=wayland` can run the same desktop acceptance against an
 available Wayland display; it opens only owned test windows and needs no user
 input. GTK environment configuration remains local to the launched process.
 
-Eighteen selectors cover byte-exact paths and metadata, independent/same-folder
+Twenty-three selectors cover byte-exact paths and metadata, independent/same-folder
 watches, failed/rapid navigation, malformed/truncated/disconnected peers,
 close-during-request cleanup, real two-pane widgets/history/sorting/filtering,
 a 10,000-file load, multi-selection review/cancel/refresh, copy conflict policies,
 same/cross-filesystem moves, trash recovery records, injected persistence errors,
-cancellation before publication and close-during-job draining. The test creates its own temporary root and removes
+cancellation before publication and close-during-job draining. Desktop checks
+exercise default/chosen application launches, file types and symlink/byte-exact
+paths, context-menu hit testing/selection/actions, clipboard content generation,
+and asynchronous close/cancel. Application registration uses owned XDG fixtures;
+tests neither launch user applications nor overwrite the user clipboard.
+The test creates its own temporary root and removes
 only those fixtures, using lstat so fixture symlinks are never followed.
 Selectors and helper/source dependencies are in `tests/native-impact.json`.
 
@@ -167,3 +172,42 @@ Their helper paths now fence ancestry and directory namespace changes before
 reporting success. A late rename barrier error is completion-unconfirmed; a
 created folder is retained if its final barrier fails. These are namespace
 barriers, not recursive payload flushing or a new power-loss test.
+
+
+## File opening and context menus
+
+Enter/double-click on a regular file asks its default **Linux** application to
+open it. Folder activation stays inside the pane. File metadata and application
+discovery run off the GTK thread; launches are asynchronous. Symlinks follow their
+target, including the kernel semantics of logical `symlink/../name` paths. Missing
+files, broken links, special nodes, missing associations and launch failures show
+an error in a separate opening-status line. An accepted launch is reported as an
+open request, not proof that another application's document has rendered.
+
+Right-click any cell in a row for Open, Open With, Copy/Move to Other Pane,
+Rename, Move to Trash and Copy Path. Existing multi-selection is preserved;
+right-clicking another item selects that item alone. Open and Rename require one
+item. Copy/Move/Trash use the existing review dialogs and helpers. Shift+F10 or
+the Menu key opens the selection's menu while the file list has focus.
+
+Right-click empty space for New Folder, Copy Path, Open Terminal Here and Refresh.
+A selected folder also offers Open Terminal Here for that folder. Menus close
+when selection, location or listing changes, so an old menu cannot redirect an
+action onto a new snapshot. Dismissing a menu never starts an operation.
+
+Open With lists installed visible Linux applications, with compatible apps first
+and a search field. It applies only to that launch and never changes the default
+association. The chooser supports Cancel/Escape; closing Folderwing cancels
+pending discovery and closes its chooser. No filename becomes shell code.
+
+Copy Path puts the reversible displayed path(s) in text and byte-preserving
+`file:` URIs in `text/uri-list`. This retains raw Linux filenames even where a
+plain-text consumer cannot represent them. The background action copies the
+pane's current folder.
+
+Open Terminal Here asks GIO to find a terminal emulator and runs the existing
+helper's `--shell` entry point, using a hex-encoded native path as argv. It enters
+the folder and starts the user's Bash configuration. A Linux terminal emulator
+must be installed; a missing launcher is reported without changing settings.
+This uses the [GIO application launch APIs](https://docs.gtk.org/gio/method.AppInfo.launch_uris_async.html)
+and [terminal launch flag](https://docs.gtk.org/gio/flags.AppInfoCreateFlags.html).

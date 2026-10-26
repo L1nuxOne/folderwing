@@ -33,6 +33,7 @@ def main():
     evidence = ROOT/'build/linux-prototype'/('check-'+args.backend)
     evidence.mkdir(parents=True, exist_ok=True)
     changes = ['linux-prototype/model.c', 'linux-prototype/model.h', 'linux-prototype/browser.c',
+               'linux-prototype/desktop.c', 'linux-prototype/desktop.h',
                'linux-prototype/build.sh', 'linux-prototype/check.py', 'linux-prototype/operations.c', 'linux-prototype/operations.h', 'tests/fixtures/linux_ops_faults.c', 'tests/linux_browser_tests.c']
     for name, tail in [('audit', ['audit']), ('self-check', ['self-check']), ('selection', ['select', '--changed', *changes])]:
         result = subprocess.run([sys.executable, 'tools/native-impact.py', *tail], cwd=ROOT, capture_output=True, text=True)
@@ -44,7 +45,7 @@ def main():
     plan = json.loads((evidence/'selection.json').read_text())
     selected = plan['selected_nodeids']
     expected = sorted(x.split('::')[1] for x in selected)
-    assert len(expected) == 18 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
+    assert len(expected) == 23 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
     binary = ROOT/'build/linux-prototype/folderwing-linux-browser-tests'
     helper = ROOT/'build/linux-prototype/folderwing-linux-helper'
     icon = ROOT/'build/linux-prototype/folderwing.svg'
@@ -65,7 +66,7 @@ def main():
             'kernel': platform.release(), 'machine': platform.machine(), 'cpu_count': os.cpu_count(),
             'load_average': os.getloadavg(),
             'memory_available_kib': int(re.search(r'^MemAvailable:\s+(\d+)', Path('/proc/meminfo').read_text(), re.M)[1]),
-            'fixture': 'owned temporary trees/trash, native helper + link-time fsync fault helper, distinct /tmp and /dev/shm, 10000-file desktop case',
+            'fixture': 'owned temporary trees/trash, native helper + link-time fsync fault helper, owned desktop associations/capture apps, distinct /tmp and /dev/shm, 10000-file desktop case',
             'network': 'none', 'windows_input': False, 'wsl_shutdown': False},
     }
     key = digest(inputs)

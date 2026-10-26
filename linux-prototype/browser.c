@@ -4,10 +4,12 @@
 #include <signal.h>
 #include "model.h"
 #include "operations.h"
+#include "desktop.h"
 
 typedef struct App App;
 typedef struct Draft Draft;
 typedef struct NameEdit NameEdit;
+typedef struct ContextMenu ContextMenu;
 typedef struct Pane {
     App *app;
     FwBrowser *browser;
@@ -21,11 +23,13 @@ typedef struct Pane {
     gboolean busy, requested, restore_selection;
     GHashTable *selected_names;
     char *select_after, *select_root;
+    ContextMenu *context;
 } Pane;
 struct App {
     GtkWindow *window; Pane panes[2]; Pane *active; gboolean hidden, closing, close_wait, close_queued, job_reported;
     char *helper, **job_env; FwJob *job; Draft *draft; NameEdit *edit;
     GtkWidget *copy, *move, *trash, *cancel, *job_status, *job_progress, *job_details, *details;
+    GCancellable *launch_cancel; GtkWindow *chooser; GtkWidget *desktop_status;gboolean opening;
 };
 static void update_actions(App *app);
 static void draft_discard(App *app);
@@ -34,13 +38,19 @@ static void edit_finished(App *app, const FwJobProgress *progress);
 static void begin_name_edit(Pane *pane, FwOperation operation, gboolean popup);
 static void pane_update(Pane *pane);
 static void pane_navigate(Pane *pane, const char *path);
+static void context_discard(Pane *pane);
+static void show_context(Pane *pane,const char *name,double x,double y);
+static void open_path(Pane *pane,const char *path,guint purpose);
 static void app_stop(App *app)
 {
     app->closing = TRUE;
     draft_discard(app); edit_discard(app);
+    if(app->launch_cancel)g_cancellable_cancel(app->launch_cancel);
+    if(app->chooser){GtkWindow *chooser=app->chooser;app->chooser=NULL;gtk_window_destroy(chooser);}
     if (app->job) { g_signal_handlers_disconnect_by_data(app->job, app); fw_job_cancel(app->job); }
     for (guint i = 0; i < 2; i++) {
         Pane *pane = &app->panes[i];
+        context_discard(pane);
         if (pane->selection) g_signal_handlers_disconnect_by_data(pane->selection, pane);
         if (pane->sorted) g_signal_handlers_disconnect_by_data(pane->sorted, pane);
         if (pane->filtered) g_signal_handlers_disconnect_by_data(pane->filtered, pane);
@@ -63,7 +73,7 @@ static void app_free(gpointer data)
         if (pane->history) g_ptr_array_unref(pane->history);
         g_clear_pointer(&pane->selected_names, g_hash_table_unref); g_free(pane->select_after); g_free(pane->select_root);
     }
-    g_clear_object(&app->job); g_free(app->helper); g_strfreev(app->job_env); g_free(app);
+    g_clear_object(&app->launch_cancel);g_clear_object(&app->job); g_free(app->helper); g_strfreev(app->job_env); g_free(app);
 }
 static gint compare_name(gconstpointer a, gconstpointer b, gpointer unused)
 {
@@ -113,6 +123,7 @@ static void bind_cell(GtkSignalListItemFactory *factory, GtkListItem *item, gpoi
     (void)factory;
     GFileInfo *info = gtk_list_item_get_item(item);
     GtkWidget *child = gtk_list_item_get_child(item), *label = child;
+    g_object_set_data_full(G_OBJECT(child),"fw-row",g_strdup(g_file_info_get_name(info)),g_free);
     guint column = GPOINTER_TO_UINT(field);
     if (!column) {
         GtkWidget *icon = gtk_widget_get_first_child(child); label = gtk_widget_get_next_sibling(icon);
@@ -137,11 +148,17 @@ static void bind_cell(GtkSignalListItemFactory *factory, GtkListItem *item, gpoi
         gtk_label_set_text(GTK_LABEL(label), text); g_free(text); if (date) g_date_time_unref(date);
     }
 }
+static void unbind_cell(GtkSignalListItemFactory *factory,GtkListItem *item,gpointer unused)
+{
+    (void)factory;(void)unused;GtkWidget *child=gtk_list_item_get_child(item);
+    g_object_set_data(G_OBJECT(child),"fw-row",NULL);g_object_set_data(G_OBJECT(child),"fw-name",NULL);
+}
 static GtkColumnViewColumn *make_column(Pane *pane, const char *name, guint field)
 {
     GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
     g_signal_connect(factory, "setup", G_CALLBACK(setup_cell), GUINT_TO_POINTER(field));
     g_signal_connect(factory, "bind", G_CALLBACK(bind_cell), GUINT_TO_POINTER(field));
+    g_signal_connect(factory,"unbind",G_CALLBACK(unbind_cell),NULL);
     GtkColumnViewColumn *column = gtk_column_view_column_new(name, factory);
     gtk_column_view_column_set_resizable(column, TRUE);
     gtk_column_view_column_set_expand(column, field == 0);
@@ -165,6 +182,7 @@ static void pane_update(Pane *pane)
 {
     if (pane->app->closing) return;
     gboolean busy = fw_browser_busy(pane->browser);
+    if(busy)context_discard(pane);
     if (busy && !pane->busy) {
         g_clear_pointer(&pane->selected_names, g_hash_table_unref);
         if (!pane->requested) {
@@ -229,6 +247,7 @@ static void model_changed(FwBrowser *browser, gpointer data) { (void)browser; pa
 static void pending_changed(GObject *object, GParamSpec *spec, gpointer data) { (void)object; (void)spec; pane_update(data); }
 static void pane_navigate(Pane *pane, const char *path)
 {
+    context_discard(pane);
     if (!*fw_browser_path(pane->browser)) {
         char *display = fw_display_bytes(path);
         gtk_editable_set_text(GTK_EDITABLE(pane->address), display); g_free(display);
@@ -248,13 +267,14 @@ static void address_activate(GtkEntry *entry, gpointer data)
 static void row_activate(GtkColumnView *view, guint position, gpointer data)
 {
     (void)view; Pane *pane = data;
-    if (fw_browser_busy(pane->browser) || gtk_sort_list_model_get_pending(pane->sorted)) return;
+    if (fw_browser_busy(pane->browser) || gtk_sort_list_model_get_pending(pane->sorted)||gtk_filter_list_model_get_pending(pane->filtered)||*fw_browser_error(pane->browser)) return;
     GFileInfo *info = g_list_model_get_item(G_LIST_MODEL(pane->sorted), position);
     if (!info) return;
+    char *path = g_build_filename(fw_browser_path(pane->browser), g_file_info_get_name(info), NULL);
     if (fw_entry_directory(info)) {
-        char *path = g_build_filename(fw_browser_path(pane->browser), g_file_info_get_name(info), NULL);
-        pane->history_target = -1; pane_navigate(pane, path); g_free(path);
-    } else gtk_label_set_text(GTK_LABEL(pane->status), "File selected · previews are outside this browsing prototype.");
+        pane->history_target = -1; pane_navigate(pane, path);
+    } else open_path(pane,path,0);
+    g_free(path);
     g_object_unref(info);
 }
 static void history_step(Pane *pane, gint delta)
@@ -318,7 +338,7 @@ static void update_actions(App *app)
 }
 static void selection_changed(GtkSelectionModel *selection, guint position, guint count, gpointer data)
 {
-    (void)selection; (void)position; (void)count; Pane *pane = data; update_actions(pane->app);
+    (void)selection; (void)position; (void)count; Pane *pane = data;context_discard(pane);update_actions(pane->app);
 }
 static void draft_discard(App *app)
 {
@@ -566,6 +586,244 @@ static void name_menu_create(GtkMenuButton *button,gpointer data)
     Pane *pane=data;begin_name_edit(pane,GTK_WIDGET(button)==pane->rename_button?FW_RENAME:FW_MKDIR,FALSE);
 }
 
+/* A launch owns a window reference until the asynchronous result arrives.
+   Closing cancels discovery/launch and callbacks never touch destroyed widgets. */
+typedef struct Launch { GtkWindow *window; guint pane,purpose; gboolean explicit_app; FwDesktopTarget *target; } Launch;
+static App *launch_app(Launch *launch) { return g_object_get_data(G_OBJECT(launch->window),"browser-state"); }
+static void launch_free(gpointer data)
+{
+    Launch *launch=data;fw_desktop_target_free(launch->target);g_object_unref(launch->window);g_free(launch);
+}
+static void launch_result(Launch *launch,GError *error)
+{
+    App *app=launch_app(launch);
+    if(!app->closing){
+        app->opening=FALSE;
+        const char *message=error?error->message:"Open request sent to the application.";
+        /* Do not relabel a different folder after asynchronous navigation. */
+        gtk_label_set_text(GTK_LABEL(app->desktop_status),message);gtk_widget_set_tooltip_text(app->desktop_status,message);
+        if(error)gtk_widget_add_css_class(app->desktop_status,"error");else gtk_widget_remove_css_class(app->desktop_status,"error");
+    }
+    g_clear_error(&error);launch_free(launch);
+}
+static void launch_done(GObject *source,GAsyncResult *result,gpointer data)
+{
+    GError *error=NULL;
+    Launch *launch=data;
+    if(launch->explicit_app)g_app_info_launch_uris_finish(G_APP_INFO(source),result,&error);
+    else g_app_info_launch_default_for_uri_finish(result,&error);
+    launch_result(data,error);
+}
+static void launch_target(Launch *launch,GAppInfo *chosen)
+{
+    App *app=launch_app(launch);launch->explicit_app=chosen!=NULL;
+    GdkAppLaunchContext *context=gdk_display_get_app_launch_context(gtk_widget_get_display(GTK_WIDGET(app->window)));
+    if(chosen){GList uri={.data=launch->target->uri};g_app_info_launch_uris_async(chosen,launch->purpose==2?NULL:&uri,G_APP_LAUNCH_CONTEXT(context),app->launch_cancel,launch_done,launch);}
+    else g_app_info_launch_default_for_uri_async(launch->target->uri,G_APP_LAUNCH_CONTEXT(context),app->launch_cancel,launch_done,launch);
+    g_object_unref(context);
+}
+static void chooser_destroy(GtkWidget *widget,gpointer data)
+{
+    Launch *launch=data;App *app=launch_app(launch);
+    if(app->chooser==GTK_WINDOW(widget))app->chooser=NULL;
+    app->opening=FALSE;
+    if(!app->closing)gtk_label_set_text(GTK_LABEL(app->desktop_status),"Open cancelled.");
+}
+static gboolean chooser_filter(GtkListBoxRow *row,gpointer data)
+{
+    GtkEditable *entry=data;const char *text=gtk_editable_get_text(entry);
+    GAppInfo *info=g_object_get_data(G_OBJECT(row),"application");
+    char *name=g_utf8_casefold(g_app_info_get_display_name(info),-1),*needle=g_utf8_casefold(text,-1);
+    gboolean visible=strstr(name,needle)!=NULL;g_free(name);g_free(needle);return visible;
+}
+static void chooser_search(GtkSearchEntry *entry,gpointer data) { (void)entry;gtk_list_box_invalidate_filter(GTK_LIST_BOX(data)); }
+static void chooser_cancel(GtkButton *button,gpointer data) { (void)button;gtk_window_destroy(GTK_WINDOW(data)); }
+static gboolean chooser_key(GtkEventControllerKey *controller,guint key,guint code,GdkModifierType mods,gpointer data)
+{ (void)controller;(void)code;(void)mods;if(key!=GDK_KEY_Escape)return FALSE;gtk_window_destroy(GTK_WINDOW(data));return TRUE; }
+static void chooser_open(GtkWidget *widget,gpointer data)
+{
+    (void)widget;GtkWindow *window=data;Launch *owned=g_object_get_data(G_OBJECT(window),"launch");
+    GtkListBox *list=g_object_get_data(G_OBJECT(window),"applications");GtkListBoxRow *row=gtk_list_box_get_selected_row(list);if(!row||!gtk_widget_get_child_visible(GTK_WIDGET(row)))return;
+    GAppInfo *info=g_object_ref(g_object_get_data(G_OBJECT(row),"application"));
+    /* Transfer the launch ownership before destroying the chooser. */
+    Launch *launch=g_object_steal_data(G_OBJECT(window),"launch");App *app=launch_app(owned);
+    g_signal_handlers_disconnect_by_data(window,launch);app->chooser=NULL;
+    gtk_window_destroy(window);app->opening=TRUE;launch_target(launch,info);g_object_unref(info);
+}
+static void chooser_activate(GtkListBox *box,GtkListBoxRow *row,gpointer data) { (void)box;(void)row;chooser_open(NULL,data); }
+static void show_chooser(Launch *launch)
+{
+    App *app=launch_app(launch);GtkWindow *window=GTK_WINDOW(gtk_window_new());app->chooser=window;
+    gtk_window_set_transient_for(window,app->window);gtk_window_set_modal(window,TRUE);gtk_window_set_title(window,"Open With");gtk_window_set_default_size(window,460,460);
+    g_object_set_data_full(G_OBJECT(window),"launch",launch,launch_free);g_signal_connect(window,"destroy",G_CALLBACK(chooser_destroy),launch);
+    GtkWidget *box=gtk_box_new(GTK_ORIENTATION_VERTICAL,10);gtk_widget_set_margin_top(box,16);gtk_widget_set_margin_bottom(box,16);gtk_widget_set_margin_start(box,16);gtk_widget_set_margin_end(box,16);
+    char *name=g_path_get_basename(launch->target->path),*display=fw_display_bytes(name);g_free(name);
+    GtkWidget *label=gtk_label_new(display);g_free(display);gtk_label_set_ellipsize(GTK_LABEL(label),PANGO_ELLIPSIZE_MIDDLE);gtk_box_append(GTK_BOX(box),label);
+    GtkWidget *search=gtk_search_entry_new();gtk_box_append(GTK_BOX(box),search);
+    GtkWidget *list=gtk_list_box_new();gtk_list_box_set_activate_on_single_click(GTK_LIST_BOX(list),FALSE);
+    g_object_set_data(G_OBJECT(window),"applications",list);
+    for(GList *at=launch->target->applications;at;at=at->next){
+        GAppInfo *info=at->data;if(!g_app_info_should_show(info)||(!g_app_info_supports_files(info)&&!g_app_info_supports_uris(info)))continue;
+        GtkWidget *row=gtk_list_box_row_new(),*item=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,10);
+        GIcon *icon=g_app_info_get_icon(info);GtkWidget *image=icon?gtk_image_new_from_gicon(icon):gtk_image_new_from_icon_name("application-x-executable-symbolic");
+        gtk_box_append(GTK_BOX(item),image);label=gtk_label_new(g_app_info_get_display_name(info));gtk_label_set_xalign(GTK_LABEL(label),0);gtk_box_append(GTK_BOX(item),label);
+        gtk_widget_set_margin_top(item,7);gtk_widget_set_margin_bottom(item,7);gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row),item);
+        g_object_set_data_full(G_OBJECT(row),"application",g_object_ref(info),g_object_unref);gtk_list_box_append(GTK_LIST_BOX(list),row);
+    }
+    gtk_list_box_set_filter_func(GTK_LIST_BOX(list),chooser_filter,search,NULL);g_signal_connect(search,"search-changed",G_CALLBACK(chooser_search),list);
+    GtkWidget *empty=gtk_label_new("No applications found. Install a Linux application for this file type.");gtk_label_set_wrap(GTK_LABEL(empty),TRUE);gtk_list_box_set_placeholder(GTK_LIST_BOX(list),empty);
+    GtkWidget *scroll=gtk_scrolled_window_new();gtk_widget_set_vexpand(scroll,TRUE);gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scroll),list);gtk_box_append(GTK_BOX(box),scroll);
+    GtkWidget *buttons=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,8),*cancel=gtk_button_new_with_label("Cancel"),*open=gtk_button_new_with_label("Open");gtk_widget_set_halign(buttons,GTK_ALIGN_END);
+    gtk_box_append(GTK_BOX(buttons),cancel);gtk_box_append(GTK_BOX(buttons),open);gtk_box_append(GTK_BOX(box),buttons);gtk_widget_add_css_class(open,"suggested-action");
+    g_signal_connect(cancel,"clicked",G_CALLBACK(chooser_cancel),window);g_signal_connect(open,"clicked",G_CALLBACK(chooser_open),window);g_signal_connect(list,"row-activated",G_CALLBACK(chooser_activate),window);
+    gtk_window_set_default_widget(window,open);gtk_window_set_child(window,box);
+    GtkEventController *keys=gtk_event_controller_key_new();gtk_event_controller_set_propagation_phase(keys,GTK_PHASE_CAPTURE);g_signal_connect(keys,"key-pressed",G_CALLBACK(chooser_key),window);gtk_widget_add_controller(GTK_WIDGET(window),keys);
+    g_signal_connect(search,"activate",G_CALLBACK(chooser_open),window);
+    GtkListBoxRow *first=gtk_list_box_get_row_at_index(GTK_LIST_BOX(list),0);if(first)gtk_list_box_select_row(GTK_LIST_BOX(list),first);
+    gtk_window_present(window);gtk_widget_grab_focus(search);
+}
+static void open_queried(GObject *source,GAsyncResult *result,gpointer data)
+{
+    (void)source;Launch *launch=data;App *app=launch_app(launch);GError *error=NULL;
+    launch->target=fw_desktop_query_finish(result,&error);
+    if(app->closing||error){launch_result(launch,error);return;}
+    if(launch->purpose==1){show_chooser(launch);return;}
+    if(launch->purpose==2){
+        GAppInfo *terminal=fw_desktop_terminal_app(app->helper,launch->target->path,&error);
+        if(!terminal){launch_result(launch,error);return;}launch_target(launch,terminal);g_object_unref(terminal);
+    }else launch_target(launch,NULL);
+}
+static void open_path(Pane *pane,const char *path,guint purpose)
+{
+    App *app=pane->app;if(app->closing||app->opening||app->edit||app->draft)return;
+    Launch *launch=g_new0(Launch,1);launch->window=g_object_ref(app->window);launch->pane=(guint)(pane-app->panes);launch->purpose=purpose;
+    app->opening=TRUE;gtk_widget_set_visible(app->desktop_status,TRUE);gtk_widget_remove_css_class(app->desktop_status,"error");
+    gtk_label_set_text(GTK_LABEL(app->desktop_status),purpose==1?"Finding applications…":"Opening…");
+    fw_desktop_query_async(path,purpose==2,purpose==1,app->launch_cancel,open_queried,launch);
+}
+
+enum { MENU_OPEN,MENU_OPEN_WITH,MENU_COPY,MENU_MOVE,MENU_RENAME,MENU_TRASH,MENU_PATH,MENU_NEW,MENU_TERMINAL,MENU_REFRESH,MENU_COUNT };
+struct ContextMenu {
+    Pane *pane;GtkWidget *popover,*buttons[MENU_COUNT];char *root,**names;guint count,revision;gboolean directory;
+};
+typedef struct ContextCleanup { GtkWidget *popover,*parent; } ContextCleanup;
+static gboolean context_unparent(gpointer data)
+{
+    ContextCleanup *cleanup=data;
+    if(gtk_widget_get_parent(cleanup->popover))gtk_widget_unparent(cleanup->popover);
+    g_object_unref(cleanup->popover);g_object_unref(cleanup->parent);g_free(cleanup);return G_SOURCE_REMOVE;
+}
+static void context_discard(Pane *pane)
+{
+    ContextMenu *menu=pane->context;if(!menu)return;pane->context=NULL;
+    g_signal_handlers_disconnect_by_data(menu->popover,menu);
+    for(guint i=0;i<MENU_COUNT;i++)if(menu->buttons[i])g_signal_handlers_disconnect_by_data(menu->buttons[i],menu);
+    gtk_popover_popdown(GTK_POPOVER(menu->popover));
+    ContextCleanup *cleanup=g_new0(ContextCleanup,1);cleanup->popover=g_object_ref(menu->popover);cleanup->parent=g_object_ref(pane->view);
+    g_idle_add(context_unparent,cleanup);
+    g_free(menu->root);g_strfreev(menu->names);g_free(menu);
+}
+static void context_closed(GtkPopover *popover,gpointer data) { (void)popover;ContextMenu *menu=data;context_discard(menu->pane); }
+static gboolean pane_ready(Pane *pane)
+{
+    return !pane->app->closing&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&*fw_browser_path(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
+}
+static GdkContentProvider *path_content(ContextMenu *menu)
+{
+    GString *text=g_string_new(NULL),*uris=g_string_new(NULL);guint count=MAX(menu->count,1u);
+    for(guint i=0;i<count;i++){
+        char *path=menu->count?g_build_filename(menu->root,menu->names[i],NULL):g_strdup(menu->root);
+        char *display=fw_display_bytes(path),*uri=g_filename_to_uri(path,NULL,NULL);
+        if(i)g_string_append_c(text,'\n');
+        g_string_append(text,display);if(uri){g_string_append_printf(uris,"%s\r\n",uri);g_free(uri);}
+        g_free(path);g_free(display);
+    }
+    GBytes *bytes=g_bytes_new(uris->str,uris->len);
+    GdkContentProvider *providers[]={gdk_content_provider_new_typed(G_TYPE_STRING,text->str),gdk_content_provider_new_for_bytes("text/uri-list",bytes)};
+    GdkContentProvider *content=gdk_content_provider_new_union(providers,G_N_ELEMENTS(providers));
+    g_bytes_unref(bytes);g_string_free(text,TRUE);g_string_free(uris,TRUE);return content;
+}
+static void context_action(GtkButton *button,gpointer data)
+{
+    ContextMenu *menu=data;Pane *pane=menu->pane;App *app=pane->app;guint action=GPOINTER_TO_UINT(g_object_get_data(G_OBJECT(button),"menu-action"));
+    if(!pane_ready(pane)||menu->revision!=fw_browser_revision(pane->browser)||strcmp(menu->root,fw_browser_path(pane->browser))){context_discard(pane);return;}
+    if(action==MENU_PATH){GdkContentProvider *content=path_content(menu);gdk_clipboard_set_content(gtk_widget_get_clipboard(pane->view),content);g_object_unref(content);}
+    char *path=menu->count?g_build_filename(menu->root,menu->names[0],NULL):g_strdup(menu->root);gboolean directory=menu->directory;
+    app->active=pane;context_discard(pane);
+    switch(action){
+    case MENU_OPEN: if(directory)pane_navigate(pane,path);else open_path(pane,path,0);break;
+    case MENU_OPEN_WITH:open_path(pane,path,1);break;
+    case MENU_COPY:prepare_operation(app,FW_COPY);break;
+    case MENU_MOVE:prepare_operation(app,FW_MOVE);break;
+    case MENU_RENAME:begin_name_edit(pane,FW_RENAME,TRUE);break;
+    case MENU_TRASH:prepare_operation(app,FW_TRASH);break;
+    case MENU_NEW:begin_name_edit(pane,FW_MKDIR,TRUE);break;
+    case MENU_TERMINAL:open_path(pane,path,2);break;
+    case MENU_REFRESH:fw_browser_refresh(pane->browser);break;
+    default:break;
+    }
+    g_free(path);
+}
+static void menu_item(ContextMenu *menu,guint action,const char *title,gboolean enabled)
+{
+    GtkWidget *button=gtk_button_new_with_label(title);menu->buttons[action]=button;
+    gtk_widget_add_css_class(button,"flat");gtk_widget_set_halign(button,GTK_ALIGN_FILL);gtk_widget_set_sensitive(button,enabled);
+    g_object_set_data(G_OBJECT(button),"menu-action",GUINT_TO_POINTER(action));g_signal_connect(button,"clicked",G_CALLBACK(context_action),menu);
+    gtk_box_append(GTK_BOX(gtk_popover_get_child(GTK_POPOVER(menu->popover))),button);
+}
+static void show_context(Pane *pane,const char *name,double x,double y)
+{
+    App *app=pane->app;if(!pane_ready(pane)||app->edit||app->draft)return;
+    context_discard(pane);context_discard(pane==app->panes?app->panes+1:app->panes);app->active=pane;
+    guint found=G_MAXUINT;GFileInfo *clicked=NULL;
+    if(name){
+        for(guint i=0;i<g_list_model_get_n_items(G_LIST_MODEL(pane->sorted));i++){
+            GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),i);
+            if(!strcmp(name,g_file_info_get_name(info))){found=i;clicked=info;break;}g_object_unref(info);
+        }
+        if(found==G_MAXUINT)return;
+        if(!gtk_selection_model_is_selected(pane->selection,found))gtk_selection_model_select_item(pane->selection,found,TRUE);
+    }else gtk_selection_model_unselect_all(pane->selection);
+    ContextMenu *menu=g_new0(ContextMenu,1);menu->pane=pane;menu->root=g_strdup(fw_browser_path(pane->browser));menu->revision=fw_browser_revision(pane->browser);
+    GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);guint64 count=gtk_bitset_get_size(selected);
+    if(count>4096){gtk_bitset_unref(selected);g_clear_object(&clicked);g_free(menu->root);g_free(menu);return;}
+    menu->count=(guint)count;menu->names=g_new0(char *,count+1);guint pos,index=0;GtkBitsetIter iter;
+    for(gboolean more=gtk_bitset_iter_init_first(&iter,selected,&pos);more;more=gtk_bitset_iter_next(&iter,&pos)){
+        GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),pos);menu->names[index++]=g_strdup(g_file_info_get_name(info));g_object_unref(info);
+    }
+    gtk_bitset_unref(selected);menu->directory=clicked&&fw_entry_directory(clicked);g_clear_object(&clicked);pane->context=menu;update_actions(app);
+    menu->popover=gtk_popover_new();gtk_popover_set_has_arrow(GTK_POPOVER(menu->popover),FALSE);gtk_widget_set_parent(menu->popover,pane->view);
+    GtkWidget *box=gtk_box_new(GTK_ORIENTATION_VERTICAL,0);gtk_popover_set_child(GTK_POPOVER(menu->popover),box);
+    gboolean idle=!job_active(app),one=count==1;
+    if(count){
+        menu_item(menu,MENU_OPEN,"Open",one&&!app->opening);
+        if(!menu->directory)menu_item(menu,MENU_OPEN_WITH,"Open With…",one&&!app->opening);
+        menu_item(menu,MENU_COPY,"Copy to Other Pane…",gtk_widget_get_sensitive(app->copy));menu_item(menu,MENU_MOVE,"Move to Other Pane…",gtk_widget_get_sensitive(app->move));
+        menu_item(menu,MENU_RENAME,"Rename…",one&&idle);menu_item(menu,MENU_TRASH,"Move to Trash…",idle);
+    }else menu_item(menu,MENU_NEW,"New Folder…",idle);
+    menu_item(menu,MENU_PATH,count>1?"Copy Paths":"Copy Path",TRUE);
+    if(!count||menu->directory)menu_item(menu,MENU_TERMINAL,"Open Terminal Here",(count<=1)&&!app->opening);
+    if(!count)menu_item(menu,MENU_REFRESH,"Refresh",TRUE);
+    GdkRectangle anchor={(int)x,(int)y,1,1};gtk_popover_set_pointing_to(GTK_POPOVER(menu->popover),&anchor);
+    g_signal_connect(menu->popover,"closed",G_CALLBACK(context_closed),menu);gtk_popover_popup(GTK_POPOVER(menu->popover));update_actions(app);
+}
+static const char *context_row_at(Pane *pane,double x,double y)
+{
+    GtkWidget *picked=gtk_widget_pick(pane->view,x,y,GTK_PICK_DEFAULT);
+    for(GtkWidget *at=picked;at&&at!=pane->view;at=gtk_widget_get_parent(at)){
+        const char *name=g_object_get_data(G_OBJECT(at),"fw-row");if(name)return name;
+    }
+    return NULL;
+}
+static void context_pressed(GtkGestureClick *gesture,gint n,double x,double y,gpointer data)
+{
+    (void)n;Pane *pane=data;const char *name=context_row_at(pane,x,y);
+    if(!name){GtkWidget *picked=gtk_widget_pick(pane->view,x,y,GTK_PICK_DEFAULT);
+        for(GtkWidget *at=picked;at&&at!=pane->view;at=gtk_widget_get_parent(at))if(!strcmp(gtk_widget_get_css_name(at),"header"))return;
+    }
+    show_context(pane,name,x,y);if(pane->context)gtk_gesture_set_state(GTK_GESTURE(gesture),GTK_EVENT_SEQUENCE_CLAIMED);
+}
+
 static void pane_focus(GtkEventControllerFocus *controller, gpointer data)
 {
     (void)controller; Pane *pane = data;
@@ -620,6 +878,8 @@ static void make_pane(App *app, guint index, const char *helper)
     gtk_box_append(GTK_BOX(pane->box), statusbox);
     GtkEventController *focus = gtk_event_controller_focus_new();
     g_signal_connect(focus, "enter", G_CALLBACK(pane_focus), pane); gtk_widget_add_controller(pane->box, focus);
+    GtkGesture *context=gtk_gesture_click_new();gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(context),GDK_BUTTON_SECONDARY);gtk_event_controller_set_propagation_phase(GTK_EVENT_CONTROLLER(context),GTK_PHASE_CAPTURE);
+    g_signal_connect(context,"pressed",G_CALLBACK(context_pressed),pane);gtk_widget_add_controller(pane->view,GTK_EVENT_CONTROLLER(context));
     g_signal_connect(pane->view, "activate", G_CALLBACK(row_activate), pane);
     g_signal_connect(pane->selection, "selection-changed", G_CALLBACK(selection_changed), pane);
     g_signal_connect(pane->browser, "changed", G_CALLBACK(model_changed), pane);
@@ -655,6 +915,11 @@ static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint 
     }
     GtkWidget *focus = gtk_window_get_focus(app->window);
     gboolean in_files = focus && (focus == pane->view || gtk_widget_is_ancestor(focus, pane->view));
+    if(in_files&&(key==GDK_KEY_Menu||(key==GDK_KEY_F10&&(mods&GDK_SHIFT_MASK)))){
+        GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);guint pos=gtk_bitset_is_empty(selected)?G_MAXUINT:gtk_bitset_get_minimum(selected);gtk_bitset_unref(selected);
+        GFileInfo *info=pos==G_MAXUINT?NULL:g_list_model_get_item(G_LIST_MODEL(pane->sorted),pos);
+        show_context(pane,info?g_file_info_get_name(info):NULL,20,40);g_clear_object(&info);return TRUE;
+    }
     if (in_files && key==GDK_KEY_F2 && !(mods&(GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_ALT_MASK))) {begin_name_edit(pane,FW_RENAME,TRUE);return TRUE;}
     if (in_files && (mods & GDK_SHIFT_MASK) && key == GDK_KEY_F5) { prepare_operation(app, FW_COPY); return TRUE; }
     if (in_files && (mods & GDK_SHIFT_MASK) && key == GDK_KEY_F6) { prepare_operation(app, FW_MOVE); return TRUE; }
@@ -691,7 +956,7 @@ static void configure_style(void)
 static App *create_window(GtkApplication *application, const char *helper, const char *icon, const char *left, const char *right)
 {
     configure_style();
-    App *app = g_new0(App, 1); app->helper = g_strdup(helper); app->job_env = g_get_environ();
+    App *app = g_new0(App, 1); app->helper = g_strdup(helper); app->job_env = g_get_environ();app->launch_cancel=g_cancellable_new();
     app->window = GTK_WINDOW(application ? gtk_application_window_new(application) : gtk_window_new());
     g_object_set_data_full(G_OBJECT(app->window), "browser-state", app, app_free);
     gtk_window_set_title(app->window, "Folderwing · Linux prototype"); gtk_window_set_default_size(app->window, 1280, 760);
@@ -713,6 +978,8 @@ static App *create_window(GtkApplication *application, const char *helper, const
     gtk_paned_set_position(GTK_PANED(split), 640); gtk_paned_set_shrink_start_child(GTK_PANED(split), TRUE); gtk_paned_set_shrink_end_child(GTK_PANED(split), TRUE);
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); gtk_widget_set_vexpand(split, TRUE);
     gtk_box_append(GTK_BOX(root), split); gtk_box_append(GTK_BOX(root), make_operations(app));
+    app->desktop_status=gtk_label_new("");gtk_label_set_xalign(GTK_LABEL(app->desktop_status),0);gtk_label_set_ellipsize(GTK_LABEL(app->desktop_status),PANGO_ELLIPSIZE_END);
+    gtk_widget_set_margin_start(app->desktop_status,10);gtk_widget_set_margin_bottom(app->desktop_status,6);gtk_widget_set_visible(app->desktop_status,FALSE);gtk_box_append(GTK_BOX(root),app->desktop_status);
     gtk_window_set_child(app->window, root);
     GtkEventController *keys = gtk_event_controller_key_new(); gtk_event_controller_set_propagation_phase(keys, GTK_PHASE_CAPTURE);
     g_signal_connect(keys, "key-pressed", G_CALLBACK(key_pressed), app); gtk_widget_add_controller(GTK_WIDGET(app->window), keys);
