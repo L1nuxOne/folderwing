@@ -661,7 +661,7 @@ static void wait_paste(App *app)
 }
 static void paste_to(App *app,Pane *pane)
 {
-    app->active=pane;gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_v,0,GDK_CONTROL_MASK,app));wait_paste(app);CHECK(app->draft);
+    app->active=pane;gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_v,0,GDK_CONTROL_MASK,app));wait_paste(app);if(!app->draft)g_printerr("PASTE status=%s ready=%d requested=%d busy=%d path=%s\n",gtk_label_get_text(GTK_LABEL(app->desktop_status)),pane_ready(pane),pane->requested,fw_browser_busy(pane->browser),fw_browser_path(pane->browser));CHECK(app->draft);
 }
 static void test_clipboard_copy_cut_paste_desktop(void)
 {
@@ -703,6 +703,99 @@ static void test_clipboard_focus_navigation_and_close(void)
     clipboard_paste(pane);CHECK(app->paste_cancel);gpointer weak=app->window;g_object_add_weak_pointer(G_OBJECT(app->window),&weak);gtk_window_close(app->window);
     gint64 end=g_get_monotonic_time()+5000000;while(weak){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
     char *source=g_build_filename(left,"keep.txt",NULL);bytes_equal(source,"untouched");g_free(source);gdk_clipboard_set_content(test_clipboard,NULL);g_free(left);g_free(right);
+}
+
+typedef struct SessionResult { gboolean done,saved;FwSessionLoad *load;GError *error; } SessionResult;
+static void store_loaded(GObject *source,GAsyncResult *result,gpointer data)
+{ SessionResult *r=data;r->load=fw_session_load_finish(FW_SESSION_STORE(source),result,&r->error);r->done=TRUE; }
+static void store_saved(GObject *source,GAsyncResult *result,gpointer data)
+{ SessionResult *r=data;r->saved=fw_session_save_finish(FW_SESSION_STORE(source),result,&r->error);r->done=TRUE; }
+static FwSessionLoad *load_store(FwSessionStore *store)
+{ SessionResult r={0};fw_session_load_async(store,store_loaded,&r);wait_flag(&r.done);CHECK(r.load&&!r.error);return r.load; }
+static void save_store(FwSessionStore *store,FwSession *s)
+{ SessionResult r={0};fw_session_save_async(store,s,store_saved,&r);wait_flag(&r.done);CHECK(r.saved&&!r.error); }
+static FwSession *sample_session(const char *left,const char *right)
+{ FwSession *s=fw_session_new();g_ptr_array_add(s->paths[0],g_strdup(left));g_ptr_array_add(s->paths[1],g_strdup(right));return s; }
+static FwSession *read_session(const char *path)
+{
+    char *bytes=NULL;gsize n=0;CHECK(g_file_get_contents(path,&bytes,&n,NULL));GError *error=NULL;FwSession *s=fw_session_decode(bytes,n,&error);CHECK(s&&!error);g_free(bytes);return s;
+}
+static void test_session_codec_and_bounds(void)
+{
+    FwSession *s=sample_session("/tmp/raw-\xff-\n-\\","/tmp/link/../target");g_ptr_array_add(s->paths[0],g_strdup("/missing/mount"));s->active[0]=1;s->pane=1;s->hidden=TRUE;s->split=6400;s->width=1440;
+    gsize n=0;GError *error=NULL;char *bytes=fw_session_encode(s,&n,&error);CHECK(bytes&&!error);CHECK(g_utf8_validate(bytes,n,NULL));FwSession *back=fw_session_decode(bytes,n,&error);CHECK(back&&!error);CHECK(back->paths[0]->len==2&&back->active[0]==1&&back->pane==1&&back->hidden&&back->split==6400&&back->width==1440);
+    CHECK(!strcmp(back->paths[0]->pdata[0],s->paths[0]->pdata[0]));CHECK(!strcmp(back->paths[1]->pdata[0],s->paths[1]->pdata[0]));fw_session_free(back);
+    const char *bad[]={"", "[Session]\nversion=99\n", "[Session]\nversion=1\npane=-1\n"};for(guint i=0;i<G_N_ELEMENTS(bad);i++){CHECK(!fw_session_decode(bad[i],strlen(bad[i]),&error));CHECK(error);g_clear_error(&error);}
+    CHECK(!fw_session_decode(bytes,FW_SESSION_LIMIT+1,&error));g_clear_error(&error);
+    char *nul=g_memdup2(bytes,n);nul[n/2]=0;CHECK(!fw_session_decode(nul,n,&error));g_clear_error(&error);g_free(nul);
+    s->active[0]=9;CHECK(!fw_session_encode(s,&n,&error));g_clear_error(&error);s->active[0]=0;
+    g_ptr_array_set_size(s->paths[0],0);for(guint i=0;i<33;i++)g_ptr_array_add(s->paths[0],g_strdup("/tmp"));CHECK(!fw_session_encode(s,&n,&error));g_clear_error(&error);
+    g_free(bytes);fw_session_free(s);
+}
+static void test_session_store_atomic_ownership_and_recovery(void)
+{
+    char *root=directory("session-store"),*path=g_build_filename(root,"session.ini",NULL);FwSessionStore *store=fw_session_store_new(path);FwSessionLoad *load=load_store(store);CHECK(load->writable&&!load->session);fw_session_load_free(load);
+    FwSession *s=sample_session(root,"/");save_store(store,s);struct stat st;CHECK(!stat(path,&st));CHECK((st.st_mode&0777)==0600);
+    FwSessionStore *second=fw_session_store_new(path);load=load_store(second);CHECK(!load->writable&&load->warning&&load->session);CHECK(!strcmp(load->session->paths[0]->pdata[0],root));fw_session_load_free(load);g_object_unref(second);g_object_unref(store);
+    store=fw_session_store_new(path);load=load_store(store);CHECK(load->writable&&load->session);fw_session_load_free(load);s->hidden=TRUE;save_store(store,s);g_object_unref(store);FwSession *restored=read_session(path);CHECK(restored->hidden);fw_session_free(restored);
+    CHECK(g_file_set_contents(path,"invalid saved session",-1,NULL));store=fw_session_store_new(path);load=load_store(store);CHECK(load->writable&&!load->session&&load->warning);CHECK(!g_file_test(path,G_FILE_TEST_EXISTS));
+    GDir *dir=g_dir_open(root,0,NULL);CHECK(dir);const char *name;gboolean kept=FALSE;while((name=g_dir_read_name(dir))){if(g_str_has_prefix(name,"session.ini.invalid-")){char *backup=g_build_filename(root,name,NULL);bytes_equal(backup,"invalid saved session");g_free(backup);kept=TRUE;}}g_dir_close(dir);CHECK(kept);fw_session_load_free(load);save_store(store,s);g_object_unref(store);fw_session_free(s);
+    char *link=g_build_filename(root,"link.ini",NULL);CHECK(!symlink("session.ini",link));store=fw_session_store_new(link);load=load_store(store);CHECK(!load->writable&&!load->session);fw_session_load_free(load);g_object_unref(store);CHECK(g_file_test(link,G_FILE_TEST_IS_SYMLINK));g_free(link);g_free(path);g_free(root);
+}
+static void switch_tab(Pane *pane,guint index)
+{ gtk_notebook_set_current_page(GTK_NOTEBOOK(pane->notebook),index); }
+static void test_tabs_history_selection_reorder_and_limits(void)
+{
+    char *left=directory("tabs-left"),*right=directory("tabs-right"),*child=g_build_filename(left,"child",NULL),*missing=g_build_filename(left,"missing",NULL);CHECK(!g_mkdir(child,0700));file(left,"selected.txt","selected");file(child,"child.txt","child");
+    App *app=clipboard_window(left,right);Pane *pane=app->panes;Tab *original=pane->tab;select_named(pane,"selected.txt",TRUE);gtk_widget_grab_focus(pane->view);
+    CHECK(key_pressed(NULL,GDK_KEY_t,0,GDK_CONTROL_MASK,app));CHECK(pane->tabs->len==2&&pane->tab!=original);wait_panes(app);Tab *second=pane->tab;pane_navigate(pane,child);wait_panes(app);CHECK(pane->history->len==2);switch_tab(pane,0);wait_panes(app);CHECK(pane->tab==original);CHECK(pane->history->len==1);wait_selected_name(pane,"selected.txt");
+    switch_tab(pane,1);wait_panes(app);CHECK(pane->tab==second&&!strcmp(fw_browser_path(pane->browser),child));history_step(pane,-1);wait_panes(app);CHECK(!strcmp(fw_browser_path(pane->browser),left));history_step(pane,1);wait_panes(app);CHECK(!strcmp(fw_browser_path(pane->browser),child));
+    gtk_notebook_reorder_child(GTK_NOTEBOOK(pane->notebook),second->page,0);FwSession *captured=session_capture(app);CHECK(!strcmp(captured->paths[0]->pdata[0],child));fw_session_free(captured);
+    tab_close(pane,original);CHECK(pane->tabs->len==1&&pane->tab==second);tab_close(pane,second);CHECK(pane->tabs->len==1);
+    tab_add(pane,missing,TRUE);wait_failure(pane->browser);CHECK(!*fw_browser_path(pane->browser));CHECK(!strcmp(pane->tab->path,missing));CHECK(!g_list_model_get_n_items(G_LIST_MODEL(pane->sorted)));CHECK(!pane_ready(pane));tab_close(pane,pane->tab);wait_panes(app);CHECK(!strcmp(fw_browser_path(pane->browser),child));
+    tab_add(pane,left,TRUE);wait_panes(app);show_context(pane,"child",20,60);CHECK(pane->context->buttons[MENU_TAB]);g_signal_emit_by_name(pane->context->buttons[MENU_TAB],"clicked");wait_panes(app);CHECK(pane->tabs->len==3&&!strcmp(fw_browser_path(pane->browser),child));
+    gtk_widget_grab_focus(pane->view);CHECK(key_pressed(NULL,GDK_KEY_w,0,GDK_CONTROL_MASK,app));wait_panes(app);CHECK(pane->tabs->len==2);g_signal_emit_by_name(pane->tab->close,"clicked");wait_panes(app);CHECK(pane->tabs->len==1);
+    while(pane->tabs->len<FW_SESSION_TABS)tab_add(pane,left,FALSE);
+    CHECK(pane->tabs->len==FW_SESSION_TABS);Tab *active=pane->tab;tab_add(pane,left,TRUE);CHECK(pane->tabs->len==FW_SESSION_TABS&&pane->tab==active);
+    gtk_widget_grab_focus(pane->address);CHECK(!key_pressed(NULL,GDK_KEY_w,0,GDK_CONTROL_MASK,app));gtk_window_close(app->window);settle(70);g_free(left);g_free(right);g_free(child);g_free(missing);
+}
+static void test_tabs_pending_paste_and_transfer(void)
+{
+    char *left=directory("tabs-jobs-left"),*right=directory("tabs-jobs-right"),*other=directory("tabs-jobs-other");file(left,"source.txt","captured transfer");App *app=clipboard_window(left,right);Pane *pane=app->panes;
+    select_named(pane,"source.txt",TRUE);clipboard_copy(pane,FALSE);clipboard_paste(pane);CHECK(app->paste_cancel);tab_add(pane,left,TRUE);wait_paste(app);CHECK(!app->draft);wait_panes(app);
+    select_named(pane,"source.txt",TRUE);app->active=pane;prepare_operation(app,FW_COPY);CHECK(app->draft);confirm_draft(app);tab_add(app->panes+1,other,TRUE);tab_close(pane,pane->tab);FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);wait_panes(app);
+    char *target=g_build_filename(right,"source.txt",NULL);bytes_equal(target,"captured transfer");CHECK(!strcmp(fw_browser_path(app->panes[1].browser),other));
+    select_named(pane,"source.txt",TRUE);begin_name_edit(pane,FW_RENAME,TRUE);submit_name(app,"renamed.txt");tab_add(pane,other,TRUE);p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);wait_panes(app);char *renamed=g_build_filename(left,"renamed.txt",NULL);bytes_equal(renamed,"captured transfer");CHECK(!strcmp(fw_browser_path(pane->browser),other));
+    gtk_window_close(app->window);settle(70);g_free(renamed);g_free(target);g_free(other);g_free(left);g_free(right);
+}
+static void wait_session_window(App *app)
+{
+    gint64 end=g_get_monotonic_time()+5000000;while(app->restoring){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+}
+static void close_session_window(App *app)
+{
+    gpointer weak=app->window;g_object_add_weak_pointer(G_OBJECT(app->window),&weak);gtk_window_close(app->window);gint64 end=g_get_monotonic_time()+5000000;
+    while(weak){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}
+}
+static void test_session_desktop_restore_and_overrides(void)
+{
+    char *left=directory("restore-left"),*right=directory("restore-right"),*extra=directory("restore-raw-\xff"),*missing=g_build_filename(left,"not-mounted",NULL),*state=directory("restore-state"),*path=g_build_filename(state,"session.ini",NULL);
+    FwSession *s=sample_session(left,right);g_ptr_array_add(s->paths[0],g_strdup(extra));g_ptr_array_add(s->paths[0],g_strdup(missing));s->active[0]=1;s->pane=1;s->hidden=TRUE;s->width=1400;s->height=800;s->split=5800;
+    FwSessionStore *store=fw_session_store_new(path);FwSessionLoad *load=load_store(store);fw_session_load_free(load);save_store(store,s);g_object_unref(store);fw_session_free(s);
+    App *app=create_window(NULL,helper,icon,NULL,NULL);clipboard_set(app,test_clipboard);gtk_window_present(app->window);session_start(app,path,NULL,NULL);wait_session_window(app);wait_panes(app);settle(80);CHECK(app->session_writable&&app->hidden);CHECK(app->panes[0].tabs->len==3);CHECK(!strcmp(fw_browser_path(app->panes[0].browser),extra));CHECK(app->active==app->panes+1);
+    switch_tab(app->panes,2);wait_failure(app->panes[0].browser);CHECK(!strcmp(app->panes[0].tab->path,missing));switch_tab(app->panes,1);wait_panes(app);gtk_notebook_reorder_child(GTK_NOTEBOOK(app->panes[0].notebook),app->panes[0].tab->page,0);close_session_window(app);
+    s=read_session(path);CHECK(s->paths[0]->len==3&&!strcmp(s->paths[0]->pdata[0],extra));CHECK(s->hidden);CHECK(s->split>5500&&s->split<6100);fw_session_free(s);
+    app=create_window(NULL,helper,icon,NULL,NULL);clipboard_set(app,test_clipboard);gtk_window_present(app->window);session_start(app,path,right,NULL);wait_session_window(app);wait_panes(app);CHECK(app->panes[0].tabs->len==1);CHECK(!strcmp(fw_browser_path(app->panes[0].browser),right));CHECK(!strcmp(fw_browser_path(app->panes[1].browser),right));close_session_window(app);
+    g_free(path);g_free(state);g_free(missing);g_free(extra);g_free(right);g_free(left);
+}
+static void test_session_close_loading_and_save_failure(void)
+{
+    char *left=directory("session-close-left"),*right=directory("session-close-right"),*state=directory("session-close-state"),*path=g_build_filename(state,"session.ini",NULL),*moved=g_strconcat(state,"-moved",NULL);
+    FwSession *s=sample_session(left,right);FwSessionStore *store=fw_session_store_new(path);FwSessionLoad *load=load_store(store);fw_session_load_free(load);save_store(store,s);g_object_unref(store);fw_session_free(s);
+    App *app=create_window(NULL,helper,icon,NULL,NULL);clipboard_set(app,test_clipboard);gtk_window_present(app->window);session_start(app,path,NULL,NULL);close_session_window(app);s=read_session(path);CHECK(!strcmp(s->paths[0]->pdata[0],left));fw_session_free(s);
+    app=create_window(NULL,helper,icon,NULL,NULL);clipboard_set(app,test_clipboard);gtk_window_present(app->window);session_start(app,path,NULL,NULL);wait_session_window(app);wait_panes(app);CHECK(!g_rename(state,moved));gtk_window_close(app->window);
+    gint64 end=g_get_monotonic_time()+5000000;while(!app->session_exit_without_save){pump();CHECK(g_get_monotonic_time()<end);g_usleep(1000);}CHECK(!app->closing&&!app->session_closing);close_session_window(app);
+    char *kept=g_build_filename(moved,"session.ini",NULL);s=read_session(kept);CHECK(!strcmp(s->paths[1]->pdata[0],right));fw_session_free(s);g_free(kept);g_free(moved);g_free(path);g_free(state);g_free(right);g_free(left);
 }
 
 static int peer_read(void *data,size_t size)
@@ -774,7 +867,13 @@ int main(int argc, char **argv)
         {"test_clipboard_external_transport",test_clipboard_external_transport},
         {"test_clipboard_copy_cut_paste_desktop",test_clipboard_copy_cut_paste_desktop},
         {"test_clipboard_move_retention_and_replacement",test_clipboard_move_retention_and_replacement},
-        {"test_clipboard_focus_navigation_and_close",test_clipboard_focus_navigation_and_close}
+        {"test_clipboard_focus_navigation_and_close",test_clipboard_focus_navigation_and_close},
+        {"test_session_codec_and_bounds",test_session_codec_and_bounds},
+        {"test_session_store_atomic_ownership_and_recovery",test_session_store_atomic_ownership_and_recovery},
+        {"test_tabs_history_selection_reorder_and_limits",test_tabs_history_selection_reorder_and_limits},
+        {"test_tabs_pending_paste_and_transfer",test_tabs_pending_paste_and_transfer},
+        {"test_session_desktop_restore_and_overrides",test_session_desktop_restore_and_overrides},
+        {"test_session_close_loading_and_save_failure",test_session_close_loading_and_save_failure}
     };
     for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
         gint64 start = g_get_monotonic_time(); cases[i].run();

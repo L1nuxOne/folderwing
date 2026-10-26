@@ -20,11 +20,11 @@ read -r -a sqlite_flags <<< "$(pkg-config --cflags --libs sqlite3)"
  "${helper_sources[@]}" "${sqlite_flags[@]}" -lm -lpthread -o "$stage/folderwing-linux-helper"
 read -r -a gtk_flags <<< "$(pkg-config --cflags --libs gtk4 gio-unix-2.0)"
 "$compiler" -std=c11 -O2 -g -Wall -Wextra -Werror \
- linux-prototype/model.c linux-prototype/operations.c linux-prototype/desktop.c linux-prototype/clipboard.c linux-prototype/browser.c "${gtk_flags[@]}" -o "$stage/folderwing-linux"
+ linux-prototype/model.c linux-prototype/operations.c linux-prototype/desktop.c linux-prototype/clipboard.c linux-prototype/session.c linux-prototype/browser.c "${gtk_flags[@]}" -o "$stage/folderwing-linux"
 cp docs/branding/folderwing-icon.svg "$stage/folderwing.svg"
 if [[ "${1:-}" == --tests ]]; then
  "$compiler" -std=c11 -O2 -g -Wall -Wextra -Werror \
- tests/linux_browser_tests.c linux-prototype/model.c linux-prototype/operations.c linux-prototype/desktop.c linux-prototype/clipboard.c "${gtk_flags[@]}" -o "$stage/folderwing-linux-browser-tests"
+ tests/linux_browser_tests.c linux-prototype/model.c linux-prototype/operations.c linux-prototype/desktop.c linux-prototype/clipboard.c linux-prototype/session.c "${gtk_flags[@]}" -o "$stage/folderwing-linux-browser-tests"
  "$compiler" -std=c11 -O2 -g -Isrc -Wno-unused-parameter -Wno-missing-field-initializers \
   "${helper_sources[@]}" tests/fixtures/linux_ops_faults.c "${sqlite_flags[@]}" -lm -lpthread -Wl,--wrap=fsync -o "$stage/folderwing-linux-helper-faults"
 fi

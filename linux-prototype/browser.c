@@ -6,11 +6,16 @@
 #include "operations.h"
 #include "desktop.h"
 #include "clipboard.h"
+#include "session.h"
 
 typedef struct App App;
 typedef struct Draft Draft;
 typedef struct NameEdit NameEdit;
 typedef struct ContextMenu ContextMenu;
+typedef struct Tab {
+    char *path;GPtrArray *history;guint history_at;GHashTable *selection;
+    GtkWidget *page,*label,*close;gboolean failed;guint64 id;
+} Tab;
 typedef struct Pane {
     App *app;
     FwBrowser *browser;
@@ -25,6 +30,7 @@ typedef struct Pane {
     GHashTable *selected_names;
     char *select_after, *select_root;
     ContextMenu *context;
+    GPtrArray *tabs;Tab *tab;GtkWidget *notebook,*new_tab;gboolean tab_changing,restore_tab_selection;
 } Pane;
 struct App {
     GtkWindow *window; Pane panes[2]; Pane *active; gboolean hidden, closing, close_wait, close_queued, job_reported;
@@ -33,6 +39,8 @@ struct App {
     GCancellable *launch_cancel; GtkWindow *chooser; GtkWidget *desktop_status;gboolean opening;
     GdkClipboard *clipboard;GdkContentProvider *owned_clipboard;GHashTable *cut_paths;
     GCancellable *paste_cancel;guint64 clipboard_epoch,job_clipboard_epoch;gboolean job_clipboard_cut;
+    GtkWidget *split;FwSessionStore *session;gboolean restoring,session_writable,session_dirty,session_saving,session_closing,session_close_ready,session_exit_without_save;
+    guint session_timer;guint64 tab_serial;char *initial_paths[2];gint normal_width,normal_height,restore_split;gboolean restore_maximized;
 };
 static void update_actions(App *app);
 static void draft_discard(App *app);
@@ -50,9 +58,16 @@ static void clipboard_job_finished(App *app,const FwJobProgress *progress);
 static void clipboard_set(App *app,GdkClipboard *clipboard);
 static gboolean cut_path(Pane *pane,const char *name);
 static void clipboard_notice(App *app,const char *message,gboolean error);
+static void session_changed(App *app);
+static void tab_sync(Pane *pane);
+static void tab_add(Pane *pane,const char *path,gboolean activate);
+static void tab_close(Pane *pane,Tab *tab);
+static void tabs_init(Pane *pane);
+static gboolean session_close(App *app);
 static void app_stop(App *app)
 {
     app->closing = TRUE;
+    if(app->session_timer){g_source_remove(app->session_timer);app->session_timer=0;}
     draft_discard(app); edit_discard(app);
     if(app->paste_cancel)g_cancellable_cancel(app->paste_cancel);
     if(app->clipboard)g_signal_handlers_disconnect_by_data(app->clipboard,app);
@@ -82,9 +97,11 @@ static void app_free(gpointer data)
         }
         g_clear_object(&pane->selection); g_clear_object(&pane->sorted); g_clear_object(&pane->filtered);
         if (pane->history) g_ptr_array_unref(pane->history);
+        if(pane->tabs)g_ptr_array_unref(pane->tabs);
         g_clear_pointer(&pane->selected_names, g_hash_table_unref); g_free(pane->select_after); g_free(pane->select_root);
     }
     g_clear_object(&app->paste_cancel);g_clear_object(&app->owned_clipboard);g_clear_object(&app->clipboard);g_clear_pointer(&app->cut_paths,g_hash_table_unref);
+    g_clear_object(&app->session);g_free(app->initial_paths[0]);g_free(app->initial_paths[1]);
     g_clear_object(&app->launch_cancel);g_clear_object(&app->job); g_free(app->helper); g_strfreev(app->job_env); g_free(app);
 }
 static gint compare_name(gconstpointer a, gconstpointer b, gpointer unused)
@@ -216,6 +233,7 @@ static void pane_update(Pane *pane)
     if (committed) {
         pane->revision = revision; update_history(pane); pane->restore_selection = pane->selected_names && g_hash_table_size(pane->selected_names);
     }
+    tab_sync(pane);
     if (committed || (!busy && pane->requested && *fw_browser_path(pane->browser))) {
         char *display = fw_display_bytes(fw_browser_path(pane->browser));
         gtk_editable_set_text(GTK_EDITABLE(pane->address), display); g_free(display);
@@ -227,6 +245,14 @@ static void pane_update(Pane *pane)
     gtk_widget_set_sensitive(pane->back, pane->history->len && pane->history_at > 0);
     gtk_widget_set_sensitive(pane->forward, pane->history->len && pane->history_at+1 < pane->history->len);
     guint visible = g_list_model_get_n_items(G_LIST_MODEL(pane->sorted));
+    if(!busy&&!pending&&pane->restore_tab_selection){
+        pane->restore_tab_selection=FALSE;
+        for(guint i=0;pane->tab&&pane->tab->selection&&i<visible;i++){
+            GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),i);
+            if(g_hash_table_contains(pane->tab->selection,g_file_info_get_name(info)))gtk_selection_model_select_item(pane->selection,i,FALSE);
+            g_object_unref(info);
+        }
+    }
     if (!busy && !pending && pane->restore_selection) {
         pane->restore_selection = FALSE;
         GtkBitset *selected = gtk_bitset_new_empty(), *mask = gtk_bitset_new_range(0, visible);
@@ -268,6 +294,8 @@ static void pane_navigate(Pane *pane, const char *path)
         gtk_editable_set_text(GTK_EDITABLE(pane->address), display); g_free(display);
     }
     if (pane->app->edit) edit_discard(pane->app);
+    pane->restore_tab_selection=FALSE;
+    if(pane->tab){g_free(pane->tab->path);pane->tab->path=g_strdup(path);g_clear_pointer(&pane->tab->selection,g_hash_table_unref);session_changed(pane->app);}
     g_clear_pointer(&pane->select_after,g_free);g_clear_pointer(&pane->select_root,g_free);
     pane->requested = TRUE; g_clear_pointer(&pane->selected_names, g_hash_table_unref);
     fw_browser_navigate(pane->browser, path);
@@ -335,7 +363,7 @@ static gboolean job_active(App *app)
 static void update_actions(App *app)
 {
     if (!app->copy || app->closing) return;
-    gboolean ready = app->active && !app->draft && !app->edit && !app->paste_cancel && !job_active(app) && !fw_browser_busy(app->active->browser) &&
+    gboolean ready = !app->restoring && app->active && !app->draft && !app->edit && !app->paste_cancel && !job_active(app) && !fw_browser_busy(app->active->browser) &&
         !*fw_browser_error(app->active->browser) && !gtk_sort_list_model_get_pending(app->active->sorted) && !gtk_filter_list_model_get_pending(app->active->filtered);
     GtkBitset *selection = app->active ? gtk_selection_model_get_selection(app->active->selection) : NULL;
     guint64 selected = selection ? gtk_bitset_get_size(selection) : 0; if (selection) gtk_bitset_unref(selection);
@@ -346,9 +374,10 @@ static void update_actions(App *app)
     gboolean destination = other->browser && *fw_browser_path(other->browser) && !fw_browser_busy(other->browser) && !*fw_browser_error(other->browser);
     for(guint i=0;i<2;i++) {
         Pane *pane=&app->panes[i];GtkBitset *items=gtk_selection_model_get_selection(pane->selection);guint64 n=gtk_bitset_get_size(items);gtk_bitset_unref(items);
-        gboolean can_name=!app->draft&&!app->edit&&!app->paste_cancel&&!job_active(app)&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
+        gboolean can_name=!app->restoring&&!app->draft&&!app->edit&&!app->paste_cancel&&!job_active(app)&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
         if(pane->rename_button)gtk_widget_set_sensitive(pane->rename_button,(can_name&&n==1)||g_object_get_data(G_OBJECT(pane->rename_button),"editing")!=NULL);
         if(pane->new_button)gtk_widget_set_sensitive(pane->new_button,can_name||g_object_get_data(G_OBJECT(pane->new_button),"editing")!=NULL);
+        if(pane->new_tab)gtk_widget_set_sensitive(pane->new_tab,!app->restoring&&!app->session_closing&&!app->draft&&!app->chooser&&pane->tabs->len<FW_SESSION_TABS);
     }
     gtk_widget_set_sensitive(app->copy, ready && destination); gtk_widget_set_sensitive(app->move, ready && destination); gtk_widget_set_sensitive(app->trash, ready);
 }
@@ -724,7 +753,7 @@ static void open_path(Pane *pane,const char *path,guint purpose)
     fw_desktop_query_async(path,purpose==2,purpose==1,app->launch_cancel,open_queried,launch);
 }
 
-enum { MENU_OPEN,MENU_OPEN_WITH,MENU_COPY,MENU_MOVE,MENU_RENAME,MENU_TRASH,MENU_PATH,MENU_NEW,MENU_TERMINAL,MENU_REFRESH,MENU_CLIP_COPY,MENU_CUT,MENU_PASTE,MENU_COUNT };
+enum { MENU_OPEN,MENU_OPEN_WITH,MENU_COPY,MENU_MOVE,MENU_RENAME,MENU_TRASH,MENU_PATH,MENU_NEW,MENU_TERMINAL,MENU_REFRESH,MENU_CLIP_COPY,MENU_CUT,MENU_PASTE,MENU_TAB,MENU_COUNT };
 struct ContextMenu {
     Pane *pane;GtkWidget *popover,*buttons[MENU_COUNT];char *root,**names;guint count,revision;gboolean directory;
 };
@@ -805,7 +834,7 @@ static void clipboard_copy(Pane *pane,gboolean cut)
     }else{clipboard_notice(app,error->message,TRUE);g_error_free(error);}
     g_strfreev(paths);
 }
-typedef struct Paste { GtkWindow *window;GCancellable *cancel;char *root;guint pane;guint64 epoch; } Paste;
+typedef struct Paste { GtkWindow *window;GCancellable *cancel;char *root;guint pane;guint64 epoch,tab_id; } Paste;
 static void paste_read(GObject *source,GAsyncResult *result,gpointer data)
 {
     (void)source;Paste *paste=data;App *app=g_object_get_data(G_OBJECT(paste->window),"browser-state");GError *error=NULL;
@@ -814,7 +843,7 @@ static void paste_read(GObject *source,GAsyncResult *result,gpointer data)
     if(!app->closing){
         if(error)clipboard_notice(app,error->message,TRUE);
         else if(app->clipboard_epoch!=paste->epoch)clipboard_notice(app,"Clipboard changed; paste again.",FALSE);
-        else if(!pane_ready(pane)||strcmp(paste->root,fw_browser_path(pane->browser))||app->draft||app->edit||job_active(app))clipboard_notice(app,"Destination changed or is busy; paste again when it is ready.",TRUE);
+        else if(!pane->tab||pane->tab->id!=paste->tab_id||pane->requested||*fw_browser_error(pane->browser)||strcmp(paste->root,fw_browser_path(pane->browser))||app->draft||app->edit||job_active(app))clipboard_notice(app,"Destination changed or is busy; paste again when it is ready.",TRUE);
         else{app->active=pane;present_draft(app,files->cut?FW_MOVE:FW_COPY,files->paths,files->count,paste->root,TRUE,paste->epoch);clipboard_notice(app,"Review the pasted files and destination before starting.",FALSE);}
         update_actions(app);
     }
@@ -826,6 +855,7 @@ static void clipboard_paste(Pane *pane)
     if(!fw_clipboard_has_files(app->clipboard)){clipboard_notice(app,"The clipboard does not contain files to paste.",FALSE);return;}
     for(guint i=0;i<2;i++)context_discard(app->panes+i);
     Paste *paste=g_new0(Paste,1);paste->window=g_object_ref(app->window);paste->pane=(guint)(pane-app->panes);paste->root=g_strdup(fw_browser_path(pane->browser));paste->epoch=app->clipboard_epoch;
+    paste->tab_id=pane->tab->id;
     app->paste_cancel=g_cancellable_new();paste->cancel=g_object_ref(app->paste_cancel);clipboard_notice(app,"Reading clipboard files…",FALSE);
     fw_clipboard_read_async(app->clipboard,app->paste_cancel,paste_read,paste);update_actions(app);
 }
@@ -873,6 +903,7 @@ static void context_action(GtkButton *button,gpointer data)
     case MENU_CLIP_COPY:clipboard_copy(pane,FALSE);break;
     case MENU_CUT:clipboard_copy(pane,TRUE);break;
     case MENU_PASTE:clipboard_paste(pane);break;
+    case MENU_TAB:tab_add(pane,path,TRUE);break;
     default:break;
     }
     g_free(path);
@@ -916,6 +947,7 @@ static void show_context(Pane *pane,const char *name,double x,double y)
         menu_item(menu,MENU_RENAME,"Rename…",one&&idle);menu_item(menu,MENU_TRASH,"Move to Trash…",idle);
     }else menu_item(menu,MENU_NEW,"New Folder…",idle);
     menu_item(menu,MENU_PASTE,"Paste into This Pane…",idle&&!app->opening&&fw_clipboard_has_files(app->clipboard));
+    if(!count||(one&&menu->directory))menu_item(menu,MENU_TAB,count?"Open in New Tab":"New Tab",pane->tabs->len<FW_SESSION_TABS);
     menu_item(menu,MENU_PATH,count>1?"Copy Paths":"Copy Path",TRUE);
     if(!count||menu->directory)menu_item(menu,MENU_TERMINAL,"Open Terminal Here",(count<=1)&&!app->opening);
     if(!count)menu_item(menu,MENU_REFRESH,"Refresh",TRUE);
@@ -939,10 +971,203 @@ static void context_pressed(GtkGestureClick *gesture,gint n,double x,double y,gp
     show_context(pane,name,x,y);if(pane->context)gtk_gesture_set_state(GTK_GESTURE(gesture),GTK_EVENT_SEQUENCE_CLAIMED);
 }
 
+static void tab_free(gpointer data)
+{
+    Tab *tab=data;g_free(tab->path);g_ptr_array_unref(tab->history);g_clear_pointer(&tab->selection,g_hash_table_unref);g_free(tab);
+}
+static void tab_label(Tab *tab,const char *error)
+{
+    char *base=g_path_get_basename(tab->path),*display=fw_display_bytes(base),*path=fw_display_bytes(tab->path);g_free(base);
+    gtk_label_set_text(GTK_LABEL(tab->label),display);gtk_widget_set_tooltip_text(tab->label,path);
+    if(error&&*error)gtk_widget_add_css_class(tab->label,"error");else gtk_widget_remove_css_class(tab->label,"error");
+    g_free(display);g_free(path);
+}
+static void tab_sync(Pane *pane)
+{
+    if(!pane->tab)return;
+    const char *path=fw_browser_path(pane->browser),*error=fw_browser_error(pane->browser);
+    if(!fw_browser_busy(pane->browser)&&*path&&strcmp(path,pane->tab->path)){
+        g_free(pane->tab->path);pane->tab->path=g_strdup(path);session_changed(pane->app);
+    }
+    pane->tab->history_at=pane->history_at;pane->tab->failed=*error!=0;tab_label(pane->tab,error);
+}
+static void tab_capture(Pane *pane)
+{
+    Tab *tab=pane->tab;if(!tab)return;
+    tab->history_at=pane->history_target>=0?(guint)pane->history_target:pane->history_at;
+    g_clear_pointer(&tab->selection,g_hash_table_unref);tab->selection=g_hash_table_new_full(g_str_hash,g_str_equal,g_free,NULL);
+    if(pane->requested||fw_browser_busy(pane->browser))return;
+    GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);GtkBitsetIter iter;guint pos,count=0;
+    for(gboolean more=gtk_bitset_iter_init_first(&iter,selected,&pos);more&&count<4096;more=gtk_bitset_iter_next(&iter,&pos)){
+        GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),pos);if(info){g_hash_table_add(tab->selection,g_strdup(g_file_info_get_name(info)));g_object_unref(info);count++;}
+    }
+    gtk_bitset_unref(selected);
+}
+static void tab_activate(Pane *pane,Tab *tab)
+{
+    App *app=pane->app;tab_capture(pane);context_discard(pane);
+    if(app->paste_cancel)g_cancellable_cancel(app->paste_cancel);
+    if(app->edit)edit_discard(app);
+    g_signal_handlers_disconnect_by_data(pane->browser,pane);fw_browser_close(pane->browser);
+    FwBrowser *old=pane->browser;pane->browser=fw_browser_new(app->helper);g_signal_connect(pane->browser,"changed",G_CALLBACK(model_changed),pane);
+    pane->tab=tab;g_clear_pointer(&pane->history,g_ptr_array_unref);pane->history=g_ptr_array_ref(tab->history);pane->history_at=tab->history_at;pane->history_target=-1;
+    pane->revision=0;pane->busy=FALSE;pane->requested=TRUE;pane->restore_selection=FALSE;pane->restore_tab_selection=FALSE;
+    g_clear_pointer(&pane->selected_names,g_hash_table_unref);g_clear_pointer(&pane->select_after,g_free);g_clear_pointer(&pane->select_root,g_free);
+    gtk_filter_list_model_set_model(pane->filtered,fw_browser_entries(pane->browser));g_object_unref(old);
+    pane->restore_tab_selection=TRUE;
+    char *display=fw_display_bytes(tab->path);gtk_editable_set_text(GTK_EDITABLE(pane->address),display);g_free(display);
+    fw_browser_navigate(pane->browser,tab->path);app->active=pane;gtk_widget_grab_focus(pane->view);session_changed(app);update_actions(app);
+}
+static void tab_switched(GtkNotebook *notebook,GtkWidget *page,guint index,gpointer data)
+{
+    (void)index;Pane *pane=data;App *app=pane->app;if(pane->tab_changing||app->restoring||app->closing)return;
+    Tab *tab=g_object_get_data(G_OBJECT(page),"tab");if(!tab||tab==pane->tab)return;
+    if(app->draft||app->chooser||app->session_closing){
+        pane->tab_changing=TRUE;gtk_notebook_set_current_page(notebook,gtk_notebook_page_num(notebook,pane->tab->page));pane->tab_changing=FALSE;return;
+    }
+    tab_activate(pane,tab);
+}
+static void tab_closed(GtkButton *button,gpointer data)
+{
+    (void)button;Tab *tab=data;Pane *pane=g_object_get_data(G_OBJECT(tab->page),"pane");tab_close(pane,tab);
+}
+static Tab *tab_record(Pane *pane,const char *path)
+{
+    Tab *tab=g_new0(Tab,1);tab->id=++pane->app->tab_serial;tab->path=g_strdup(path);tab->history=g_ptr_array_new_with_free_func(g_free);tab->page=gtk_box_new(GTK_ORIENTATION_VERTICAL,0);
+    GtkWidget *header=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,4);tab->label=gtk_label_new("");gtk_label_set_ellipsize(GTK_LABEL(tab->label),PANGO_ELLIPSIZE_MIDDLE);gtk_label_set_max_width_chars(GTK_LABEL(tab->label),18);
+    tab->close=gtk_button_new_from_icon_name("window-close-symbolic");gtk_widget_add_css_class(tab->close,"flat");gtk_widget_set_tooltip_text(tab->close,"Close tab (Ctrl+W in the file list)");
+    gtk_box_append(GTK_BOX(header),tab->label);gtk_box_append(GTK_BOX(header),tab->close);g_object_set_data(G_OBJECT(tab->page),"tab",tab);g_object_set_data(G_OBJECT(tab->page),"pane",pane);
+    g_signal_connect(tab->close,"clicked",G_CALLBACK(tab_closed),tab);g_ptr_array_add(pane->tabs,tab);gtk_notebook_append_page(GTK_NOTEBOOK(pane->notebook),tab->page,header);
+    gtk_notebook_set_tab_reorderable(GTK_NOTEBOOK(pane->notebook),tab->page,TRUE);tab_label(tab,NULL);return tab;
+}
+static void tab_buttons(Pane *pane)
+{
+    for(guint i=0;i<pane->tabs->len;i++)gtk_widget_set_sensitive(((Tab *)pane->tabs->pdata[i])->close,pane->tabs->len>1);
+}
+static void tab_add(Pane *pane,const char *path,gboolean activate)
+{
+    App *app=pane->app;if(app->closing||app->restoring||app->session_closing||app->draft||app->chooser)return;
+    if(!path||!g_path_is_absolute(path)||strlen(path)>16384){clipboard_notice(app,"Choose an absolute folder path of at most 16 KiB.",TRUE);return;}
+    if(pane->tabs->len>=FW_SESSION_TABS){clipboard_notice(app,"Each pane supports up to 32 tabs.",FALSE);return;}
+    pane->tab_changing=TRUE;Tab *tab=tab_record(pane,path);pane->tab_changing=FALSE;tab_buttons(pane);
+    if(activate)gtk_notebook_set_current_page(GTK_NOTEBOOK(pane->notebook),gtk_notebook_page_num(GTK_NOTEBOOK(pane->notebook),tab->page));
+    session_changed(app);update_actions(app);
+}
+static void tab_close(Pane *pane,Tab *tab)
+{
+    App *app=pane->app;if(app->closing||app->restoring||app->session_closing||app->draft||app->chooser||pane->tabs->len<2)return;
+    gint at=gtk_notebook_page_num(GTK_NOTEBOOK(pane->notebook),tab->page);if(at<0)return;
+    if(tab==pane->tab)gtk_notebook_set_current_page(GTK_NOTEBOOK(pane->notebook),at?at-1:1);
+    pane->tab_changing=TRUE;gtk_notebook_remove_page(GTK_NOTEBOOK(pane->notebook),gtk_notebook_page_num(GTK_NOTEBOOK(pane->notebook),tab->page));pane->tab_changing=FALSE;
+    g_ptr_array_remove(pane->tabs,tab);tab_buttons(pane);session_changed(app);update_actions(app);
+}
+static void tab_new_clicked(GtkButton *button,gpointer data) { (void)button;Pane *pane=data;tab_add(pane,pane->tab->path,TRUE); }
+static void tab_reordered(GtkNotebook *notebook,GtkWidget *page,guint at,gpointer data)
+{ (void)notebook;(void)page;(void)at;Pane *pane=data;session_changed(pane->app); }
+static void tabs_init(Pane *pane)
+{
+    pane->tabs=g_ptr_array_new_with_free_func(tab_free);GtkWidget *bar=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);pane->notebook=gtk_notebook_new();gtk_notebook_set_show_border(GTK_NOTEBOOK(pane->notebook),FALSE);gtk_notebook_set_scrollable(GTK_NOTEBOOK(pane->notebook),TRUE);gtk_widget_set_hexpand(pane->notebook,TRUE);
+    pane->new_tab=gtk_button_new_from_icon_name("tab-new-symbolic");gtk_widget_add_css_class(pane->new_tab,"flat");gtk_widget_set_tooltip_text(pane->new_tab,"New tab (Ctrl+T)");
+    gtk_box_append(GTK_BOX(bar),pane->notebook);gtk_box_append(GTK_BOX(bar),pane->new_tab);gtk_box_prepend(GTK_BOX(pane->box),bar);
+    pane->tab_changing=TRUE;pane->tab=tab_record(pane,pane==pane->app->panes?g_get_home_dir():"/");g_ptr_array_unref(pane->tab->history);pane->tab->history=g_ptr_array_ref(pane->history);pane->tab_changing=FALSE;tab_buttons(pane);
+    g_signal_connect(pane->notebook,"switch-page",G_CALLBACK(tab_switched),pane);g_signal_connect(pane->notebook,"page-reordered",G_CALLBACK(tab_reordered),pane);g_signal_connect(pane->new_tab,"clicked",G_CALLBACK(tab_new_clicked),pane);
+}
+static FwSession *session_capture(App *app)
+{
+    FwSession *s=fw_session_new();s->pane=app->active==app->panes+1;s->hidden=app->hidden;s->maximized=app->restore_split?app->restore_maximized:gtk_window_is_maximized(app->window);
+    if(!s->maximized&&!app->restore_split){gint w=gtk_widget_get_width(GTK_WIDGET(app->window)),h=gtk_widget_get_height(GTK_WIDGET(app->window));if(w>=640)app->normal_width=w;if(h>=400)app->normal_height=h;}
+    s->width=CLAMP(app->normal_width,640,8192);s->height=CLAMP(app->normal_height,400,8192);gint width=gtk_widget_get_width(app->split);
+    s->split=app->restore_split?app->restore_split:width>0?CLAMP((gint)((gint64)gtk_paned_get_position(GTK_PANED(app->split))*10000/width),1000,9000):5000;
+    for(guint i=0;i<2;i++){
+        Pane *pane=app->panes+i;s->active[i]=(guint)MAX(gtk_notebook_get_current_page(GTK_NOTEBOOK(pane->notebook)),0);
+        for(guint j=0;j<pane->tabs->len;j++){GtkWidget *page=gtk_notebook_get_nth_page(GTK_NOTEBOOK(pane->notebook),j);Tab *tab=g_object_get_data(G_OBJECT(page),"tab");g_ptr_array_add(s->paths[i],g_strdup(tab->path));}
+    }
+    return s;
+}
+static void session_write(App *app);
+static void session_saved(GObject *source,GAsyncResult *result,gpointer data)
+{
+    GtkWindow *window=data;App *app=g_object_get_data(G_OBJECT(window),"browser-state");GError *error=NULL;gboolean ok=fw_session_save_finish(FW_SESSION_STORE(source),result,&error);app->session_saving=FALSE;
+    if(app->closing){g_clear_error(&error);g_object_unref(window);return;}
+    if(ok)app->session_exit_without_save=FALSE;
+    if(!ok){
+        app->session_dirty=TRUE;clipboard_notice(app,error->message,TRUE);g_warning("Folderwing session save failed: %s",error->message);g_error_free(error);
+        if(app->session_closing){app->session_closing=FALSE;app->session_exit_without_save=TRUE;gtk_widget_set_sensitive(GTK_WIDGET(window),TRUE);clipboard_notice(app,"Session could not be saved. Close again to exit without saving.",TRUE);}
+    }else if(app->session_closing){
+        if(app->session_dirty)session_write(app);else{app->session_close_ready=TRUE;gtk_window_close(window);}
+    }else if(app->session_dirty)session_changed(app);
+    g_object_unref(window);
+}
+static void session_write(App *app)
+{
+    if(app->closing||app->session_saving||!app->session_writable)return;
+    app->session_saving=TRUE;app->session_dirty=FALSE;FwSession *s=session_capture(app);
+    fw_session_save_async(app->session,s,session_saved,g_object_ref(app->window));fw_session_free(s);
+}
+static gboolean session_due(gpointer data)
+{ App *app=data;app->session_timer=0;if(app->session_dirty)session_write(app);return G_SOURCE_REMOVE; }
+static void session_changed(App *app)
+{
+    if(!app->session||!app->session_writable||app->restoring||app->closing||app->session_closing)return;
+    app->session_dirty=TRUE;
+    if(!app->session_saving&&!app->session_timer)app->session_timer=g_timeout_add(500,session_due,app);
+}
+static gboolean session_close(App *app)
+{
+    if(!app->session||app->session_close_ready||app->session_exit_without_save)return FALSE;
+    if(!app->restoring&&!app->session_writable)return FALSE;
+    if(app->session_closing)return TRUE;
+    app->session_closing=TRUE;gtk_widget_set_sensitive(GTK_WIDGET(app->window),FALSE);
+    if(app->session_timer){g_source_remove(app->session_timer);app->session_timer=0;}
+    app->session_dirty=TRUE;if(!app->restoring)session_write(app);return TRUE;
+}
+static gboolean session_split_tick(GtkWidget *widget,GdkFrameClock *clock,gpointer data)
+{
+    (void)clock;App *app=data;gint width=gtk_widget_get_width(widget);if(!width)return G_SOURCE_CONTINUE;
+    gtk_paned_set_position(GTK_PANED(widget),(gint)((gint64)width*app->restore_split/10000));app->restore_split=0;return G_SOURCE_REMOVE;
+}
+static void session_split_changed(GObject *object,GParamSpec *spec,gpointer data)
+{ (void)object;(void)spec;session_changed(data); }
+static void session_apply(App *app,const FwSession *s)
+{
+    app->restoring=TRUE;
+    for(guint i=0;i<2;i++){
+        Pane *pane=app->panes+i;pane->tab_changing=TRUE;pane->tab=NULL;
+        while(gtk_notebook_get_n_pages(GTK_NOTEBOOK(pane->notebook)))gtk_notebook_remove_page(GTK_NOTEBOOK(pane->notebook),0);
+        g_ptr_array_set_size(pane->tabs,0);
+        if(app->initial_paths[i])tab_record(pane,app->initial_paths[i]);else for(guint j=0;j<s->paths[i]->len;j++)tab_record(pane,s->paths[i]->pdata[j]);
+        guint active=app->initial_paths[i]?0:s->active[i];gtk_notebook_set_current_page(GTK_NOTEBOOK(pane->notebook),active);Tab *tab=g_object_get_data(G_OBJECT(gtk_notebook_get_nth_page(GTK_NOTEBOOK(pane->notebook),active)),"tab");
+        pane->tab_changing=FALSE;tab_activate(pane,tab);tab_buttons(pane);
+    }
+    GtkToggleButton *hidden=g_object_get_data(G_OBJECT(app->window),"hidden-button");gtk_toggle_button_set_active(hidden,s->hidden);
+    app->normal_width=s->width;app->normal_height=s->height;gtk_window_set_default_size(app->window,s->width,s->height);
+    app->restore_split=s->split;app->restore_maximized=s->maximized;gtk_widget_add_tick_callback(app->split,session_split_tick,app,NULL);if(s->maximized)gtk_window_maximize(app->window);
+    app->active=app->panes+s->pane;gtk_widget_grab_focus(app->active->view);app->restoring=FALSE;update_actions(app);
+}
+static void session_loaded(GObject *source,GAsyncResult *result,gpointer data)
+{
+    GtkWindow *window=data;App *app=g_object_get_data(G_OBJECT(window),"browser-state");GError *error=NULL;FwSessionLoad *load=fw_session_load_finish(FW_SESSION_STORE(source),result,&error);
+    if(!app->closing){
+        FwSession *fallback=NULL;const FwSession *s=load?load->session:NULL;
+        if(!s){fallback=fw_session_new();g_ptr_array_add(fallback->paths[0],g_strdup(g_get_home_dir()));g_ptr_array_add(fallback->paths[1],g_strdup("/"));s=fallback;}
+        app->session_writable=load&&load->writable;session_apply(app,s);fw_session_free(fallback);
+        if(error)clipboard_notice(app,error->message,TRUE);else if(load->warning)clipboard_notice(app,load->warning,FALSE);else clipboard_notice(app,"Session restored.",FALSE);
+        if(app->session_closing){if(app->session_writable)session_write(app);else{app->session_close_ready=TRUE;gtk_window_close(window);}}
+        else session_changed(app);
+    }
+    g_clear_error(&error);fw_session_load_free(load);g_object_unref(window);
+}
+static void session_start(App *app,const char *path,const char *left,const char *right)
+{
+    app->restoring=TRUE;app->initial_paths[0]=g_strdup(left);app->initial_paths[1]=g_strdup(right);app->session=fw_session_store_new(path);
+    g_signal_connect(app->split,"notify::position",G_CALLBACK(session_split_changed),app);clipboard_notice(app,"Restoring session…",FALSE);update_actions(app);
+    fw_session_load_async(app->session,session_loaded,g_object_ref(app->window));
+}
+
 static void pane_focus(GtkEventControllerFocus *controller, gpointer data)
 {
     (void)controller; Pane *pane = data;
-    pane->app->active = pane;
+    if(pane->app->active!=pane){pane->app->active=pane;session_changed(pane->app);}
     for (guint i = 0; i < 2; i++) gtk_widget_remove_css_class(pane->app->panes[i].box, "active-pane");
     gtk_widget_add_css_class(pane->box, "active-pane"); update_actions(pane->app);
 }
@@ -1000,6 +1225,7 @@ static void make_pane(App *app, guint index, const char *helper)
     g_signal_connect(pane->browser, "changed", G_CALLBACK(model_changed), pane);
     g_signal_connect(pane->sorted, "notify::pending", G_CALLBACK(pending_changed), pane);
     g_signal_connect(pane->filtered, "notify::pending", G_CALLBACK(pending_changed), pane);
+    tabs_init(pane);
     pane_update(pane);
 }
 static void hidden_toggled(GtkToggleButton *button, gpointer data)
@@ -1009,11 +1235,21 @@ static void hidden_toggled(GtkToggleButton *button, gpointer data)
         gtk_filter_changed(gtk_filter_list_model_get_filter(app->panes[i].filtered), GTK_FILTER_CHANGE_DIFFERENT);
         pane_update(&app->panes[i]);
     }
+    session_changed(app);
 }
 static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint code, GdkModifierType mods, gpointer data)
 {
     (void)controller; (void)code; App *app = data; Pane *pane = app->active;
     if (!pane) return FALSE;
+    if(app->restoring||app->session_closing)return FALSE;
+    if((mods&GDK_CONTROL_MASK)&&!(mods&GDK_ALT_MASK)&&(key==GDK_KEY_t||key==GDK_KEY_T)){
+        tab_add(pane,pane->tab->path,TRUE);return TRUE;
+    }
+    if((mods&GDK_CONTROL_MASK)&&!(mods&GDK_ALT_MASK)&&(key==GDK_KEY_Page_Up||key==GDK_KEY_Page_Down||key==GDK_KEY_Tab||key==GDK_KEY_ISO_Left_Tab)){
+        gint count=(gint)pane->tabs->len,at=gtk_notebook_get_current_page(GTK_NOTEBOOK(pane->notebook));
+        gint step=key==GDK_KEY_Page_Up||key==GDK_KEY_ISO_Left_Tab||(mods&GDK_SHIFT_MASK)?-1:1;
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(pane->notebook),(at+step+count)%count);return TRUE;
+    }
     if ((mods & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK) && (key==GDK_KEY_n||key==GDK_KEY_N)) {begin_name_edit(pane,FW_MKDIR,TRUE);return TRUE;}
     if ((mods & GDK_CONTROL_MASK) && (key == GDK_KEY_l || key == GDK_KEY_L)) {
         gtk_widget_grab_focus(pane->address); gtk_editable_select_region(GTK_EDITABLE(pane->address), 0, -1); return TRUE;
@@ -1030,6 +1266,7 @@ static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint 
     }
     GtkWidget *focus = gtk_window_get_focus(app->window);
     gboolean in_files = focus && (focus == pane->view || gtk_widget_is_ancestor(focus, pane->view));
+    if(in_files&&(mods&GDK_CONTROL_MASK)&&!(mods&(GDK_SHIFT_MASK|GDK_ALT_MASK))&&(key==GDK_KEY_w||key==GDK_KEY_W)){tab_close(pane,pane->tab);return TRUE;}
     if(in_files&&(mods&GDK_CONTROL_MASK)&&!(mods&(GDK_ALT_MASK|GDK_SHIFT_MASK))){
         if(key==GDK_KEY_c||key==GDK_KEY_C){clipboard_copy(pane,FALSE);return TRUE;}
         if(key==GDK_KEY_x||key==GDK_KEY_X){clipboard_copy(pane,TRUE);return TRUE;}
@@ -1054,6 +1291,7 @@ static gboolean window_close(GtkWindow *window, gpointer data)
     if (job_active(app)) {
         app->close_wait = TRUE; fw_job_cancel(app->job); operation_changed(app->job, app); return TRUE;
     }
+    if(session_close(app))return TRUE;
     app_stop(app);
     return FALSE;
 }
@@ -1094,6 +1332,7 @@ static App *create_window(GtkApplication *application, const char *helper, const
     gtk_window_set_titlebar(app->window, header);
     make_pane(app, 0, helper); make_pane(app, 1, helper); app->active = app->panes;
     GtkWidget *split = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+    app->split=split;app->normal_width=1280;app->normal_height=760;
     gtk_paned_set_start_child(GTK_PANED(split), app->panes[0].box); gtk_paned_set_end_child(GTK_PANED(split), app->panes[1].box);
     gtk_paned_set_position(GTK_PANED(split), 640); gtk_paned_set_shrink_start_child(GTK_PANED(split), TRUE); gtk_paned_set_shrink_end_child(GTK_PANED(split), TRUE);
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); gtk_widget_set_vexpand(split, TRUE);
@@ -1105,16 +1344,19 @@ static App *create_window(GtkApplication *application, const char *helper, const
     g_signal_connect(keys, "key-pressed", G_CALLBACK(key_pressed), app); gtk_widget_add_controller(GTK_WIDGET(app->window), keys);
     g_signal_connect(app->window, "close-request", G_CALLBACK(window_close), app);
     clipboard_set(app,gtk_widget_get_clipboard(GTK_WIDGET(app->window)));
-    pane_navigate(app->panes, left); pane_navigate(app->panes+1, right); return app;
+    if(left)pane_navigate(app->panes,left);
+    if(right)pane_navigate(app->panes+1,right);
+    return app;
 }
 #ifndef FW_BROWSER_TEST
-static char *option_left, *option_right, *option_helper, *program_dir;
+static char *option_left, *option_right, *option_helper, *option_session, *program_dir;static gboolean option_no_session;
 static void activate(GtkApplication *application, gpointer unused)
 {
     (void)unused;
     char *helper = option_helper ? g_strdup(option_helper) : g_build_filename(program_dir, "folderwing-linux-helper", NULL);
     char *icon = g_build_filename(program_dir, "folderwing.svg", NULL);
-    App *app = create_window(application, helper, icon, option_left ? option_left : g_get_home_dir(), option_right ? option_right : "/");
+    App *app = create_window(application, helper, icon, option_no_session?(option_left?option_left:g_get_home_dir()):NULL,option_no_session?(option_right?option_right:"/"):NULL);
+    if(!option_no_session){char *path=option_session?g_strdup(option_session):fw_session_default_path();session_start(app,path,option_left,option_right);g_free(path);}
     gtk_window_present(app->window); gtk_widget_grab_focus(app->panes[0].view); g_free(helper); g_free(icon);
 }
 int main(int argc, char **argv)
@@ -1124,17 +1366,20 @@ int main(int argc, char **argv)
         {"left", 'l', 0, G_OPTION_ARG_FILENAME, &option_left, "Initial left folder (absolute native path)", "PATH"},
         {"right", 'r', 0, G_OPTION_ARG_FILENAME, &option_right, "Initial right folder (absolute native path)", "PATH"},
         {"helper", 0, 0, G_OPTION_ARG_FILENAME, &option_helper, "Explicit listing/watching helper executable", "PATH"},
+        {"session-file",0,0,G_OPTION_ARG_FILENAME,&option_session,"Use a separate absolute session file","PATH"},
+        {"no-session",0,0,G_OPTION_ARG_NONE,&option_no_session,"Start without loading or saving a session",NULL},
         {NULL, 0, 0, 0, NULL, NULL, NULL}
     };
     GOptionContext *context = g_option_context_new("— Folderwing native Linux browsing prototype");
     g_option_context_add_main_entries(context, options, NULL); GError *error = NULL;
     if (!g_option_context_parse(context, &argc, &argv, &error)) { g_printerr("%s\n", error->message); g_error_free(error); g_option_context_free(context); return 2; }
     g_option_context_free(context);
+    if((option_left&&(!g_path_is_absolute(option_left)||strlen(option_left)>16384))||(option_right&&(!g_path_is_absolute(option_right)||strlen(option_right)>16384))||(option_session&&!g_path_is_absolute(option_session))||(option_session&&option_no_session)){g_printerr("Use absolute folder/session paths (folders up to 16 KiB); use --session-file and --no-session separately.\n");return 2;}
     if (argc != 1) { g_printerr("Use --left PATH and --right PATH.\n"); return 2; }
     char *binary = g_file_read_link("/proc/self/exe", NULL); program_dir = binary ? g_path_get_dirname(binary) : g_get_current_dir(); g_free(binary);
     GtkApplication *application = gtk_application_new("one.l1nux.Folderwing.Prototype", G_APPLICATION_NON_UNIQUE);
     g_signal_connect(application, "activate", G_CALLBACK(activate), NULL);
     int status = g_application_run(G_APPLICATION(application), argc, argv);
-    g_object_unref(application); g_free(option_left); g_free(option_right); g_free(option_helper); g_free(program_dir); return status;
+    g_object_unref(application); g_free(option_left); g_free(option_right); g_free(option_helper);g_free(option_session); g_free(program_dir); return status;
 }
 #endif

@@ -61,7 +61,7 @@ cancellation; operations are not whole-batch rollback transactions. A disconnect
 or invalid result after mutation starts is **completion unconfirmed**, never
 success. There is no permanent-delete action or fallback.
 
-Previews, tabs and desktop/mount integration remain future steps. Mutation of mounted Windows/9P endpoints is refused: those need
+Previews and desktop/mount integration remain future steps. Mutation of mounted Windows/9P endpoints is refused: those need
 the Windows application's stream inventory and durability acknowledgements.
 
 The address bar uses a reversible display: `\\` represents a literal backslash,
@@ -111,7 +111,7 @@ its owned Xvfb only for the clipboard. Wayland clipboard transport itself is
 not covered by that profile. No user input automation or distro shutdown is
 needed; GTK environment configuration stays local to the launched process.
 
-Twenty-eight selectors cover byte-exact paths and metadata, independent/same-folder
+Thirty-four selectors cover byte-exact paths and metadata, independent/same-folder
 watches, failed/rapid navigation, malformed/truncated/disconnected peers,
 close-during-request cleanup, real two-pane widgets/history/sorting/filtering,
 a 10,000-file load, multi-selection review/cancel/refresh, copy conflict policies,
@@ -123,7 +123,11 @@ and asynchronous close/cancel. Application registration uses owned XDG fixtures.
 GNOME/Nautilus and KDE offers, bounded URI decoding/streaming, real native
 Copy/Move through Paste review, cut styling/refresh, cancellation, clipboard
 replacement, partial/failed completion and text-field shortcut guards. Tests
-neither launch user applications nor overwrite the user clipboard.
+neither launch user applications nor overwrite the user clipboard. Tab/session
+checks cover independent history/selection, reordering and bounds, unavailable
+folders, pending Paste/transfer/rename state, byte-exact session round trips,
+writer ownership, corrupt-file preservation and asynchronous close/save failure.
+All session fixtures are owned temporary paths; tests leave the user session alone.
 The test creates its own temporary root and removes
 only those fixtures, using lstat so fixture symlinks are never followed.
 Selectors and helper/source dependencies are in `tests/native-impact.json`.
@@ -259,3 +263,53 @@ The exchange formats follow the upstream
 and [KDE cut marker](https://github.com/KDE/kio/blob/master/src/widgets/paste.cpp).
 Acceptance uses protocol fixtures and two GDK connections; it does not claim
 an interactive Nautilus/Dolphin or Wayland-transport interoperability run.
+
+
+## Tabs and session restoration
+
+Each pane has its own tab strip, a **+** button and close buttons. **Ctrl+T**
+duplicates the active folder into a new tab; **Ctrl+W** closes the current tab
+while the file list has focus. **Ctrl+PageUp/PageDown** and **Ctrl+Tab** /
+**Ctrl+Shift+Tab** cycle within the active pane. Ctrl+W retains its text-editing
+behavior in the address/name fields. Drag tab headers to reorder them within a
+pane. A folder's context menu offers **Open in New Tab**, and the background
+menu offers **New Tab**. Each pane keeps at least one tab, up to 32.
+
+Navigation history and up to 4096 selected names are retained separately for
+each tab during the run. Sorting remains per pane. Switching tabs starts a fresh
+listing through the existing helper and closes that pane's previous listing
+connection. Only the two visible tabs have listing/watch helpers; inactive tabs
+keep lightweight folder/navigation records. An unavailable tab retains its path
+and error, with no other tab's old snapshot presented as that location. F5 retries
+it when a disk or mount returns.
+
+Switching or closing a tab discards unapplied name edits and cancels a pending
+clipboard read. Already-started jobs retain their captured source/destination
+paths and continue in the operation bar. No running job, clipboard cut state or
+unapplied dialog is saved or restarted as a session operation.
+
+Normal startup restores tab paths/order, selected tabs, active pane, hidden-file
+visibility, pane split and window size/maximized state. Folder history and file
+selection start fresh after a process restart. The state file is
+`$XDG_STATE_HOME/folderwing/linux-prototype/session.ini`, or
+`~/.local/state/folderwing/linux-prototype/session.ini` when XDG_STATE_HOME is not
+absolute. File names are base64-encoded native bytes, so non-UTF-8 names and
+logical symlink paths survive unchanged.
+
+Session I/O runs off the UI thread. Changes are coalesced for 500 ms and written
+with atomic replacement and GLib's durable-write flags. Closing drains any older
+save and writes the latest layout before exit. A final save failure keeps the
+window open with an error; closing it again exits without saving. The first
+window holds the writer lock for that session. Other windows can load it and
+browse independently, with a notice that they will not overwrite the saved
+layout. Process exit releases the lock automatically.
+
+Malformed/unsupported regular session files are preserved under a unique
+`.invalid-…` name before starting a new session. Unreadable files and non-regular
+session paths are preserved with saving disabled. Limits are 32 tabs per pane,
+16 KiB per path and a 2 MiB state file; decoding validates all layout fields.
+
+Use `--left PATH` or `--right PATH` to replace that pane's restored tabs with the
+specified folder. `--session-file /absolute/path/session.ini` gives a separate
+persistent session. `--no-session` starts without loading or saving state; it
+can be combined with `--left` and `--right` for disposable runs.
