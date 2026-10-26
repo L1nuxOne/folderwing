@@ -12,6 +12,7 @@
 #include <sys/xattr.h>
 
 static const char *helper, *icon, *executable;
+static void wait_visible_count(Pane *pane,guint count);
 static char *fixture;
 static guint assertions;
 #define CHECK(x) do { assertions++; if (!(x)) g_error("%s:%d: %s", __FILE__, __LINE__, #x); } while (0)
@@ -196,8 +197,15 @@ static void test_large_listing_and_cleanup(void)
     for (guint i = 0; i < 10000; i++) { char *name = g_strdup_printf("item-%05u.txt", i); file(root, name, "data"); g_free(name); }
     gint64 start = g_get_monotonic_time(); App *app = create_window(NULL, helper, icon, root, root);
     gtk_window_present(app->window); wait_panes(app);
-    CHECK(g_list_model_get_n_items(G_LIST_MODEL(app->panes[0].sorted)) == 10000);
-    CHECK(g_list_model_get_n_items(G_LIST_MODEL(app->panes[1].sorted)) == 10000);
+    for(guint i=0;i<2;i++) {
+        Pane *p=&app->panes[i];
+        if(g_list_model_get_n_items(G_LIST_MODEL(p->sorted))!=10000)
+            g_printerr("READINESS pane %u snapshot=%u filtered=%u sorted=%u filter-pending=%u sort-pending=%u revision=%u error=%s\n", i,
+                g_list_model_get_n_items(fw_browser_entries(p->browser)),g_list_model_get_n_items(G_LIST_MODEL(p->filtered)),g_list_model_get_n_items(G_LIST_MODEL(p->sorted)),
+                gtk_filter_list_model_get_pending(p->filtered),gtk_sort_list_model_get_pending(p->sorted),fw_browser_revision(p->browser),fw_browser_error(p->browser));
+        wait_visible_count(p,10000);
+        CHECK(g_list_model_get_n_items(G_LIST_MODEL(p->sorted))==10000);
+    }
     g_print("MEASURE two-pane 10000-file load and sort %.1f ms; helper listing %.1f / %.1f ms\n", (g_get_monotonic_time()-start)/1000.0,
         fw_browser_elapsed_ms(app->panes[0].browser), fw_browser_elapsed_ms(app->panes[1].browser));
     gtk_window_close(app->window); settle(100); g_free(root);
