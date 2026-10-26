@@ -7,10 +7,11 @@
 
 typedef struct App App;
 typedef struct Draft Draft;
+typedef struct NameEdit NameEdit;
 typedef struct Pane {
     App *app;
     FwBrowser *browser;
-    GtkWidget *box, *address, *view, *status, *spinner, *back, *forward;
+    GtkWidget *box, *address, *view, *status, *spinner, *back, *forward, *rename_button, *new_button;
     GtkFilterListModel *filtered;
     GtkSortListModel *sorted;
     GtkSelectionModel *selection;
@@ -19,20 +20,24 @@ typedef struct Pane {
     gint history_target;
     gboolean busy, requested, restore_selection;
     GHashTable *selected_names;
+    char *select_after, *select_root;
 } Pane;
 struct App {
     GtkWindow *window; Pane panes[2]; Pane *active; gboolean hidden, closing, close_wait, close_queued, job_reported;
-    char *helper, **job_env; FwJob *job; Draft *draft;
+    char *helper, **job_env; FwJob *job; Draft *draft; NameEdit *edit;
     GtkWidget *copy, *move, *trash, *cancel, *job_status, *job_progress, *job_details, *details;
 };
 static void update_actions(App *app);
 static void draft_discard(App *app);
+static void edit_discard(App *app);
+static void edit_finished(App *app, const FwJobProgress *progress);
+static void begin_name_edit(Pane *pane, FwOperation operation, gboolean popup);
 static void pane_update(Pane *pane);
 static void pane_navigate(Pane *pane, const char *path);
 static void app_stop(App *app)
 {
     app->closing = TRUE;
-    draft_discard(app);
+    draft_discard(app); edit_discard(app);
     if (app->job) { g_signal_handlers_disconnect_by_data(app->job, app); fw_job_cancel(app->job); }
     for (guint i = 0; i < 2; i++) {
         Pane *pane = &app->panes[i];
@@ -56,7 +61,7 @@ static void app_free(gpointer data)
         }
         g_clear_object(&pane->selection); g_clear_object(&pane->sorted); g_clear_object(&pane->filtered);
         if (pane->history) g_ptr_array_unref(pane->history);
-        g_clear_pointer(&pane->selected_names, g_hash_table_unref);
+        g_clear_pointer(&pane->selected_names, g_hash_table_unref); g_free(pane->select_after); g_free(pane->select_root);
     }
     g_clear_object(&app->job); g_free(app->helper); g_strfreev(app->job_env); g_free(app);
 }
@@ -115,6 +120,7 @@ static void bind_cell(GtkSignalListItemFactory *factory, GtkListItem *item, gpoi
         if (g_file_info_get_attribute_uint32(info, "fw::flags") & 2) name = "dialog-warning-symbolic";
         gtk_image_set_from_icon_name(GTK_IMAGE(icon), name);
         gtk_label_set_text(GTK_LABEL(label), g_file_info_get_display_name(info));
+        g_object_set_data_full(G_OBJECT(child), "fw-name", g_strdup(g_file_info_get_name(info)), g_free);
         guint mode = g_file_info_get_attribute_uint32(info, "unix::mode");
         const char *target = g_file_info_has_attribute(info, G_FILE_ATTRIBUTE_STANDARD_SYMLINK_TARGET) ? g_file_info_get_symlink_target(info) : NULL;
         char *link = target ? fw_display_bytes(target) : g_strdup("");
@@ -200,6 +206,14 @@ static void pane_update(Pane *pane)
         gtk_selection_model_set_selection(pane->selection, selected, mask);
         gtk_bitset_unref(selected); gtk_bitset_unref(mask);
     }
+    if (!busy && !pending && pane->select_after) {
+        if (strcmp(fw_browser_path(pane->browser), pane->select_root)) { g_clear_pointer(&pane->select_after,g_free); g_clear_pointer(&pane->select_root,g_free); }
+        else for (guint i=0;i<visible;i++) {
+            GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),i);
+            gboolean match=!strcmp(g_file_info_get_name(info),pane->select_after);g_object_unref(info);
+            if(match){gtk_selection_model_select_item(pane->selection,i,TRUE);g_clear_pointer(&pane->select_after,g_free);g_clear_pointer(&pane->select_root,g_free);break;}
+        }
+    }
     char *message;
     const char *error = fw_browser_error(pane->browser);
     if (*error) message = g_strdup(error);
@@ -219,6 +233,8 @@ static void pane_navigate(Pane *pane, const char *path)
         char *display = fw_display_bytes(path);
         gtk_editable_set_text(GTK_EDITABLE(pane->address), display); g_free(display);
     }
+    if (pane->app->edit) edit_discard(pane->app);
+    g_clear_pointer(&pane->select_after,g_free);g_clear_pointer(&pane->select_root,g_free);
     pane->requested = TRUE; g_clear_pointer(&pane->selected_names, g_hash_table_unref);
     fw_browser_navigate(pane->browser, path);
 }
@@ -283,7 +299,7 @@ static gboolean job_active(App *app)
 static void update_actions(App *app)
 {
     if (!app->copy || app->closing) return;
-    gboolean ready = app->active && !app->draft && !job_active(app) && !fw_browser_busy(app->active->browser) &&
+    gboolean ready = app->active && !app->draft && !app->edit && !job_active(app) && !fw_browser_busy(app->active->browser) &&
         !*fw_browser_error(app->active->browser) && !gtk_sort_list_model_get_pending(app->active->sorted) && !gtk_filter_list_model_get_pending(app->active->filtered);
     GtkBitset *selection = app->active ? gtk_selection_model_get_selection(app->active->selection) : NULL;
     guint64 selected = selection ? gtk_bitset_get_size(selection) : 0; if (selection) gtk_bitset_unref(selection);
@@ -292,6 +308,12 @@ static void update_actions(App *app)
     gtk_button_set_label(GTK_BUTTON(app->move), app->active == app->panes ? "Move →" : "← Move");
     Pane *other = app->active == app->panes ? app->panes+1 : app->panes;
     gboolean destination = other->browser && *fw_browser_path(other->browser) && !fw_browser_busy(other->browser) && !*fw_browser_error(other->browser);
+    for(guint i=0;i<2;i++) {
+        Pane *pane=&app->panes[i];GtkBitset *items=gtk_selection_model_get_selection(pane->selection);guint64 n=gtk_bitset_get_size(items);gtk_bitset_unref(items);
+        gboolean can_name=!app->draft&&!app->edit&&!job_active(app)&&!fw_browser_busy(pane->browser)&&!*fw_browser_error(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted)&&!gtk_filter_list_model_get_pending(pane->filtered);
+        if(pane->rename_button)gtk_widget_set_sensitive(pane->rename_button,(can_name&&n==1)||g_object_get_data(G_OBJECT(pane->rename_button),"editing")!=NULL);
+        if(pane->new_button)gtk_widget_set_sensitive(pane->new_button,can_name||g_object_get_data(G_OBJECT(pane->new_button),"editing")!=NULL);
+    }
     gtk_widget_set_sensitive(app->copy, ready && destination); gtk_widget_set_sensitive(app->move, ready && destination); gtk_widget_set_sensitive(app->trash, ready);
 }
 static void selection_changed(GtkSelectionModel *selection, guint position, guint count, gpointer data)
@@ -325,7 +347,7 @@ static void operation_changed(FwJob *job, gpointer data)
     gtk_label_set_text(GTK_LABEL(app->details), p.details); gtk_widget_set_visible(app->job_details, *p.details != 0);
     if (p.state == FW_JOB_ERRORS || p.state == FW_JOB_UNCONFIRMED) gtk_widget_add_css_class(app->job_status, "error"); else gtk_widget_remove_css_class(app->job_status, "error");
     if (!p.active && !app->job_reported) {
-        app->job_reported = TRUE;
+        app->job_reported = TRUE; edit_finished(app,&p);
         for (guint i = 0; i < 2; i++) fw_browser_refresh(app->panes[i].browser);
         if (app->close_wait && !app->close_queued) {
             app->close_queued = TRUE;
@@ -412,6 +434,117 @@ static GtkWidget *make_operations(App *app)
     gtk_expander_set_child(GTK_EXPANDER(app->job_details), scroll); gtk_widget_set_visible(app->job_details, FALSE); gtk_box_append(GTK_BOX(box), app->job_details); update_actions(app); return box;
 }
 
+struct NameEdit {
+    App *app; Pane *pane; GtkWidget *button,*popover,*entry,*error,*save,*cancel;
+    char *root,*source,*target; FwOperation operation; gboolean pending,dismissed;
+};
+static void edit_discard(App *app)
+{
+    NameEdit *edit=app->edit;if(!edit)return;
+    app->edit=NULL;g_signal_handlers_disconnect_by_data(edit->popover,edit);
+    GtkWidget *focus=gtk_window_get_focus(app->window);
+    if(focus&&(focus==edit->entry||gtk_widget_is_ancestor(focus,edit->popover)))gtk_window_set_focus(app->window,NULL);
+    gtk_popover_popdown(GTK_POPOVER(edit->popover));
+    g_object_set_data(G_OBJECT(edit->button),"editing",NULL);
+    gtk_menu_button_set_popover(GTK_MENU_BUTTON(edit->button),NULL);
+    if(!app->closing)gtk_widget_grab_focus(edit->pane->view);
+    g_free(edit->root);g_free(edit->source);g_free(edit->target);g_free(edit);update_actions(app);
+}
+static void edit_closed(GtkPopover *popover,gpointer data)
+{
+    (void)popover;NameEdit *edit=data;
+    if(edit->pending){edit->dismissed=TRUE;fw_job_cancel(edit->app->job);}
+    else edit_discard(edit->app);
+}
+static void edit_cancel(GtkButton *button,gpointer data)
+{
+    (void)button;NameEdit *edit=data;
+    if(edit->pending)gtk_popover_popdown(GTK_POPOVER(edit->popover));else edit_discard(edit->app);
+}
+static void edit_finished(App *app,const FwJobProgress *progress)
+{
+    NameEdit *edit=app->edit;if(!edit||!edit->pending)return;edit->pending=FALSE;
+    if(progress->state==FW_JOB_COMPLETE){
+        Pane *pane=edit->pane;g_free(pane->select_after);g_free(pane->select_root);
+        pane->select_after=g_path_get_basename(edit->target);pane->select_root=g_strdup(edit->root);
+        if(pane->select_after[0]=='.'&&!app->hidden){g_clear_pointer(&pane->select_after,g_free);g_clear_pointer(&pane->select_root,g_free);}
+        edit_discard(app);
+    }else if(progress->state==FW_JOB_CANCELLED||edit->dismissed||app->close_wait)edit_discard(app);
+    else {
+        gtk_widget_set_sensitive(edit->entry,TRUE);gtk_widget_set_sensitive(edit->save,TRUE);
+        gtk_label_set_text(GTK_LABEL(edit->error),*progress->details?progress->details:progress->message);
+        gtk_widget_set_tooltip_text(edit->error,*progress->details?progress->details:progress->message);
+        gtk_widget_grab_focus(edit->entry);
+    }
+}
+static void edit_submit(GtkWidget *widget,gpointer data)
+{
+    (void)widget;NameEdit *edit=data;App *app=edit->app;if(edit->pending)return;GError *error=NULL;
+    char *name=fw_parse_name(gtk_editable_get_text(GTK_EDITABLE(edit->entry)),&error);
+    if(!name){gtk_label_set_text(GTK_LABEL(edit->error),error->message);g_error_free(error);return;}
+    char *target=g_build_filename(edit->root,name,NULL);g_free(name);
+    const char *sources[]={edit->operation==FW_RENAME?edit->source:target};
+    FwJob *job=fw_job_new(app->helper,edit->operation,sources,1,edit->operation==FW_RENAME?target:NULL,FW_FAIL_CONFLICT,(const char *const *)app->job_env,&error);
+    if(!job){gtk_label_set_text(GTK_LABEL(edit->error),error->message);g_error_free(error);g_free(target);return;}
+    g_free(edit->target);edit->target=target;edit->pending=TRUE;
+    gtk_widget_grab_focus(edit->cancel);
+    gtk_widget_set_sensitive(edit->entry,FALSE);gtk_widget_set_sensitive(edit->save,FALSE);gtk_label_set_text(GTK_LABEL(edit->error),"");
+    if(app->job)g_signal_handlers_disconnect_by_data(app->job,app);
+    g_clear_object(&app->job);app->job=job;app->job_reported=FALSE;
+    g_signal_connect(job,"changed",G_CALLBACK(operation_changed),app);fw_job_start(job);operation_changed(job,app);
+}
+static GtkWidget *find_name_cell(GtkWidget *widget,const char *name)
+{
+    const char *bound=g_object_get_data(G_OBJECT(widget),"fw-name");
+    if(bound&&!strcmp(bound,name)&&gtk_widget_get_mapped(widget))return widget;
+    for(GtkWidget *child=gtk_widget_get_first_child(widget);child;child=gtk_widget_get_next_sibling(child)){
+        GtkWidget *found=find_name_cell(child,name);if(found)return found;
+    }
+    return NULL;
+}
+static char *new_folder_name(Pane *pane)
+{
+    GHashTable *names=g_hash_table_new_full(g_str_hash,g_str_equal,g_free,NULL);GListModel *model=fw_browser_entries(pane->browser);
+    for(guint i=0;i<g_list_model_get_n_items(model);i++){
+        GFileInfo *info=g_list_model_get_item(model,i);g_hash_table_add(names,g_strdup(g_file_info_get_name(info)));g_object_unref(info);
+    }
+    char *name=g_strdup("New folder");
+    for(guint i=2;g_hash_table_contains(names,name)&&i<200002;i++){g_free(name);name=g_strdup_printf("New folder (%u)",i);}
+    g_hash_table_unref(names);return name;
+}
+static void begin_name_edit(Pane *pane,FwOperation operation,gboolean popup)
+{
+    App *app=pane->app;if(app->closing||app->draft||app->edit||job_active(app)||fw_browser_busy(pane->browser)||!*fw_browser_path(pane->browser)||*fw_browser_error(pane->browser)||gtk_sort_list_model_get_pending(pane->sorted)||gtk_filter_list_model_get_pending(pane->filtered))return;
+    char *name=NULL;GtkWidget *cell=NULL;
+    if(operation==FW_RENAME){
+        GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);
+        if(gtk_bitset_get_size(selected)!=1){gtk_bitset_unref(selected);return;}
+        guint position=gtk_bitset_get_minimum(selected);gtk_bitset_unref(selected);
+        GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),position);if(!info)return;
+        name=g_strdup(g_file_info_get_name(info));g_object_unref(info);cell=find_name_cell(pane->view,name);
+    }else name=new_folder_name(pane);
+    NameEdit *edit=g_new0(NameEdit,1);edit->app=app;edit->pane=pane;edit->operation=operation;edit->root=g_strdup(fw_browser_path(pane->browser));edit->source=g_build_filename(edit->root,name,NULL);
+    edit->button=operation==FW_RENAME?pane->rename_button:pane->new_button;app->edit=edit;app->active=pane;
+    edit->popover=gtk_popover_new();gtk_popover_set_has_arrow(GTK_POPOVER(edit->popover),FALSE);
+    gtk_menu_button_set_popover(GTK_MENU_BUTTON(edit->button),edit->popover);g_object_set_data(G_OBJECT(edit->button),"editing",edit);
+    if(cell){graphene_rect_t bounds;if(gtk_widget_compute_bounds(cell,edit->button,&bounds)){
+        GdkRectangle anchor={(int)bounds.origin.x,(int)bounds.origin.y,(int)bounds.size.width,(int)bounds.size.height};gtk_popover_set_pointing_to(GTK_POPOVER(edit->popover),&anchor);
+    }}
+    GtkWidget *box=gtk_box_new(GTK_ORIENTATION_VERTICAL,9);gtk_widget_set_margin_top(box,10);gtk_widget_set_margin_bottom(box,10);gtk_widget_set_margin_start(box,10);gtk_widget_set_margin_end(box,10);
+    GtkWidget *title=gtk_label_new(operation==FW_RENAME?"Rename":"New Folder");gtk_label_set_xalign(GTK_LABEL(title),0);gtk_box_append(GTK_BOX(box),title);
+    edit->entry=gtk_entry_new();gtk_widget_set_size_request(edit->entry,300,-1);char *display=fw_display_bytes(name);gtk_editable_set_text(GTK_EDITABLE(edit->entry),display);g_free(display);g_free(name);gtk_box_append(GTK_BOX(box),edit->entry);
+    edit->error=gtk_label_new("");gtk_widget_add_css_class(edit->error,"error");gtk_label_set_wrap(GTK_LABEL(edit->error),TRUE);gtk_label_set_max_width_chars(GTK_LABEL(edit->error),42);gtk_label_set_lines(GTK_LABEL(edit->error),3);gtk_label_set_ellipsize(GTK_LABEL(edit->error),PANGO_ELLIPSIZE_END);gtk_label_set_xalign(GTK_LABEL(edit->error),0);gtk_box_append(GTK_BOX(box),edit->error);
+    GtkWidget *buttons=gtk_box_new(GTK_ORIENTATION_HORIZONTAL,8),*cancel=gtk_button_new_with_label("Cancel");edit->cancel=cancel;gtk_widget_set_halign(buttons,GTK_ALIGN_END);
+    edit->save=gtk_button_new_with_label(operation==FW_RENAME?"Rename":"Create");gtk_widget_add_css_class(edit->save,"suggested-action");gtk_box_append(GTK_BOX(buttons),cancel);gtk_box_append(GTK_BOX(buttons),edit->save);gtk_box_append(GTK_BOX(box),buttons);
+    g_signal_connect(cancel,"clicked",G_CALLBACK(edit_cancel),edit);g_signal_connect(edit->save,"clicked",G_CALLBACK(edit_submit),edit);g_signal_connect(edit->entry,"activate",G_CALLBACK(edit_submit),edit);g_signal_connect(edit->popover,"closed",G_CALLBACK(edit_closed),edit);
+    gtk_popover_set_child(GTK_POPOVER(edit->popover),box);if(popup)gtk_menu_button_popup(GTK_MENU_BUTTON(edit->button));
+    gtk_widget_grab_focus(edit->entry);gtk_editable_select_region(GTK_EDITABLE(edit->entry),0,-1);update_actions(app);
+}
+static void name_menu_create(GtkMenuButton *button,gpointer data)
+{
+    Pane *pane=data;begin_name_edit(pane,GTK_WIDGET(button)==pane->rename_button?FW_RENAME:FW_MKDIR,FALSE);
+}
+
 static void pane_focus(GtkEventControllerFocus *controller, gpointer data)
 {
     (void)controller; Pane *pane = data;
@@ -436,6 +569,11 @@ static void make_pane(App *app, guint index, const char *helper)
     g_signal_connect(pane->address, "activate", G_CALLBACK(address_activate), pane);
     gtk_box_append(GTK_BOX(toolbar), pane->address);
     gtk_box_append(GTK_BOX(toolbar), toolbar_button(pane, "view-refresh-symbolic", "Refresh (F5)", 4));
+    pane->rename_button=gtk_menu_button_new();gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(pane->rename_button),"document-edit-symbolic");gtk_widget_set_tooltip_text(pane->rename_button,"Rename selected item (F2)");
+    pane->new_button=gtk_menu_button_new();gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(pane->new_button),"folder-new-symbolic");gtk_widget_set_tooltip_text(pane->new_button,"New Folder (Ctrl+Shift+N)");
+    gtk_menu_button_set_create_popup_func(GTK_MENU_BUTTON(pane->rename_button),name_menu_create,pane,NULL);
+    gtk_menu_button_set_create_popup_func(GTK_MENU_BUTTON(pane->new_button),name_menu_create,pane,NULL);
+    gtk_box_append(GTK_BOX(toolbar),pane->rename_button);gtk_box_append(GTK_BOX(toolbar),pane->new_button);
     gtk_box_append(GTK_BOX(pane->box), toolbar);
     pane->view = gtk_column_view_new(NULL); gtk_column_view_set_enable_rubberband(GTK_COLUMN_VIEW(pane->view), TRUE);
     GtkCustomFilter *filter = gtk_custom_filter_new(filter_entry, pane, NULL);
@@ -480,6 +618,7 @@ static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint 
 {
     (void)controller; (void)code; App *app = data; Pane *pane = app->active;
     if (!pane) return FALSE;
+    if ((mods & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK) && (key==GDK_KEY_n||key==GDK_KEY_N)) {begin_name_edit(pane,FW_MKDIR,TRUE);return TRUE;}
     if ((mods & GDK_CONTROL_MASK) && (key == GDK_KEY_l || key == GDK_KEY_L)) {
         gtk_widget_grab_focus(pane->address); gtk_editable_select_region(GTK_EDITABLE(pane->address), 0, -1); return TRUE;
     }
@@ -495,6 +634,7 @@ static gboolean key_pressed(GtkEventControllerKey *controller, guint key, guint 
     }
     GtkWidget *focus = gtk_window_get_focus(app->window);
     gboolean in_files = focus && (focus == pane->view || gtk_widget_is_ancestor(focus, pane->view));
+    if (in_files && key==GDK_KEY_F2 && !(mods&(GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_ALT_MASK))) {begin_name_edit(pane,FW_RENAME,TRUE);return TRUE;}
     if (in_files && (mods & GDK_SHIFT_MASK) && key == GDK_KEY_F5) { prepare_operation(app, FW_COPY); return TRUE; }
     if (in_files && (mods & GDK_SHIFT_MASK) && key == GDK_KEY_F6) { prepare_operation(app, FW_MOVE); return TRUE; }
     if (in_files && key == GDK_KEY_Delete && !(mods & (GDK_SHIFT_MASK|GDK_CONTROL_MASK|GDK_ALT_MASK))) { prepare_operation(app, FW_TRASH); return TRUE; }

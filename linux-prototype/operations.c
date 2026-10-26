@@ -72,12 +72,19 @@ FwJob *fw_job_new(const char *helper, FwOperation operation, const char *const *
     guint count, const char *destination, FwConflict policy, const char *const *env, GError **error)
 {
     if (!helper || !*helper || !sources || !count || count > 4096 || policy > FW_FAIL_CONFLICT ||
-        (operation != FW_COPY && operation != FW_MOVE && operation != FW_TRASH) ||
-        (operation != FW_TRASH && (!destination || !g_path_is_absolute(destination)))) goto invalid;
+        (operation != FW_COPY && operation != FW_MOVE && operation != FW_TRASH && operation != FW_RENAME && operation != FW_MKDIR) ||
+        ((operation == FW_COPY || operation == FW_MOVE || operation == FW_RENAME) && (!destination || !g_path_is_absolute(destination))) ||
+        ((operation == FW_RENAME || operation == FW_MKDIR) && (count != 1 || policy != FW_FAIL_CONFLICT))) goto invalid;
+    if (operation == FW_RENAME) {
+        if (!sources[0]) goto invalid;
+        char *from_parent=g_path_get_dirname(sources[0]),*to_parent=g_path_get_dirname(destination);
+        gboolean same=!strcmp(from_parent,to_parent);g_free(from_parent);g_free(to_parent);
+        if (!same) goto invalid;
+    }
     GByteArray *bytes = g_byte_array_new();
     wslp_job body = {operation, policy, count, 0}; g_byte_array_append(bytes, (guint8 *)&body, sizeof body);
     for (guint i = 0; i <= count; i++) {
-        const char *path = i ? sources[i-1] : operation == FW_TRASH ? "" : destination;
+        const char *path = i ? sources[i-1] : (operation == FW_TRASH || operation == FW_MKDIR) ? "" : destination;
         if (!path || (i && !g_path_is_absolute(path)) || strlen(path) > 16384) { g_byte_array_unref(bytes); goto invalid; }
         wslp_path item = {(guint32)strlen(path), 0};
         g_byte_array_append(bytes, (guint8 *)&item, sizeof item); g_byte_array_append(bytes, (guint8 *)path, item.bytes);
@@ -85,7 +92,7 @@ FwJob *fw_job_new(const char *helper, FwOperation operation, const char *const *
     }
     FwJob *job = g_object_new(FW_TYPE_JOB, NULL);
     job->helper = g_strdup(helper); job->count = count; job->operation = operation; job->policy = policy;
-    job->destination = g_strdup(operation == FW_TRASH ? "" : destination);
+    job->destination = g_strdup((operation == FW_TRASH || operation == FW_MKDIR) ? "" : destination);
     job->sources = g_new0(char *, count+1); for (guint i = 0; i < count; i++) job->sources[i] = g_strdup(sources[i]);
     job->env = env ? g_strdupv((char **)env) : g_get_environ();
     g_bytes_unref(job->request); job->request = g_byte_array_free_to_bytes(bytes); return job;
@@ -121,7 +128,7 @@ static gboolean control(Wire *wire, guint type)
 }
 static gboolean send_cancel(Wire *wire)
 {
-    if (!control(wire, WSLP_JOB_CANCEL)) return FALSE;
+    if (!control(wire, wire->job->operation == FW_RENAME ? WSLP_RENAME_CANCEL : WSLP_JOB_CANCEL)) return FALSE;
     wire->cancel_sent = TRUE;
     g_mutex_lock(&wire->job->lock); wire->job->progress.cancel_sent = TRUE; g_mutex_unlock(&wire->job->lock);
     notify(wire->job); return TRUE;
@@ -203,6 +210,65 @@ static gboolean dispatch(Wire *wire, const wslp_head *head, const guint8 *data)
 }
 typedef struct Result { FwJobState state; char *message; } Result;
 static void result_free(gpointer data) { Result *r = data; g_free(r->message); g_free(r); }
+static gboolean rename_phase(Wire *wire, guint apply, wslp_rename_identity *expected, wslp_rename_result *out, GError **error)
+{
+    FwJob *job=wire->job;
+    g_clear_object(&wire->process);wire->request_sent=FALSE;wire->cancel_sent=FALSE;wire->continued=FALSE;wire->terminal=FALSE;
+    GSubprocessLauncher *launcher=g_subprocess_launcher_new(G_SUBPROCESS_FLAGS_STDIN_PIPE|G_SUBPROCESS_FLAGS_STDOUT_PIPE);
+    g_subprocess_launcher_set_environ(launcher,job->env);
+    wire->process=g_subprocess_launcher_spawn(launcher,error,job->helper,"--rename",NULL);g_object_unref(launcher);
+    if(!wire->process)return FALSE;
+    wire->input=g_unix_output_stream_get_fd(G_UNIX_OUTPUT_STREAM(g_subprocess_get_stdin_pipe(wire->process)));
+    wire->output=g_unix_input_stream_get_fd(G_UNIX_INPUT_STREAM(g_subprocess_get_stdout_pipe(wire->process)));
+    if(fcntl(wire->input,F_SETFL,fcntl(wire->input,F_GETFL)|O_NONBLOCK)||fcntl(wire->output,F_SETFL,fcntl(wire->output,F_GETFL)|O_NONBLOCK)){wire->failure=errno;return FALSE;}
+    wslp_head h;wslp_hello hello;
+    if(read_exact(wire,&h,sizeof h)!=1||h.type!=WSLP_HELLO||h.id||h.size!=sizeof hello||read_exact(wire,&hello,sizeof hello)!=1||hello.magic!=WSLP_MAGIC||hello.version!=WSLP_VERSION||hello.uid!=(guint)getuid()){wire->failure=EPROTO;return FALSE;}
+    char *root=g_path_get_dirname(job->sources[0]),*from=g_path_get_basename(job->sources[0]),*to=g_path_get_basename(job->destination);
+    wslp_rename_request request={apply,1,(guint)strlen(root),0};
+    wslp_rename_item item={*expected,(guint)strlen(from),(guint)strlen(to)};
+    GByteArray *packet=g_byte_array_new();g_byte_array_append(packet,(guint8 *)&request,sizeof request);g_byte_array_append(packet,(guint8 *)root,request.root_bytes);
+    g_byte_array_append(packet,(guint8 *)&item,sizeof item);g_byte_array_append(packet,(guint8 *)from,item.from_bytes);g_byte_array_append(packet,(guint8 *)to,item.to_bytes);
+    g_free(root);g_free(from);g_free(to);
+    h=(wslp_head){WSLP_RENAME_BATCH,packet->len,1};
+    wire->continued=apply!=0; /* Apply may mutate once its complete packet arrives. */
+    g_mutex_lock(&job->lock);job->progress.state=apply?FW_JOB_RUNNING:FW_JOB_SCANNING;job->progress.items_total=1;g_mutex_unlock(&job->lock);
+    gboolean sent=write_exact(wire,&h,sizeof h)&&write_exact(wire,packet->data,packet->len);g_byte_array_unref(packet);if(!sent)return FALSE;
+    wire->request_sent=TRUE;message(job,apply?"Renaming…":"Checking name…");
+    for(;;){
+        int got=read_exact(wire,&h,sizeof h);if(!got)break;
+        if(got<0||h.id!=1||wire->terminal||h.size>sizeof(wslp_rename_end)+sizeof(wslp_rename_result))goto invalid;
+        guint8 data[sizeof(wslp_rename_end)+sizeof(wslp_rename_result)];
+        if(h.size&&read_exact(wire,data,h.size)!=1)goto invalid;
+        if(h.type==WSLP_RENAME_PROGRESS&&h.size==sizeof(wslp_rename_progress)){
+            wslp_rename_progress progress;memcpy(&progress,data,sizeof progress);
+            if(progress.completed>1||progress.apply>apply)goto invalid;
+        }else if(h.type==WSLP_RENAME_RESULT&&h.size==sizeof(wslp_rename_end)+sizeof(wslp_rename_result)){
+            wslp_rename_end end;memcpy(&end,data,sizeof end);memcpy(out,data+sizeof end,sizeof *out);
+            if(end.count!=1||end.stopped>1||out->state<1||out->state>7||out->error>4095||
+               (!apply&&(out->state==3||out->state==6||out->state==7))||(apply&&out->state==1)||
+               ((out->state==3||out->state==2||out->state==1)&&out->error))goto invalid;
+            wire->terminal=TRUE;
+        }else goto invalid;
+    }
+    if(!wire->terminal||!g_subprocess_wait_check(wire->process,NULL,error))return FALSE;
+    return TRUE;
+invalid:
+    if(!wire->failure)wire->failure=EPROTO;
+    return FALSE;
+}
+static gboolean rename_job(Wire *wire, Result *result, GError **error)
+{
+    wslp_rename_identity identity={0};wslp_rename_result renamed={0};
+    if(!rename_phase(wire,0,&identity,&renamed,error))return FALSE;
+    if(renamed.state==1){identity=renamed.identity;if(!rename_phase(wire,1,&identity,&renamed,error))return FALSE;}
+    result->state=renamed.state==2||renamed.state==3?FW_JOB_COMPLETE:renamed.state==5?FW_JOB_CANCELLED:renamed.state==7?FW_JOB_UNCONFIRMED:FW_JOB_ERRORS;
+    result->message=g_strdup(result->state==FW_JOB_COMPLETE?(renamed.state==2?"Name unchanged":"Renamed"):result->state==FW_JOB_CANCELLED?"Rename cancelled":result->state==FW_JOB_UNCONFIRMED?"Rename may have happened; review the folder":"Rename failed; the target was not replaced");
+    g_mutex_lock(&wire->job->lock);wire->job->progress.items_total=1;wire->job->progress.items_done=result->state==FW_JOB_COMPLETE;
+    wire->job->progress.errors=result->state==FW_JOB_ERRORS||result->state==FW_JOB_UNCONFIRMED;g_mutex_unlock(&wire->job->lock);
+    if(renamed.error){wslp_event event={0,(gint32)renamed.error,1,0};event_detail(wire,&event,(const guint8 *)"");}
+    return TRUE;
+}
+
 static void worker(GTask *task, gpointer source, gpointer unused, GCancellable *cancellable)
 {
     (void)unused; (void)cancellable; FwJob *job = source; Result *result = g_new0(Result, 1);
@@ -212,8 +278,8 @@ static void worker(GTask *task, gpointer source, gpointer unused, GCancellable *
     /* DrvFS/9P paths need the Windows coordinator's stream inventory and
      * Windows durability ACKs. Never quietly label them native Linux paths. */
     for (guint i = 0; i <= job->count; i++) {
-        if (!i && job->operation == FW_TRASH) continue;
-        char *parent = i ? g_path_get_dirname(job->sources[i-1]) : g_strdup(job->destination);
+        if (!i && (job->operation == FW_TRASH || job->operation == FW_MKDIR)) continue;
+        char *parent = i ? g_path_get_dirname(job->sources[i-1]) : job->operation == FW_RENAME ? g_path_get_dirname(job->destination) : g_strdup(job->destination);
         struct statfs fs;
         int checked = statfs(parent, &fs); g_free(parent);
         if (!checked && (unsigned long)fs.f_type == 0x01021997ul) {
@@ -221,6 +287,7 @@ static void worker(GTask *task, gpointer source, gpointer unused, GCancellable *
             goto failed;
         }
     }
+    if (job->operation == FW_RENAME) { if (!rename_job(&wire, result, &error)) goto failed; goto done; }
     GSubprocessLauncher *launcher = g_subprocess_launcher_new(G_SUBPROCESS_FLAGS_STDIN_PIPE|G_SUBPROCESS_FLAGS_STDOUT_PIPE);
     g_subprocess_launcher_set_environ(launcher, job->env);
     wire.process = g_subprocess_launcher_spawn(launcher, &error, job->helper, "--jobs", NULL); g_object_unref(launcher);

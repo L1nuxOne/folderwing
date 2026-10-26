@@ -44,7 +44,7 @@ def main():
     plan = json.loads((evidence/'selection.json').read_text())
     selected = plan['selected_nodeids']
     expected = sorted(x.split('::')[1] for x in selected)
-    assert len(expected) == 13 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
+    assert len(expected) == 18 and all(x.startswith('tests/linux_browser_tests.c::') for x in selected)
     binary = ROOT/'build/linux-prototype/folderwing-linux-browser-tests'
     helper = ROOT/'build/linux-prototype/folderwing-linux-helper'
     icon = ROOT/'build/linux-prototype/folderwing.svg'

@@ -363,6 +363,82 @@ static void test_operations_close_waits_for_cancel(void)
     FwJobProgress p=wait_job(job);CHECK(p.state==FW_JOB_CANCELLED);fw_job_progress_clear(&p);g_object_unref(job);settle(100);CHECK(!weak);bytes_equal(source,"keep on close");
     g_strfreev(env);g_free(left);g_free(right);g_free(source);g_free(marker);g_free(release);
 }
+static void test_names_literal_validation(void)
+{
+    const char *bad[]={"",".","..","../escape","a/b","a\\x2Fb","a\\x00b","bad\\q"};GError *error=NULL;
+    for(guint i=0;i<G_N_ELEMENTS(bad);i++){CHECK(!fw_parse_name(bad[i],&error));CHECK(error);g_clear_error(&error);}
+    const char raw[]="~ β $() \\ \xff\n";char *display=fw_display_bytes(raw),*name=fw_parse_name(display,&error);CHECK(!error);CHECK(!strcmp(name,raw));g_free(name);g_free(display);
+    name=fw_parse_name("~",&error);CHECK(!error);CHECK(!strcmp(name,"~"));g_free(name);
+    char long_name[257];memset(long_name,'a',256);long_name[256]=0;CHECK(!fw_parse_name(long_name,&error));g_clear_error(&error);
+    long_name[255]=0;name=fw_parse_name(long_name,&error);CHECK(name);CHECK(strlen(name)==255);g_free(name);
+}
+static void test_names_helper_actions(void)
+{
+    char *root=directory("names-helper"),*source=g_build_filename(root,"old.txt",NULL),*target=g_build_filename(root,"Case β $(literal)%.txt",NULL);file(root,"old.txt","retain bytes");
+    struct stat before,after;CHECK(!lstat(source,&before));FwJobProgress p=perform(new_job(helper,FW_RENAME,source,target,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(!g_file_test(source,G_FILE_TEST_EXISTS));bytes_equal(target,"retain bytes");CHECK(!lstat(target,&after));CHECK(before.st_ino==after.st_ino);
+    file(root,"existing","keep target");char *existing=g_build_filename(root,"existing",NULL);
+    p=perform(new_job(helper,FW_RENAME,target,existing,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);bytes_equal(existing,"keep target");bytes_equal(target,"retain bytes");
+    p=perform(new_job(helper,FW_RENAME,target,target,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_COMPLETE);CHECK(strstr(p.message,"unchanged"));fw_job_progress_clear(&p);
+    char *folder=g_build_filename(root,"new-\xff",NULL);p=perform(new_job(helper,FW_MKDIR,folder,NULL,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(g_file_test(folder,G_FILE_TEST_IS_DIR));
+    p=perform(new_job(helper,FW_MKDIR,folder,NULL,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);
+    char *renamed=g_build_filename(root,"renamed-folder",NULL);p=perform(new_job(helper,FW_RENAME,folder,renamed,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(g_file_test(renamed,G_FILE_TEST_IS_DIR));
+    char *link=g_build_filename(root,"broken",NULL),*to=g_build_filename(root,"renamed-link",NULL);CHECK(!symlink("missing",link));p=perform(new_job(helper,FW_RENAME,link,to,FW_FAIL_CONFLICT,NULL));CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(g_file_test(to,G_FILE_TEST_IS_SYMLINK));
+    g_free(root);g_free(source);g_free(target);g_free(existing);g_free(folder);g_free(renamed);g_free(link);g_free(to);
+}
+static void test_names_helper_persistence_failures(void)
+{
+    char *root=directory("names-faults"),*source=g_build_filename(root,"old",NULL),*target=g_build_filename(root,"new",NULL),*ancestor=g_path_get_dirname(root);file(root,"old","keep");
+    char **env=g_environ_setenv(g_strdupv(operation_env),"FW_OPS_FAIL_PATH",ancestor,TRUE);
+    FwJobProgress p=perform(new_job(fault_helper,FW_RENAME,source,target,FW_FAIL_CONFLICT,env));CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);bytes_equal(source,"keep");CHECK(!g_file_test(target,G_FILE_TEST_EXISTS));g_strfreev(env);
+    env=g_environ_setenv(g_strdupv(operation_env),"FW_OPS_FAIL_PATH",root,TRUE);
+    p=perform(new_job(fault_helper,FW_RENAME,source,target,FW_FAIL_CONFLICT,env));CHECK(p.state==FW_JOB_UNCONFIRMED);fw_job_progress_clear(&p);bytes_equal(target,"keep");g_strfreev(env);
+    char *folder=g_build_filename(root,"folder",NULL);env=g_environ_setenv(g_strdupv(operation_env),"FW_OPS_FAIL_PATH",ancestor,TRUE);
+    p=perform(new_job(fault_helper,FW_MKDIR,folder,NULL,FW_FAIL_CONFLICT,env));CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(!g_file_test(folder,G_FILE_TEST_EXISTS));g_strfreev(env);
+    env=g_environ_setenv(g_strdupv(operation_env),"FW_OPS_FAIL_PATH",folder,TRUE);
+    p=perform(new_job(fault_helper,FW_MKDIR,folder,NULL,FW_FAIL_CONFLICT,env));CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(g_file_test(folder,G_FILE_TEST_IS_DIR));g_strfreev(env);
+    g_free(root);g_free(source);g_free(target);g_free(ancestor);g_free(folder);
+}
+static void submit_name(App *app,const char *name)
+{
+    CHECK(app->edit);gtk_editable_set_text(GTK_EDITABLE(app->edit->entry),name);g_signal_emit_by_name(app->edit->entry,"activate");
+}
+static void wait_selected_name(Pane *pane,const char *name)
+{
+    gint64 end=g_get_monotonic_time()+5000000;
+    for(;;){
+        pump();GtkBitset *selected=gtk_selection_model_get_selection(pane->selection);gboolean match=FALSE;
+        if(gtk_bitset_get_size(selected)==1){GFileInfo *info=g_list_model_get_item(G_LIST_MODEL(pane->sorted),gtk_bitset_get_minimum(selected));if(info){match=!strcmp(g_file_info_get_name(info),name);g_object_unref(info);}}
+        gtk_bitset_unref(selected);if(match&&!fw_browser_busy(pane->browser)&&!gtk_sort_list_model_get_pending(pane->sorted))return;
+        CHECK(g_get_monotonic_time()<end);g_usleep(1000);
+    }
+}
+static void test_names_desktop_rename(void)
+{
+    char *left=directory("names-ui-left"),*right=directory("names-ui-right");file(left,"old.txt","rename bytes");file(left,"existing.txt","original");
+    App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);Pane *pane=app->panes;app->active=pane;select_named(pane,"old.txt",TRUE);gtk_widget_grab_focus(pane->view);
+    CHECK(key_pressed(NULL,GDK_KEY_F2,0,0,app));CHECK(app->edit);CHECK(!app->job);gtk_popover_popdown(GTK_POPOVER(app->edit->popover));settle(20);CHECK(!app->edit);
+    char *old=g_build_filename(left,"old.txt",NULL);bytes_equal(old,"rename bytes");
+    begin_name_edit(pane,FW_RENAME,TRUE);submit_name(app,"existing.txt");FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(app->edit);CHECK(gtk_widget_get_sensitive(app->edit->entry));CHECK(*gtk_label_get_text(GTK_LABEL(app->edit->error)));
+    submit_name(app,"renamed-\\xFF.txt");p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(!app->edit);wait_visible_count(pane,2);
+    char *renamed=g_build_filename(left,"renamed-\xff.txt",NULL);bytes_equal(renamed,"rename bytes");CHECK(!g_file_test(old,G_FILE_TEST_EXISTS));
+    wait_selected_name(pane,"renamed-\xff.txt");wait_panes(app);select_named(pane,"existing.txt",FALSE);begin_name_edit(pane,FW_RENAME,TRUE);CHECK(!app->edit); /* one-item action */
+    gtk_window_close(app->window);settle(50);g_free(old);g_free(renamed);g_free(left);g_free(right);
+}
+static void test_names_desktop_new_folder(void)
+{
+    char *left=directory("names-new-left"),*right=directory("names-new-right");char *existing=g_build_filename(left,"New folder",NULL);CHECK(!g_mkdir(existing,0700));
+    App *app=create_window(NULL,helper,icon,left,right);gtk_window_present(app->window);wait_panes(app);app->active=app->panes;
+    CHECK(key_pressed(NULL,GDK_KEY_N,0,GDK_CONTROL_MASK|GDK_SHIFT_MASK,app));CHECK(app->edit);CHECK(!strcmp(gtk_editable_get_text(GTK_EDITABLE(app->edit->entry)),"New folder (2)"));
+    submit_name(app,"../escape");CHECK(!app->job);CHECK(app->edit);CHECK(*gtk_label_get_text(GTK_LABEL(app->edit->error)));gtk_popover_popdown(GTK_POPOVER(app->edit->popover));settle(20);CHECK(!app->edit);
+    char *cancelled=g_build_filename(left,"New folder (2)",NULL);CHECK(!g_file_test(cancelled,G_FILE_TEST_EXISTS));
+    begin_name_edit(app->panes,FW_MKDIR,TRUE);submit_name(app,"New folder");FwJobProgress p=wait_job(app->job);CHECK(p.state==FW_JOB_ERRORS);fw_job_progress_clear(&p);CHECK(app->edit);
+    submit_name(app,"literal-~-$()-\\xFF");p=wait_job(app->job);CHECK(p.state==FW_JOB_COMPLETE);fw_job_progress_clear(&p);CHECK(!app->edit);wait_visible_count(app->panes,2);
+    char *created=g_build_filename(left,"literal-~-$()-\xff",NULL);CHECK(g_file_test(created,G_FILE_TEST_IS_DIR));wait_selected_name(app->panes,"literal-~-$()-\xff");wait_panes(app);select_named(app->panes,"literal-~-$()-\xff",TRUE);
+    begin_name_edit(app->panes,FW_MKDIR,TRUE);CHECK(app->edit);pane_navigate(app->panes,right);CHECK(!app->edit);wait_panes(app);
+    begin_name_edit(app->panes,FW_MKDIR,TRUE);CHECK(app->edit);gtk_window_close(app->window);settle(50);
+    g_free(created);g_free(cancelled);g_free(existing);g_free(left);g_free(right);
+}
+
 static int peer_read(void *data,size_t size)
 {
     char *at=data;while(size){ssize_t n=read(0,at,size);if(n<=0)return 0;at+=n;size-=(size_t)n;}return 1;
@@ -402,7 +478,12 @@ int main(int argc, char **argv)
         {"test_operations_trash_durability",test_operations_trash_durability},
         {"test_operations_cancel_and_disconnect",test_operations_cancel_and_disconnect},
         {"test_operations_desktop_review_and_refresh",test_operations_desktop_review_and_refresh},
-        {"test_operations_close_waits_for_cancel",test_operations_close_waits_for_cancel}
+        {"test_operations_close_waits_for_cancel",test_operations_close_waits_for_cancel},
+        {"test_names_literal_validation",test_names_literal_validation},
+        {"test_names_helper_actions",test_names_helper_actions},
+        {"test_names_helper_persistence_failures",test_names_helper_persistence_failures},
+        {"test_names_desktop_rename",test_names_desktop_rename},
+        {"test_names_desktop_new_folder",test_names_desktop_new_folder}
     };
     for (guint i = 0; i < G_N_ELEMENTS(cases); i++) {
         gint64 start = g_get_monotonic_time(); cases[i].run();

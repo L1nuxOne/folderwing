@@ -9,7 +9,9 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "wslproto.h"
+#include "fpancestry.h"
 #define MAX_ITEMS 256
 #define R_PENDING 0
 #define R_READY 1
@@ -86,7 +88,13 @@ int fp_rename_main(void)
     }
     if(stopped)mark(items,q.count,R_STOPPED);
     else if(q.apply&&failed)mark(items,q.count,R_BLOCKED);
-    else if(q.apply)for(uint32_t i=0;i<q.count;i++){
+    else if(q.apply){
+      int barrier=fp_ancestry_sync(parent,cancelled);
+      if(barrier)for(uint32_t i=0;i<q.count;i++)if(items[i].r.state==R_READY){
+          items[i].r.state=barrier==ECANCELED?R_STOPPED:R_ERROR;items[i].r.error=barrier==ECANCELED?0:barrier;
+      }
+      if(barrier==ECANCELED)stopped=1;
+      for(uint32_t i=0;!barrier&&i<q.count;i++){
         if(cancelled()){stopped=1;mark(items,q.count,R_STOPPED);break;}
         if(items[i].r.state==R_UNCHANGED)continue;
         int err=check(parent,&items[i],1);
@@ -95,8 +103,11 @@ int fp_rename_main(void)
         if(!err){
             struct stat after;if(fstatat(parent,items[i].to,&after,AT_SYMLINK_NOFOLLOW)||
                 (uint64_t)after.st_dev!=items[i].expected.device||(uint64_t)after.st_ino!=items[i].expected.inode){items[i].r.state=R_UNCERTAIN;items[i].r.error=ESTALE;}
+            int sync;do sync=fsync(parent);while(sync<0&&errno==EINTR);
+            if(sync<0){items[i].r.state=R_UNCERTAIN;items[i].r.error=errno;}
         }
         wslp_rename_progress p={i+1,1};if(!send_frame(WSLP_RENAME_PROGRESS,&p,sizeof p)){stopped=1;mark(items,q.count,R_STOPPED);break;}
+    }
     }
     if(parent>=0)close(parent);
     size_t bytes=sizeof(wslp_rename_end)+q.count*sizeof(wslp_rename_result);unsigned char *reply=malloc(bytes);

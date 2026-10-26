@@ -17,4 +17,5 @@ double fw_browser_elapsed_ms(FwBrowser *self);
 /* Reversible UTF-8 display: controls/invalid bytes use \xHH, backslash uses \\. */
 char *fw_display_bytes(const char *bytes);
 char *fw_parse_path(const char *text, const char *base, GError **error);
+char *fw_parse_name(const char *text, GError **error); /* literal single component */
 gboolean fw_entry_directory(GFileInfo *info);

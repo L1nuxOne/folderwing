@@ -294,3 +294,12 @@ The no-replacement hard-link fallback also fences its destination before unlink.
 A late barrier failure retains recovery metadata and the trash entry for review
 and reports an error. This is namespace durability, matching same-volume moves;
 it does not recursively flush already-existing payload contents.
+
+
+## Single-item rename and mkdir
+
+The native rename helper fences parent ancestry before Apply and fsyncs the held
+parent after each successful rename. A late barrier failure returns the existing
+uncertain result state; preview remains read-only. Native mkdir fences parent
+ancestry before exclusive creation, then fsyncs the new directory and its parent.
+A late failure keeps the created directory and reports an error.

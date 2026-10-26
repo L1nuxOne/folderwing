@@ -3,7 +3,7 @@
 #include <gio/gio.h>
 #define FW_TYPE_JOB (fw_job_get_type())
 G_DECLARE_FINAL_TYPE(FwJob, fw_job, FW, JOB, GObject)
-typedef enum { FW_COPY=0, FW_MOVE=1, FW_TRASH=3 } FwOperation;
+typedef enum { FW_COPY=0, FW_MOVE=1, FW_TRASH=3, FW_RENAME=4, FW_MKDIR=5 } FwOperation;
 typedef enum { FW_KEEP_BOTH, FW_SKIP, FW_REPLACE, FW_FAIL_CONFLICT } FwConflict;
 typedef enum { FW_JOB_IDLE, FW_JOB_SCANNING, FW_JOB_RUNNING, FW_JOB_COMPLETE,
     FW_JOB_CANCELLED, FW_JOB_ERRORS, FW_JOB_UNCONFIRMED } FwJobState;

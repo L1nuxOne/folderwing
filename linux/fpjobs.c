@@ -990,7 +990,19 @@ static void run(void)
             if(fd<0||rename_new(sf,name,fd,to,0))event(0,errno,J.roots[i]);
             else J.p.items_done++;
             if(fd>=0)close(fd);free(to);
-        }else if(op==5){if(mkdirat(sf,name,0777))event(0,errno,J.roots[i]);else J.p.items_done++;}
+        }else if(op==5){
+            int error=fp_ancestry_sync(sf,cancel);
+            if(!error&&cancel())error=ECANCELED;
+            if(!error&&mkdirat(sf,name,0777))error=errno;
+            else if(!error){
+                int created=fp_mount_open(sf,name,O_RDONLY|O_DIRECTORY);
+                error=created<0?errno:fp_stage_sync(created);
+                if(created>=0)close(created);
+                if(!error)error=fp_stage_sync(sf);
+                J.p.items_done++;
+            }
+            if(error&&error!=ECANCELED)event(0,error,J.roots[i]);
+        }
         else if(op==6){
             if(J.roots[0][0]){
                 char *from=NULL;int fd=parent(J.roots[0],&from);

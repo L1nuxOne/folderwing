@@ -159,6 +159,26 @@ invalid:
     g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT, "Enter a path; escape a literal backslash as \\\\ or a byte as \\xHH. NUL bytes are not allowed.");
     return NULL;
 }
+char *fw_parse_name(const char *text, GError **error)
+{
+    GString *raw = g_string_new(NULL);
+    for (const char *p = text; *p; p++) {
+        if (*p != '\\') g_string_append_c(raw, *p);
+        else if (p[1] == '\\') { g_string_append_c(raw, '\\'); p++; }
+        else if (p[1] == 'x' && p[2] && p[3] && g_ascii_isxdigit(p[2]) && g_ascii_isxdigit(p[3])) {
+            int byte = g_ascii_xdigit_value(p[2])*16+g_ascii_xdigit_value(p[3]);
+            if (!byte) goto invalid;
+            g_string_append_c(raw, byte); p += 3;
+        } else goto invalid;
+    }
+    if (!raw->len || raw->len > 255 || strchr(raw->str, '/') || !strcmp(raw->str, ".") || !strcmp(raw->str, "..")) goto invalid;
+    return g_string_free(raw, FALSE);
+invalid:
+    g_string_free(raw, TRUE);
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_INVALID_FILENAME,
+        "Use one name of 1–255 bytes. Slash and NUL are invalid; '.' and '..' are reserved. Byte escaping follows the path bar.");
+    return NULL;
+}
 static gboolean parse_entries(FwBrowser *self, const guint8 *data, guint32 size)
 {
     guint32 off = 0;

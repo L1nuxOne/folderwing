@@ -104,7 +104,7 @@ window. `GDK_BACKEND=wayland` can run the same desktop acceptance against an
 available Wayland display; it opens only owned test windows and needs no user
 input. GTK environment configuration remains local to the launched process.
 
-Thirteen selectors cover byte-exact paths and metadata, independent/same-folder
+Eighteen selectors cover byte-exact paths and metadata, independent/same-folder
 watches, failed/rapid navigation, malformed/truncated/disconnected peers,
 close-during-request cleanup, real two-pane widgets/history/sorting/filtering,
 a 10,000-file load, multi-selection review/cancel/refresh, copy conflict policies,
@@ -144,3 +144,26 @@ the recovery record file and its directory before moving the source name, then
 the trash destination and source-parent namespaces. A late flush failure retains
 the trash object and recovery record and reports an error; the original name
 may already be gone. No power-loss/VM interruption run is claimed for this update.
+
+
+## Rename and New Folder
+
+- F2 or the pane's Rename icon edits one selected item in place using a small
+  pane-attached name editor. Multiple selection does not start a rename.
+- Ctrl+Shift+N or the New Folder icon opens the same editor with an available
+  default name. The folder is created only when you press Enter/Create.
+- Enter applies; Escape/Cancel before applying changes nothing. A conflict
+  keeps the editor open for correction and never replaces an existing node.
+- Name text uses the path bar's reversible byte escaping. Slash, NUL, empty
+  names, `.`/`..` and names over 255 bytes are refused. Tilde, spaces, dollar
+  signs and other Linux filename bytes remain literal.
+- The editor captures its pane's original folder/source. Navigation discards
+  an unapplied edit. A successful operation refreshes and selects the result;
+  newly hidden names follow the current hidden-file setting.
+
+Rename reuses the helper's `--rename` preview/apply protocol, including fresh
+source identity and no-replacement checks. New Folder uses `--jobs` mkdir.
+Their helper paths now fence ancestry and directory namespace changes before
+reporting success. A late rename barrier error is completion-unconfirmed; a
+created folder is retained if its final barrier fails. These are namespace
+barriers, not recursive payload flushing or a new power-loss test.
