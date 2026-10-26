@@ -283,3 +283,14 @@ request IDs, errno values or unvalidated successes fail closed. Cancellation is
 drained, and persistence errors remain reported even when cancellation also
 occurs. This route never removes sources. Windows eligibility and persistence
 barriers are documented in `src/WINDOWS_TRANSFER_DURABILITY.md`.
+
+
+## Native trash namespace barriers
+
+`fpjobs.c::recycle` fences the trash files/info directories and their ancestry
+before source-name removal. It fsyncs the recovery record and its directory
+before rename, then fences the destination namespace before the source parent.
+The no-replacement hard-link fallback also fences its destination before unlink.
+A late barrier failure retains recovery metadata and the trash entry for review
+and reports an error. This is namespace durability, matching same-volume moves;
+it does not recursively flush already-existing payload contents.

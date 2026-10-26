@@ -788,6 +788,14 @@ static int recycle(int sf,const char *name,const char *path)
     if(!files||!infos||!private_dir(files)||!private_dir(infos))goto done;
     ff=open(files,O_RDONLY|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC);inf=open(infos,O_RDONLY|O_DIRECTORY|O_NOFOLLOW|O_CLOEXEC);
     if(ff<0||inf<0)goto done;
+    /* A recovery record must outlive removal of the original name. Fence the
+     * trash directories and their existing/new ancestry before that removal.
+     * As with an atomic same-volume move, this persists namespace changes,
+     * not a recursive flush of pre-existing file contents. */
+    int barrier=fp_ancestry_sync(ff,cancel);
+    if(!barrier)barrier=fp_ancestry_sync(inf,cancel);
+    if(!barrier)barrier=fp_stage_sync_pair(ff,inf);
+    if(barrier){errno=barrier;goto done;}
     const char *stored=path;
     if(relative){
         char *slash=strrchr(root,'/');size_t n=slash?(size_t)(slash-root):0;
@@ -804,10 +812,29 @@ static int recycle(int sf,const char *name,const char *path)
         time_t t=time(NULL);struct tm tm;localtime_r(&t,&tm);char date[32];strftime(date,sizeof date,"%Y-%m-%dT%H:%M:%S",&tm);
         size_t cap=strlen(encoded)+100;char *text=malloc(cap);
         int written=text?snprintf(text,cap,"[Trash Info]\nPath=%s\nDeletionDate=%s\n",encoded,date):-1;
-        int err=written<0?ENOMEM:!io(fd,text,(size_t)written,1)?errno:fsync(fd)?errno:0;
+        int err=written<0?ENOMEM:!io(fd,text,(size_t)written,1)?errno:fp_stage_sync(fd);
         free(text);if(close(fd)&&!err)err=errno;
-        if(!err && !cancel() && !rename_new(sf,name,ff,dest,0)){ok=1;break;}
-        if(!err)err=errno;unlinkat(inf,meta,0);errno=err;
+        if(!err)err=fp_stage_sync(inf);
+        if(err||cancel()){
+            /* Only our exclusively-created recovery record exists so far. */
+            unlinkat(inf,meta,0);int cleanup=fp_stage_sync(inf);
+            errno=err?err:cleanup?cleanup:ECANCELED;break;
+        }
+        if(!rename_new(sf,name,ff,dest,1)){
+            /* Persist the destination name before the source removal. A late
+             * barrier failure retains the trash entry AND recovery metadata
+             * for review and must never be reported as durable completion. */
+            err=fp_stage_sync(ff);
+            if(!err)err=fp_stage_sync(sf);
+            if(!err)ok=1;
+            errno=err;break;
+        }
+        err=errno;
+        /* A failed hard-link fallback may already have published a trash
+         * name. Preserve its recovery record unless this was a collision. */
+        if(err!=EEXIST){errno=err;break;}
+        unlinkat(inf,meta,0);int cleanup=fp_stage_sync(inf);
+        if(cleanup){errno=cleanup;break;}errno=err;
         if(err!=EEXIST || cancel())break;
     }free(encoded);
 done:
