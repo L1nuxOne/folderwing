@@ -1,0 +1,29 @@
+{
+  "schema": "folderwing-word-dependencies/v1",
+  "assets": [
+    {
+      "id": "docx-preview",
+      "version": "0.4.1",
+      "license": "Apache-2.0",
+      "url": "https://registry.npmjs.org/docx-preview/-/docx-preview-0.4.1.tgz",
+      "package_integrity": "sha512-Dv4g+LeE0swHpPvNC0lAT0YsR5Zq5pAxw7d3vHQ8EChBLgIrqqe9VPL5nVt2HBJap8bEZbXUI0TJob7kBeNU9w==",
+      "source": "app/word/vendor/docx-preview.min.js",
+      "sha256": "768e76d164040bbca6c03421f9ef3ccccc1ca2db41038ed5219f738e84d2416c",
+      "upstream_unminified_sha256": "f145f6e2d8da2eb15ef99211512df48d164938e46d2abdc7d9a5b281ed7ee307",
+      "upstream_minified_sha256": "c4a133c65a112799e35b143c572dfff9e923a3bf39b5fd3b07a06aa0f8f530c2",
+      "patch": "tools/word-preview/docx-preview-0.4.1-folderwing.patch",
+      "patch_sha256": "2de4c5bed7cbb6c348fa8ba4c13b5c1a3dd94af467df5ee1456212c0401c20d7",
+      "build": "Upstream unminified distribution plus the documented Folderwing equation patch, minified with Terser 5.19.2 and prefixed with a modification notice."
+    },
+    {
+      "id": "jszip",
+      "version": "3.10.2",
+      "license": "MIT AND LicenseRef-JSZip-bundled-dependencies",
+      "url": "https://registry.npmjs.org/jszip/-/jszip-3.10.2.tgz",
+      "package_integrity": "sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==",
+      "source": "app/word/vendor/jszip.min.js",
+      "sha256": "7f839b2d4688b845c105ebf5d2f9803075f91ea0fe72bdaac176c3a04dd3d2c1"
+    }
+  ],
+  "notice": "JSZip's upstream browser distribution embeds dependencies including pako; the release includes conservative notices for the resolved dependency closure without asserting exact embedded transitive versions."
+}

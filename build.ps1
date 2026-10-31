@@ -78,7 +78,7 @@ $archiveFlags = $cflags + @("-I$archive\include", "-I$archive\include\miniz")
 Invoke-Zig 'folderwing-zip.exe' ($archiveFlags + @('-DARCP_MINIZ',"$root\app\fparchive.c","$root\app\archiveutil.c","$archive\lib\libminiz.a") + @('-lkernel32','-lmpr','-o',"$out\folderwing-zip.exe"))
 Invoke-Zig 'folderwing-archive.exe' ($archiveFlags + @("$root\app\fparchive.c","$root\app\archiveutil.c","$archive\lib\libarchive.a","$archive\lib\libzs.a","$archive\lib\libbz2.a","$archive\lib\liblzma.a") + @('-lkernel32','-lbcrypt','-lcrypt32','-luser32','-ladvapi32','-lole32','-luuid','-lmpr','-o',"$out\folderwing-archive.exe"))
 foreach($license in Get-ChildItem "$archive\licenses" -File){Publish-BuildAsset $license.FullName $out ('archive-'+$license.Name)}
-$app = @("$root\app\brand.c", "$root\app\actiondock.c", "$root\app\gitmodel.c", "$root\app\mediautil.c", "$root\app\mediaview.c", "$root\app\workspace.c", "$root\app\workspaces.c", "$root\app\archiveutil.c", "$root\app\archiveclient.c", "$root\app\archiveview.c", "$root\app\dropwarm.c", "$root\app\imagebrowse.c", "$root\app\permissionutil.c", "$root\app\linkdialog.c", "$root\app\permissions.c", "$root\app\foldersize.c", "$root\app\foldercompare.c", "$root\app\bulkrename.c", "$root\app\renameutil.c", "$root\app\pathentry.c", "$root\app\termutil.c", "$root\app\fpdemo.c", "$root\app\shell.c", "$root\app\fn.c", "$root\app\functions.c", "$root\app\session.c", "$root\app\folderview.c",
+$app = @("$root\app\libraryview.c", "$root\app\docmarks.c", "$root\app\brand.c", "$root\app\actiondock.c", "$root\app\gitmodel.c", "$root\app\mediautil.c", "$root\app\mediaview.c", "$root\app\workspace.c", "$root\app\workspaces.c", "$root\app\archiveutil.c", "$root\app\archiveclient.c", "$root\app\archiveview.c", "$root\app\dropwarm.c", "$root\app\imagebrowse.c", "$root\app\permissionutil.c", "$root\app\linkdialog.c", "$root\app\permissions.c", "$root\app\foldersize.c", "$root\app\foldercompare.c", "$root\app\bulkrename.c", "$root\app\renameutil.c", "$root\app\pathentry.c", "$root\app\termutil.c", "$root\app\fpdemo.c", "$root\app\shell.c", "$root\app\fn.c", "$root\app\functions.c", "$root\app\session.c", "$root\app\folderview.c",
          "$root\app\folderwatch.c", "$root\app\palette.c", "$root\app\fuzzy.c", "$root\app\everything.c", "$root\app\typeicons.c",
          "$root\app\thumbnails.c", "$root\app\thumbutil.c", "$root\app\textview.c", "$root\app\textutil.c", "$root\app\imageview.c", "$root\app\imageutil.c", "$root\app\pdfview.c", "$root\app\pdftext.c", "$root\app\pdfpos.c", "$root\app\sidepanel.c", "$root\app\keys.c",
          "$root\app\menu.c", "$root\app\relay.c", "$root\app\relayedit.c", "$root\app\relaycmd.c", "$root\app\operations.c", "$root\app\previewlaunch.c", "$root\app\previewreader.c", "$root\app\pipewriter.c")
@@ -102,6 +102,9 @@ Invoke-Zig 'media_tests.exe' ($cflags + @("$root\tests\media_tests.c","$root\app
 Invoke-Zig 'media_audio_tests.exe' ($cflags + @("$root\tests\media_audio_tests.c","$root\app\mediaview.c","$root\app\mediautil.c","$root\app\previewlaunch.c","$root\app\previewreader.c","$root\app\pipewriter.c") + @('-lkernel32','-luser32','-lgdi32','-ladvapi32','-o',"$out\media_audio_tests.exe"))
 $mediaHostApp = $app | Where-Object { $_ -notin @("$root\app\fpdemo.c","$root\app\archiveview.c") }
 Invoke-Zig 'media_host_tests.exe' ($cflags + $engine + $mediaHostApp + @("$root\tests\media_host_tests.c") + $libs + @('-lgdi32','-lmsimg32','-ladvapi32','-ldwmapi','-luxtheme','-luuid','-limm32','-o',"$out\media_host_tests.exe"))
+# Footer filtering uses the actual explorer and cached engine views on a private desktop.
+$filterHostApp = $app | Where-Object { $_ -ne "$root\app\fpdemo.c" }
+Invoke-Zig 'filter_footer_tests.exe' ($cflags + $engine + $filterHostApp + @("$root\tests\filter_footer_tests.c") + $libs + @('-lgdi32','-lmsimg32','-ladvapi32','-ldwmapi','-luxtheme','-luuid','-limm32','-o',"$out\filter_footer_tests.exe"))
 # Archive acceptance includes the actual host and archive window; the other app sources stay ordinary.
 $archiveTestApp = $app | Where-Object { $_ -notin @("$root\app\fpdemo.c", "$root\app\archiveview.c", "$root\app\archiveclient.c", "$root\app\imageview.c") }
 Invoke-Zig 'archive_tests.exe' ($cflags + $engine + $archiveTestApp + @("$root\tests\archive_tests.c", "$root\tests\fixtures\native\archive_image_probe.c", "$root\tests\fixtures\native\archive_cleanup_probe.c") + $libs + @('-lgdi32','-lmsimg32','-ladvapi32','-ldwmapi','-luxtheme','-luuid','-limm32','-o',"$out\archive_tests.exe"))
@@ -181,6 +184,105 @@ Invoke-Zig 'app_tests.exe' ($cflags + $engine + @("$root\tests\app_tests.c", "$r
 Invoke-Zig 'folderwing-text.exe' ($cflags + @("$root\app\fptext.c", "$root\app\textutil.c") +
     @('-lkernel32', '-luser32', '-Wl,--subsystem,windows', '-o', "$out\folderwing-text.exe"))
 
+# The database viewer runs on demand in a separate process. Its SQLite DLL is
+# built from the same checksum-pinned source as the WSL index, without dynamic extensions.
+if (-not $Targets -or 'folderwing-sqlite.dll' -in $Targets -or 'folderwing-database.exe' -in $Targets -or 'folderwing-library.exe' -in $Targets -or 'folderwing.exe' -in $Targets) {
+    $sqliteFlags = @('-target','x86_64-windows-gnu','-std=c11','-shared','-O2','-s',
+                     '-DSQLITE_API=__declspec(dllexport)','-DSQLITE_OMIT_LOAD_EXTENSION',
+                     '-DSQLITE_THREADSAFE=1','-DSQLITE_DQS=0')
+    Invoke-BuildCompiler -Compiler $zig -OutputDirectory $out -Name 'folderwing-sqlite.dll' -Arguments ($sqliteFlags + @("$sqlite\sqlite3.c",'-o',"$out\folderwing-sqlite.dll"))
+    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    $candidate = Join-Path $out '.link\folderwing-database.exe'
+    New-Item -ItemType Directory -Force (Split-Path $candidate) | Out-Null
+    & $csc /nologo /target:winexe /platform:x64 "/out:$candidate" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll "$root\app\sqlite\DatabaseHost.cs" "$root\app\sqlite\SqliteReader.cs" "$root\app\navigation\BookmarkStore.cs" "$root\app\navigation\NativeNavigationRail.cs"
+    if ($LASTEXITCODE) { throw 'SQLite preview helper build failed' }
+    Publish-BuildFile $candidate (Join-Path $out 'folderwing-database.exe')
+}
+
+# Read-only library catalogues share the pinned SQLite engine; loaded on demand.
+if (-not $Targets -or 'folderwing-library.exe' -in $Targets -or 'folderwing.exe' -in $Targets) {
+    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    $candidate = Join-Path $out '.link\folderwing-library.exe'
+    & $csc /nologo /target:winexe /platform:x64 "/out:$candidate" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Core.dll "$root\app\library\CatalogDb.cs" "$root\app\library\Catalog.cs" "$root\app\library\LibraryState.cs" "$root\app\library\LibraryHost.cs"
+    if ($LASTEXITCODE) { throw 'Library helper build failed' }
+    Publish-BuildFile $candidate (Join-Path $out 'folderwing-library.exe')
+}
+
+# Browser-backed Markdown preview. If the separately installed WebView2 runtime is
+# absent at run time, the native source reader remains available.
+if (-not $Targets -or 'folderwing-markdown.exe' -in $Targets -or 'folderwing-json.exe' -in $Targets -or 'folderwing-table.exe' -in $Targets -or 'folderwing-notebook.exe' -in $Targets -or 'folderwing-config.exe' -in $Targets -or 'folderwing-xml.exe' -in $Targets -or 'folderwing.exe' -in $Targets) {
+    & "$root\tools\get-webview2.ps1"
+    $wv = Join-Path $root 'third_party\webview2'
+    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    $candidate = Join-Path $out '.link\folderwing-markdown.exe'
+    New-Item -ItemType Directory -Force (Split-Path $candidate) | Out-Null
+    & $csc /nologo /target:winexe /platform:x64 "/out:$candidate" "/reference:$wv\Microsoft.Web.WebView2.Core.dll" "/reference:$wv\Microsoft.Web.WebView2.WinForms.dll" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Xml.dll "$root\app\markdown\MarkdownHost.cs" "$root\app\navigation\BookmarkStore.cs" "$root\app\navigation\BrowserNavigation.cs" "$root\app\markdown\DelimitedReader.cs" "$root\app\markdown\XmlPreviewReader.cs"
+    if ($LASTEXITCODE) { throw 'Markdown helper build failed' }
+    Publish-BuildFile $candidate (Join-Path $out 'folderwing-markdown.exe')
+    Publish-BuildAsset (Join-Path $out 'folderwing-markdown.exe') $out 'folderwing-json.exe'
+    Publish-BuildAsset (Join-Path $out 'folderwing-markdown.exe') $out 'folderwing-table.exe'
+    Publish-BuildAsset (Join-Path $out 'folderwing-markdown.exe') $out 'folderwing-notebook.exe'
+    Publish-BuildAsset (Join-Path $out 'folderwing-markdown.exe') $out 'folderwing-config.exe'
+    Publish-BuildAsset (Join-Path $out 'folderwing-markdown.exe') $out 'folderwing-xml.exe'
+    foreach ($dll in Get-ChildItem "$wv\*.dll") { Publish-BuildAsset $dll.FullName $out $dll.Name }
+    New-Item -ItemType Directory -Force "$out\markdown" | Out-Null
+    New-Item -ItemType Directory -Force "$out\markdown\vendor" | Out-Null
+    Copy-Item "$root\app\markdown\*.html", "$root\app\markdown\*.js", "$root\app\markdown\*.css" "$out\markdown" -Force
+    Copy-Item "$root\app\markdown\vendor\*" "$out\markdown\vendor" -Force
+}
+
+# Excel workbooks are parsed in an on-demand process with pinned MIT libraries.
+if (-not $Targets -or 'folderwing-spreadsheet.exe' -in $Targets -or 'folderwing.exe' -in $Targets) {
+    & "$root\tools\get-spreadsheet.ps1"
+    & "$root\tools\get-webview2.ps1"
+    $sheetlib = Join-Path $root 'third_party\spreadsheet'
+    $wv = Join-Path $root 'third_party\webview2'
+    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    $candidate = Join-Path $out '.link\folderwing-spreadsheet.exe'
+    New-Item -ItemType Directory -Force (Split-Path $candidate) | Out-Null
+    & $csc /nologo /target:winexe /platform:x64 "/out:$candidate" "/reference:$wv\Microsoft.Web.WebView2.Core.dll" "/reference:$wv\Microsoft.Web.WebView2.WinForms.dll" "/reference:$sheetlib\ExcelDataReader.dll" "/reference:$sheetlib\ExcelNumberFormat.dll" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Xml.dll /reference:System.Data.dll /reference:System.IO.Compression.dll "$root\app\spreadsheet\WorkbookPackage.cs" "$root\app\spreadsheet\FormulaCursor.cs" "$root\app\spreadsheet\SpreadsheetReader.cs" "$root\app\spreadsheet\SpreadsheetHost.cs" "$root\app\navigation\BookmarkStore.cs" "$root\app\navigation\BrowserNavigation.cs"
+    if ($LASTEXITCODE) { throw 'Spreadsheet preview helper build failed' }
+    Publish-BuildFile $candidate (Join-Path $out 'folderwing-spreadsheet.exe')
+    foreach ($dll in Get-ChildItem "$sheetlib\*.dll") { Publish-BuildAsset $dll.FullName $out $dll.Name }
+    foreach ($dll in Get-ChildItem "$wv\*.dll") { Publish-BuildAsset $dll.FullName $out $dll.Name }
+    New-Item -ItemType Directory -Force "$out\spreadsheet" | Out-Null
+    Copy-Item "$root\app\spreadsheet\*.html", "$root\app\spreadsheet\*.js", "$root\app\spreadsheet\*.css" "$out\spreadsheet" -Force
+}
+
+# Word documents render in an isolated on-demand helper using pinned browser assets.
+if (-not $Targets -or 'folderwing-word.exe' -in $Targets -or 'folderwing.exe' -in $Targets) {
+    & "$root\tools\get-webview2.ps1"
+    $wordPins = Get-Content "$root\tools\word-dependencies.json" -Raw | ConvertFrom-Json
+    if ($wordPins.schema -ne 'folderwing-word-dependencies/v1') { throw 'Invalid Word dependency manifest' }
+    foreach ($item in $wordPins.assets) {
+        $asset = Join-Path $root $item.source
+        if ((Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant() -ne $item.sha256) { throw "Word dependency mismatch: $($item.id)" }
+        if ($item.patch -and (Get-FileHash -LiteralPath (Join-Path $root $item.patch) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $item.patch_sha256) { throw "Word patch mismatch: $($item.id)" }
+    }
+    $wv = Join-Path $root 'third_party\webview2'
+    $csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+    $candidate = Join-Path $out '.link\folderwing-word.exe'
+    New-Item -ItemType Directory -Force (Split-Path $candidate) | Out-Null
+    & $csc /nologo /target:winexe /platform:x64 "/out:$candidate" "/reference:$wv\Microsoft.Web.WebView2.Core.dll" "/reference:$wv\Microsoft.Web.WebView2.WinForms.dll" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Web.Extensions.dll /reference:System.Xml.dll /reference:System.Xml.Linq.dll /reference:System.IO.Compression.dll "$root\app\word\WordPackage.cs" "$root\app\word\WordHost.cs" "$root\app\navigation\BookmarkStore.cs" "$root\app\navigation\BrowserNavigation.cs"
+    if ($LASTEXITCODE) { throw 'Word preview helper build failed' }
+    Publish-BuildFile $candidate (Join-Path $out 'folderwing-word.exe')
+    foreach ($dll in Get-ChildItem "$wv\*.dll") { Publish-BuildAsset $dll.FullName $out $dll.Name }
+    New-Item -ItemType Directory -Force "$out\word\vendor" | Out-Null
+    Copy-Item "$root\app\word\*.html", "$root\app\word\*.js", "$root\app\word\*.css" "$out\word" -Force
+    Copy-Item "$root\app\word\vendor\*.js" "$out\word\vendor" -Force
+    New-Item -ItemType Directory -Force "$out\markdown\vendor" | Out-Null
+    Copy-Item "$root\app\markdown\math-config.js" "$out\markdown" -Force
+    Copy-Item "$root\app\markdown\vendor\tex-svg.js" "$out\markdown\vendor" -Force
+}
+
+# One rail implementation is published under each viewer's existing origin.
+foreach($directory in @('markdown','word','spreadsheet')) {
+    if(Test-Path (Join-Path $out $directory)) {
+        Publish-BuildAsset "$root\app\navigation\rail.js" (Join-Path $out $directory) 'navigation.js'
+        Publish-BuildAsset "$root\app\navigation\rail.css" (Join-Path $out $directory) 'navigation.css'
+    }
+}
+
 # Image preview uses WIC and a pinned, bundled WebP decoder. No silent WIC-only build.
 $webp = Join-Path $root 'third_party\libwebp'
 if (-not (Test-Path "$webp\src\webp\decode.h")) { & "$root\tools\get-libwebp.ps1" }
@@ -217,6 +319,9 @@ if (Test-Path "$pdfium\bin\pdfium.dll") {
     Assert-BuildArtifactSet $out @() @('folderwing-pdf.exe','pdfium.dll')
     Write-Host "  (no PDFium: PDF preview is not built; run ./tools/get-pdfium.ps1)"
 }
+
+Invoke-Zig 'pdf_navigation_tests.exe' ($cflags + $engine + @("$root\tests\pdf_navigation_tests.c","$root\app\docmarks.c","$root\app\pdfpos.c","$root\app\pdftext.c","$root\app\previewlaunch.c","$root\app\previewreader.c","$root\app\pipewriter.c") + $libs + @('-lgdi32','-lmsimg32','-o',"$out\pdf_navigation_tests.exe"))
+Invoke-Zig 'preview_navigation_tests.exe' ($cflags + $engine + @("$root\tests\preview_navigation_tests.c","$root\app\docmarks.c","$root\app\textutil.c","$root\app\previewlaunch.c","$root\app\previewreader.c","$root\app\pipewriter.c") + $libs + @('-lgdi32','-luxtheme','-lmsimg32','-o',"$out\preview_navigation_tests.exe"))
 
 # The terminal panel app needs libvterm (./tools/get-libvterm.ps1); without it there's no panel terminal.
 $vterm = Join-Path $root 'third_party\libvterm'

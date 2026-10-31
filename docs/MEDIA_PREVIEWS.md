@@ -8,8 +8,11 @@ can remain for the configured linger interval. Close, source replacement and
 feature disable retire the owned helper and source.
 
 The first version includes play/pause, a draggable seek bar, ±5-second buttons,
-volume and mute, elapsed/total time, audio/video stream presence and source video
-dimensions. Buttons wrap into rows in narrow panes. Video poster thumbnails use
+volume slider with adjacent −/+ buttons and mute, elapsed/total time, audio/video
+stream presence and source video dimensions. The slider can be clicked or dragged
+to any position; the −/+ buttons move to the next 10% boundary in that direction
+(for example, 48% → 50% → 60% when increasing). Adjusting volume preserves the
+mute state. Buttons wrap into rows in narrow panes. Video poster thumbnails use
 the existing byte-bounded thumbnail cache and separate muted helper jobs. They
 never borrow or seek the live player's source. Archive video/audio entries can
 use the third pane after the existing bounded extraction step; file operations
@@ -23,10 +26,11 @@ With focus in the preview:
 | Key | Action |
 |---|---|
 | Space | Play / pause |
-| Left / Right | Seek −5 / +5 seconds |
-| Up / Down | Volume ±5 percent |
+| Left / Right | Seek −5 / +5 seconds; when the volume slider is focused, select the next 10% volume step |
+| Up / Down | Select the next 10% volume step |
 | M | Mute / unmute |
-| Home | Seek to start |
+| Home | Seek to start; when the volume slider is focused, set volume to 0% |
+| End | When the volume slider is focused, set volume to 100% |
 | Tab / Shift+Tab | Move between controls and the other panes |
 | Enter | Activate the focused button |
 | Esc | Close the preview (nested: close only the third pane) |

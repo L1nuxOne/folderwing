@@ -7,7 +7,7 @@
   "scope": "Pinned runtime/header dependencies, media sources and notices, exact PDFium source graph and application toolchain runtime review. PDFium Microsoft incorporated-code grant and binary package terms remain unresolved; no MIT incompatibility is established.",
   "source_inputs_sha256": {
     "LICENSE": "521f234833364cbfa4ffb482eeeb8fe823ebf9322a5047ecba4fb443dc867527",
-    "build.ps1": "302a9d6844ddc72aa22968b9f8bbbd6154cafcb57b227421c4a47830f2c3dcca",
+    "build.ps1": "0c8957fba2c2a48f33e8cf28262a6db41383800cf5d245bca68895dd512ead15",
     "tools/get-media.ps1": "8b9f00bbceb9b9819533cdb3503b95929100c8f514f39fff7068b6fa7bcf4eae",
     "tools/media-dependencies.json": "9011093f1f50274d5a80f1f0ab9985958c2e936116502f2a8cd743a7aec95efa",
     "tools/get-archives.ps1": "cf9ce35e7113a198dde9fab18a9b9f7a46e4e4dd71378467617383093fc3f64e",
@@ -30,18 +30,18 @@
     "tools/media-lgpl/toolchain.json": "2081ef7641779e950e1e793c0e87514ea5e0d715b5a2e234039e8425aa0637b3",
     "tools/copy-media-assets.ps1": "128ee10e4120f244df4d6a89703a6a813c110af9a8183fb92590daac3c30ad34",
     "tools/bootstrap-release.py": "3c9f85008311bb94afcea9b6228122f3ddb14e38e6b58c0de7903719e3dd3477",
-    "tools/release_common.py": "7712f4745f194d0912ef6ff2e0fa64b5d2e6cf267eb0a520cadfbc1097d9c101",
+    "tools/release_common.py": "76774a16e59064a2e53171852fecf04d99b365b6401c5fe0042d5ecd69cf0bc6",
     "tools/release-inputs.json": "342b4e6fa81c5785ed19dd358dca1c8734bc4aa782a6955e7218c5ff56394872",
-    "tools/release-files.json": "af084f7676a4511ff7bccc3df0111199dff3ae85171f5082406931f019ba9a23",
+    "tools/release-files.json": "3bfaebc54f19459df9ac96a248246ac2045d01fe99a0870b1c88d5d9e097f462",
     "tools/build-release.ps1": "50c05fe27fb5e587be7e1ebbd22dc45e2d9b7b756f6fd109f8f7cd8329061170",
-    "tools/package-release.py": "c3fff6fe994b0e87535697efdd9492705cdc4d71f0a603b1db27b759ed198768",
+    "tools/package-release.py": "086a77bdd9f05a527f61b8f8287fc432d1ea05fd848cbfaa322dcfb0c556eef0",
     "tools/release-build-receipt.py": "038c1020a74728b4edb95fc6afa3b7e543705eba5db9a640f92e733c1d0fab7e",
     "tools/check-release.py": "284bbbbb734e6544f5c4de7a6716873c425ff505bf93a49bfa46c99c4b087fe2",
     "tools/media-lgpl/capture-toolchain.py": "63e056a7ed86025315a5ed934fc6d3d864f30ba99e7eb3aa7b2bab1280ab1f2b",
     "tests/release_smoke.ps1": "56efb04ab401aedd395dca13aa8132ace1a8fb44bbb1ec72521b3310ba668682",
     "tests/release_packaging.ps1": "2f277030d1180a4dafda332ce31d81a1a2e640353e161d9625e0ed2fb7dec919",
     "tests/make_media_fixtures.py": "1f8bed0d526aef496416c7769f489453a63a9070b7fc308684789f22de24b774",
-    ".github/workflows/build.yml": "66ef821f3ab5f45371825a36d8ff5543ba0d561f98bf29fc81db10a182e3932c",
+    ".github/workflows/build.yml": "6b63f591d747c06ec83b1680826f847dfc2773c64fdfb519c16a7a34ee9146cf",
     ".github/workflows/media.yml": "e5a27fbbcfeae34380641be6ddb7faf480df997feb4149fa9879d3e69baa98b5",
     ".github/actions-pins.json": "a39bc00511ac378c20879dd0240c7a47f1c731b9c34c44026bfc1aa25e045d80",
     "tools/pdfium-build/audit.py": "687ed20cf398c8bf085ea670d084895139d0c57d69b40e9ed6b463202caf8958",
@@ -60,7 +60,7 @@
     "tools/pdfium-build/patches/chromium-build.patch": "faf1cec5e5a1b5ff720d2908d26818d04c58f27982cce7217cf540500bf53edf",
     "tools/pdfium-build/patches/pdfium.patch": "d07eeda5344074997dee3ce12e3454f0f3596744a813ab326a54db5406b1c8f0",
     "docs/PDFIUM_CONTROLLED_BUILD.md": "2e2f6446bbfcba313086e9f85ac49be1fe8e643d16d0e5db6f516d0751cb7a1e",
-    "tests/native-impact.json": "3025e64f41f23abc72e13c7cfaf47c7b3b97fd512f8b4e56a79690e13f849198",
+    "tests/native-impact.json": "9d1181bf0e7bc9e3930642744f68eb8e7c340d187b12de7e9b11bd34b0bad16f",
     "docs/PDFIUM_DISTRIBUTION_REVIEW_20261025.md": "0b0e2fd144f45c4d9d7263b15234353ea31d17a368b59a3828379ec709c8d10d",
     "docs/dependency-reviews/20261025/MICROSOFT-DISTRIBUTION-INQUIRY.txt": "b413164500bd40fd5101d347891137e3bc4c85c6c7e657ca61f1a6c8d8292505",
     "docs/dependency-reviews/20261025/LLVM-MINGW-EXPERIMENT.json": "e2def57ef47da2d1c7de36195c08596e32106d088e2fc0d9517c0df39122cd57",
@@ -96,12 +96,147 @@
     "tools/get-pdfium.py": "c8b63e3ce605ae058118eedd60b178dfa1edf0436978aca323823e78914b040b",
     "docs/PDFIUM_GNU_ADOPTION.md": "2c809a2155072e92eeb253b80e032b9e3ca264b6e66fcf33f567ad32cbd533b9",
     "docs/dependency-reviews/20261025/PDFIUM-GNU-ADOPTION.json": "de4c6a95fefe97d58ff5c6490ded1109aa3eb23088c75824ccbd742288d68fbf",
-    "docs/DEPENDENCIES.md": "a3bf99d0cd9fed8badb6184c1d02979f6ed5bbaa1dc842128598713fc7f3490f",
+    "docs/DEPENDENCIES.md": "010b98b0a6d0d753a04885f40d61e4651fee54144351be9219a71a50887d3540",
     "docs/RELEASING.md": "ac76d4524d747210e15bdda78ae0187a92cb8a4df24e70eba0462106008e940a",
-    "README.md": "0e376323b2180671185f9e479c2b93cf9ace79b23b71971f26f377ad5dd54de4",
+    "README.md": "13c7e34106ac6db13cc773c79d62533ea979b2446ced72be74e34988aa4080eb",
     "docs/DEPENDENCY_HOSTING.md": "646a8e1fc54fa3a8cee261ec5ef230703d4529de1e7f2972784125304e9a80d5",
     "docs/dependency-reviews/20261025/DEPENDENCY-HOSTING.json": "df95c5a5f3fca7e477c91edce16d0a090b352f1507f2bf4edbfc633266ac799b",
-    "docs/SOURCE_PUBLISHING.md": "14cc3ab272663bdca53a520c62fda0724ce9ae1f220255a6941e3245b93f8c1c"
+    "docs/SOURCE_PUBLISHING.md": "14cc3ab272663bdca53a520c62fda0724ce9ae1f220255a6941e3245b93f8c1c",
+    "tools/get-webview2.ps1": "b054e16bea95e045a945c36897c2672bf02d4286ea35b78c8ff8de362902d3c9",
+    "app/markdown/MarkdownHost.cs": "2a1425f1caec3ad7d2cf629cad05c9a3b2d9fb5edbb17ec53510cd135efffca2",
+    "app/markdown/renderer.js": "5ed70ac73284dddbf03a0b96b3eb134fcb1d4cec4e33eebeb381980e5436ae91",
+    "app/markdown/DelimitedReader.cs": "d539599aa8e04e576f14ce161080600f6a3852a72c4021d584662b2e210741d6",
+    "tools/config-preview/entry.js": "bffc360d356702dffa8923013d1efd8f33a107a547e89eee8d60349dfbb90924",
+    "tools/config-preview/package.json": "539f6a171375d9747d6bc7c2b9c2239fcdd9424a8b71ba72f6df5c24c0cc00b4",
+    "tools/config-preview/package-lock.json": "accf45e9847801bf3f05bbc7e7317abe6649167a43ff1c31d13b47bbf1f9128c",
+    "tools/config-preview/build.py": "80b050f6a72b72e481e0aeea00d2620f81e417e88a34c2bd40fd627b94aab2ee",
+    "app/markdown/config-parser.js": "ebdf978d09053ef608f674c394a6d598e5718552f01f24f8a2e87fe0d08986ef",
+    "app/sqlite/SqliteReader.cs": "bf265a8f889b0f011439de7d4a1e55ff9ebef625dfe20ec5e94c2290cee123de",
+    "app/sqlite/DatabaseHost.cs": "abb89f840ef592b740e27391d5fad47767f14362b2387b22382a31c49cc89ba8",
+    "tests/sqlite-preview-test-impact.json": "274703a1d758fb19ec692e450d28c3244a2344afcf31d6c7270bbb74fcda4c8b",
+    "tests/sqlite_preview_tests.cs": "e6cf3a07bacd2243eb859c424c6cd33989e9611b62aeec1c18f8e45e8b917bbb",
+    "tests/sqlite_preview_tests.ps1": "dff6a37ec3c594a0a2edfadfe7bb08a17896f254e01e9083c713eb54fb75ec92",
+    "tests/sqlite_preview_ui_tests.cs": "bebca7d7c9e50f50a8fe26a76aa4a7cb85eda9345fd14e7abbe6d54498365afb",
+    "tests/sqlite_preview_ui_tests.ps1": "1b07bfd06a9b1b2a421301d3500d5e541c671a8255ec5ea53065d64f3fb712b7",
+    "tests/sqlite_preview_host_tests.ps1": "41bf2d39cedc723b25662eedf7eb2b53068a0c333094186b7d83b65d33f1fc3f",
+    "tests/fixtures/native/sqlite_preview_host.c": "a7b9133eb38e13d616b95a7a2242db669045bb16fb3b5984820880623de22fb4",
+    "tests/fixtures/native/sqlite_preview_host_fixtures.py": "fd86c7143990f766c19b4065cd29cd08dd17ea3ed766764129ed629de4ab638f",
+    "app/markdown/XmlPreviewReader.cs": "f9e0677df486846783210118faef0dabba2d65e00c088204a76277acbb8ac2b7",
+    "app/markdown/structured.css": "3eb418ef204fd39a2119342180a780b9ffdded8ceee2c042e77932e284b249b7",
+    "app/markdown/xml.html": "a7073b14f4ad222b5c22ed93064d842d3bbc7d296f150a132f4218a11795bab7",
+    "app/markdown/xml-util.js": "60be4125027642150e23ea1e1b269d39e4cc98d878722c8893604be471170045",
+    "app/markdown/xml.js": "05ae6a1761b28f985fbb4ddf2061e649ef1355f3413bfb40b47f011f9b6a6424",
+    "tests/markdown-test-impact.json": "3b93c7683c3f03df018bc549f67255f1a47c082be9f0d3681a23f7392d069795",
+    "tests/markdown_host_smoke.ps1": "2b2a936df414167c01166fd8d8823d1eddfe7e85349f11e8e564a078f9d02e83",
+    "tests/xml_preview_reader_tests.cs": "4216cc32178dff7b2d30647b6f18889484f63fb0ced54f5dbad781ad55ac4743",
+    "tests/xml_preview_reader_tests.ps1": "68e613f149759e46176d6c4d3b625bfb8cf9b2ab0cc8a3abd6e05b78e64d7e51",
+    "tests/xml_util_test.js": "684a2058dfe687f05ade9c534ffb2772597a764b9f465b00576dc6734571ac78",
+    "tests/xml_ui_fixture.js": "259b738c421a1156d3d4e263ceaf4ffc650b5d6c7a4cf54433935784c0bec40f",
+    "tests/xml_ui_test.ps1": "8458d1742eb8831f2221b566e2a67b6032159dfa8e17dd38a092bcb915f67f30",
+    "tests/fixtures/native/xml_preview_host.c": "17a233f8dab24b113794b2eab78433756292e4d83b21c52458416497f459e9cc",
+    "tests/fixtures/native/xml_preview_host_fixtures.py": "b9db5653416d6414c47023d158cc60c60ec7b1ad1c5a35144bd0d47157143f57",
+    "tests/xml_preview_host_tests.ps1": "b35c5ac0256e77a126da4f5085a67903fca213cbbbcced2c517795ab1806786f",
+    "tests/markdown_host_smoke.cs": "d6934002406e29e7743ffbd99cfeeeaaa2a8036e949b1036edfa4d047cfca2fd",
+    "tools/get-spreadsheet.ps1": "c4e766979e55421365d8407b92f7be9898411f48dec1ccfab799424136e831e0",
+    "tools/spreadsheet-dependencies.json": "f12d6825cfc16bb4e741b18e2a5c695acbfd93017873f18bd7ff4b71dced0d62",
+    "app/spreadsheet/FormulaCursor.cs": "f1830ced922378ef8aa6f0eb06b9c97f3e2b40b726ab43a5036986fc3058ab67",
+    "app/spreadsheet/index.html": "fe0bbc810ff89631b39c5245c81b53cbe27fd6096b97a0d6e659a48cfe2ca7b2",
+    "app/spreadsheet/SpreadsheetHost.cs": "011b37e24ff73e7211145e908bb91d5df5f3711f44a892960830d32ad1b72891",
+    "app/spreadsheet/SpreadsheetReader.cs": "133d31e910484ddf9398c2e28f60326ba6d1990757a739c74c5c1ab06cf454e3",
+    "app/spreadsheet/style.css": "e5e3620713e72f69099db61ad71af50ea1be0c38d37f075cc6dc714020bf90e4",
+    "app/spreadsheet/viewer.js": "dce7b1782bee4ca7a15e2485edb0398da1166168149e603479646b95a2c7645a",
+    "app/spreadsheet/WorkbookPackage.cs": "1e6a71967de6b2454376fd4c4c278fa5bb2f520adf749cb8072133c1bf4aac6e",
+    "tests/spreadsheet_host_smoke.ps1": "d09b6330af2be014ca0707d472c31959258ac4b3bf653dc420d7b141f4910b24",
+    "tests/spreadsheet_preview_host_tests.ps1": "15611c289f2123bc3a7a7d8ea747f632ce5e6ce776e2bd0eda65dca56a3fc5e9",
+    "tests/spreadsheet_reader_tests.cs": "9753f94f4abf6214010393151338938030634a75a7b33e1857edb2eb41ab2e00",
+    "tests/spreadsheet_reader_tests.ps1": "4b441aaf9dd5e89ccf7afe3d682d11bacf40b98fca0add990d1d3efeb7cede3e",
+    "tests/spreadsheet_ui_fixture.js": "599ece3b1641c47c4ea4b98c8f05a34ab13522ceb70c56a90065f0d0834719b7",
+    "tests/spreadsheet_ui_test.ps1": "dac2e3db22216cf49acc79ea6c82b1bca111906eca4fcddcc9d6da4b43fb9372",
+    "tests/fixtures/spreadsheet/create_variants.py": "b3150beb3625e3d519fe5c2a94f15c12f69278d22b23849279e75f548f9e6752",
+    "tests/fixtures/spreadsheet/synthetic.xlsx": "8dd86546ba984dfb9e248e73561d0394bb237e0bbdb6646c6bf9a7ef09f05fdf",
+    "tests/fixtures/native/spreadsheet_preview_host.c": "a519eacb822c88802b6239a13d34dd0d63287d295ace273d0c0c5fa2ce22a5ec",
+    "tests/fixtures/native/spreadsheet_preview_host_fixtures.py": "eecd033164e314bc9e71f59fa17eac1564fd7accde9d8f301b2a6afe588b8f32",
+    "tools/word-dependencies.json": "1411dcf767a62001ecdf92225d18dded6b50d032906426578397c811b6d606fe",
+    "tools/word-preview/README.md": "8e845c1a339266ab14d5baf9c25f03569414255c10804040edc41482a84df77c",
+    "tools/word-preview/docx-preview-0.4.1-folderwing.patch": "2de4c5bed7cbb6c348fa8ba4c13b5c1a3dd94af467df5ee1456212c0401c20d7",
+    "app/word/index.html": "63ed34b16fb7ab229b406a2cba3ff059a686b4348df907930105d6b3718f5212",
+    "app/word/style.css": "6d1ad1384be596ede86d974ac67286adbe2d74f466fbfbac0b73777593026eac",
+    "app/word/viewer.js": "f62b8d4e8cd6af281ae63e3c698039d5fa54756916a3c6452686c5a1e1dd80e3",
+    "app/word/word-util.js": "6443a4d18e65fc3d446f88bf7dd562ed4af6e9b752334ca8ce769349851cda32",
+    "app/word/WordHost.cs": "d48aa50c41e2bc65c2262e11a39a3fce0a766f5ac9c3dfa61c027604095eeabb",
+    "app/word/WordPackage.cs": "e228b03154ec2375c999d0e9c7ec2d53d9c2687594636cc0cc0243ebfdd9bebe",
+    "app/word/vendor/docx-preview.min.js": "768e76d164040bbca6c03421f9ef3ccccc1ca2db41038ed5219f738e84d2416c",
+    "app/word/vendor/jszip.min.js": "7f839b2d4688b845c105ebf5d2f9803075f91ea0fe72bdaac176c3a04dd3d2c1",
+    "tests/word_host_smoke.ps1": "4350a952eb85f72f413945b7fee3aa9e091294c1d66530053eafc82d4b42641e",
+    "tests/word_math_test.js": "a4cf2ed2012fc3d7b2c5abccc8620bbf6b7eee2a517863b784fb16582808d6c9",
+    "tests/word_package_tests.cs": "e9175b0b83fe3b862b618b6b50526dcd957ed8c92c1ef5eaf1bae46b9732639d",
+    "tests/word_package_tests.ps1": "52e68777534e5cac89b11e0445d52cfffa0583005e871f3395235d26c6bfd975",
+    "tests/word_preview_host_tests.ps1": "cdd15ce6a3925364cf4652856acaebabd66e8b82c0609202de0e08b86f090adf",
+    "tests/word_ui_fixture.js": "cf2b454747548fdbaa64bca147bfba5845596de54a6dc3250a0068cf59522184",
+    "tests/word_ui_test.ps1": "7fa746dc98e63c0b2135d4625033bb322dc898b7358ed5836b9c5116c47d3d21",
+    "tests/fixtures/word/synthetic.docx": "0c0e4c3b165d32a113eebf818171e3d57df478af68c01c0446da92ebae137ad4",
+    "tests/fixtures/native/word_preview_host.c": "7c12df2a641c6e904b104919558712d5d207a5a7018256fd4d3d45ecce751165",
+    "tests/fixtures/native/word_preview_host_fixtures.py": "6b8e7604f3e575799258e089c8e37a02115a0d75a811ce1e2f88ea5d07f6bf0c",
+    "tests/word_textbox_ui_fixture.js": "ef89d7f5db5670fbffd9dca367717899062fa83c639f74936be7d0a0f7cb3f6c",
+    "tests/word_textbox_ui_test.ps1": "cc663a9d87329dfd3e6f58fb84e65029e7ae6713e611d049f7e0095a129f58e2",
+    "tests/fixtures/word/make_textbox_fixture.py": "a9239e7afec2897104dc32ea41bf2d61678de971e7e09c3a2b057bc2efb57b89",
+    "tests/word_host_probe.cs": "d2b2880452bc92df3ea78a7e4c1cdd3b3c534a1ef3718605cb537932750c075b",
+    "app/docmarks.c": "bad890887b01247ccc777a6dd077b96c5ce2c0dd33d6198b70a10b46b92919ef",
+    "app/docmarks.h": "6b59729edbb75750407de36352953343664332d0c64813d1d1ae90675e9b2810",
+    "app/readingrail.h": "61ca1cfd16daadd652eb59c1eeec1a9f205ab7bc3e56c4c53c622bf121b3872f",
+    "app/textnav.inc": "0964f3fd0f2813e10c9766d9ea14f265440910cd59cddf59ebef8ef8eafb80e7",
+    "app/textview.c": "bd6725eb3d318db71e850f21a2b0fb3649a0302a684029f18d111011b03acf6c",
+    "app/textview.h": "0423869e81f19e535bcc98bd6b389b4160e74db1f2d6b27471502610998e99a8",
+    "app/app.h": "34572078e3bb9de901c2e4aee0596edacf55f2d455b5c013bfaffed27b87d2e4",
+    "app/archiveview.c": "2d47c24fb18238807bfc3fe9ed4262136570b2be44a73f3bac37dc95c92c98bc",
+    "app/fpdemo.c": "da9df7c4afb4c8120a53699d2fb638b3e457cc7a6591c907f26542410b17cfc1",
+    "app/navigation/BookmarkStore.cs": "62852cbb1de32bb395fc2ac8597c65a2ad7e81e5e3f2022651c394a3e894c2cc",
+    "app/navigation/BrowserNavigation.cs": "883be76e49bea8423f770abd612d6a027aaef9c32f1ddb2c6d6a38c4f6854573",
+    "app/navigation/NativeNavigationRail.cs": "1232f63ddc1cb08ec692797eb84a4beb13f9b47b3b53d85803672bb7970cad6c",
+    "app/navigation/rail.css": "361124ba80e0cf13f31284f468f956dbc8b9d4e4574680902b80ac18e8ccf6d7",
+    "app/navigation/rail.js": "b5739657ea77e214ac90a9127f73076d419612eaffda1f0f00d15a59163acf0f",
+    "app/markdown/config.html": "0f5db96f7cab2a7993f4a1ef7ea9294aaab39244c4e7fe6df33b1919bcc0d2af",
+    "app/markdown/index.html": "09b41ed26cedff396811e7fde1fc456a1829352d2ac770892e53be1b98ef6833",
+    "app/markdown/json-parser.js": "6d87cc21e0db480c283abc384b86bb72958e215a27e5596659233de14962a1a4",
+    "app/markdown/math-config.js": "c4ebab821589b6189323b4ae532aa455798b28cdf4d530d1ef58a4589b746703",
+    "app/markdown/notebook-util.js": "515a35548198a6ba78faf8577cc50a5c8957c095b8c40d7cd6e8a2fc7e871073",
+    "app/markdown/notebook.css": "7616ba762a2b74d078382ca010c4d74f95e0d27f2380d618354e441f6476f48d",
+    "app/markdown/notebook.html": "ee16956ce0a5265bb916f335d2f6c23220c10dea4c0d10fa6b40365fd6c4295b",
+    "app/markdown/notebook.js": "918d37de26918037fd3bd876f9e9ba3e62b5249947aacfe05f407d2c62fc2a89",
+    "app/markdown/structured.html": "229356b3ddece2e379c6bb9fae9f2fcad72a2e0b8fcc84a4c17a9796703b3598",
+    "app/markdown/structured.js": "07f35548b78b25f9661ded10f9a3ee5dbd64195e2c03ab18cbd54cb36a1c48d4",
+    "app/markdown/style.css": "ed157dce888d083b52f7e1822ee06b9e771b1198da84a3b4328a8a9e7405e730",
+    "app/markdown/table.css": "f3319aa7acd3bd7a468ef210db88df98abb752f3fd619d37d866940bf000cebc",
+    "app/markdown/table.html": "325e996c5d28fceec5dd7daaf594a64878e71753c16116c57fb6999c9229a6a5",
+    "app/markdown/table.js": "210f8dfb4850cb3acb80c4ff61810d958685fb3c350583f3c1acd07fd9b68e90",
+    "app/markdown/view.js": "e71ad875d2501e8add8c548de9e858bcb6adce785094d08737baf44714243bbb",
+    "tests/preview_navigation_tests.c": "ace785ec3bb26a80dbefb9de7fce0ffd1a0b0ac4d9a026ae4f5ac6aae7cd6871",
+    "tests/navigation_managed_tests.cs": "051d1f1d8a854cb792e3f2798d7b9cb06804a1f6cf1332e1bf55cc3e0304a597",
+    "tests/navigation_bridge_tests.cs": "3314fbcb483aa0dc1725fb98c9cafdae6353e44a7a176bc5cd7179ef2f2a0e26",
+    "tests/preview_navigation.ps1": "5867261a064cd0fcb0930d98f893be714fae9cb6465b412364e22175ba373eaa",
+    "tests/navigation_browser_fixture.js": "c98ce606d3556273c2f00d9ebdd289dcbc39dd399ce26005901a954041a7332d",
+    "tests/navigation_browser_tests.ps1": "e274ceef3a6567d80d9bcb87fd767bda37e1d3f38a34f2268c082fc882b04082",
+    "docs/PREVIEW_NAVIGATION.md": "6fc344f1174adaf733d2671fd7f074fbd804f72498a6ceb750f86537e6f41875",
+    "docs/PDF_NAVIGATION.md": "d46b5d35c3918ca33e6fc433f5cc20d7e7fd1892cc9e53f4c975f7af5f1e1178",
+    "tests/navigation_mock_bridge.js": "58405e52089cd70f1f26748c2d4292d2463ce9890c45680d2e19f7c2fe68bb0a",
+    "tests/config_ui_test.ps1": "a226aa9b08bea485a8356494b0c473cddd011df60be388d4d9f11f102fd68d33",
+    "tests/notebook_ui_test.ps1": "686dec4b7e91728b4f5344cfb0c6f41c5f65e85a2b2186687e7e8a27c41fd860",
+    "app/libraryview.c": "b78f39285cdf68df2b500a5834ff30dc594bc3b0f6218f58502c6832e0229a6b",
+    "app/libraryview.h": "36bfc604db5c89afebc59c3e0cd794f9ec613a71fdf1021e2be61aed3dc570c3",
+    "docs/LIBRARY_BROWSER.md": "b8f55f7e1b220c0d8288bb907186f1ee3be04b4bde7cd2ecda66ad2b59bfe3c1",
+    "tests/library-test-impact.json": "437146560142eec6f8705646f4a5b95c545e8bd7d9214ac3f5b074bb84379294",
+    "tests/library_fixtures.py": "b454422841ac401f71a8d8759a6f42b636044a7ea92d0a22db708df4315bf5ff",
+    "tests/library_catalog_tests.cs": "9c196dd42644c0b1306fdf7eaeb180558ccf5b8aee9fe9293f74120fc549f23f",
+    "tests/library_catalog_tests.ps1": "a03258bbb15dc9eebe5ce736303c54e5c00e52e464c34a0c3933f6b5f74fe0ea",
+    "tests/library_ui_tests.cs": "2ab6d9665c096332128308bd1d0e74ae5786e195975abcb9b1453d5b17f7dabd",
+    "tests/library_ui_tests.ps1": "7b169019e1ac5e61896ef0d231e859e03ea28fa02ce1260b7d3d805be0f74efb",
+    "tests/fixtures/native/library_host.c": "bc3a0563d442e1abd7ad93b805b2d925ec8d9fef46ac63f9b660d21e19f438fd",
+    "tests/library_host_tests.ps1": "a742f0b4aab57d980e81865f64f49dc3ed1c0389bfd0484b69c8a12ee3a12c71",
+    "app/library/Catalog.cs": "0890542cb20e67d737d11d96acc013e367be2d49aa2fc3cb4aedebfdf24ed1f4",
+    "app/library/CatalogDb.cs": "8b647fec236882a3315871e742ab0e5a55269bd1ad0e5aaa40efefbdcc35ba29",
+    "app/library/LibraryHost.cs": "a943d8781d887e43799f05e3e368bcc6b61781f4f19fdc9c131cf90a379b8ff2",
+    "app/library/LibraryState.cs": "e5ce433c24b26a52563e89c34ec36cc0295caf7421f5022db1298db0ed9f30da",
+    "tests/fixtures/native/library_pdf_probe.c": "49777c6ca17ad3821cea5c24575f9d27758ea1d7ecf234a0c4a54d0b24287d32"
   },
   "release_ready": true,
   "components": [
@@ -614,9 +749,10 @@
       "name": "SQLite amalgamation",
       "version": "3.54.0",
       "license_expression": "LicenseRef-SQLite-Public-Domain",
-      "relationship": "statically-linked",
+      "relationship": "statically-linked Linux helper; dynamically linked Windows preview helper",
       "artifacts": [
-        "folderwing-wsl"
+        "folderwing-wsl",
+        "folderwing-sqlite.dll"
       ],
       "origin": {
         "url": "https://sqlite.org/2026/sqlite-amalgamation-3540000.zip",
@@ -1357,6 +1493,252 @@
         "licenses/third-party/toolchain/header-notices.txt"
       ],
       "notice_status": "Full text and file notices prepared"
+    },
+    {
+      "id": "markdown-it",
+      "name": "markdown-it",
+      "version": "14.1.0",
+      "license_expression": "MIT",
+      "relationship": "bundled javascript",
+      "artifacts": [
+        "markdown/vendor/markdown-it.min.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/markdown-it/-/markdown-it-14.1.0.tgz"
+      },
+      "notices": [
+        "licenses/third-party/markdown/markdown-it-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "mathjax",
+      "name": "MathJax",
+      "version": "3.2.2",
+      "license_expression": "Apache-2.0",
+      "relationship": "bundled javascript",
+      "artifacts": [
+        "markdown/vendor/tex-svg.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/mathjax/-/mathjax-3.2.2.tgz"
+      },
+      "notices": [
+        "licenses/third-party/markdown/mathjax-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "webview2-sdk",
+      "name": "Microsoft WebView2 SDK",
+      "version": "1.0.4258.31",
+      "license_expression": "BSD-3-Clause",
+      "relationship": "bundled SDK loader and managed bindings; installed runtime separate",
+      "artifacts": [
+        "Microsoft.Web.WebView2.Core.dll",
+        "Microsoft.Web.WebView2.WinForms.dll",
+        "WebView2Loader.dll"
+      ],
+      "origin": {
+        "url": "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/1.0.4258.31/microsoft.web.webview2.1.0.4258.31.nupkg",
+        "archive_sha256": "56f7f4b8bf9aee4b8efefbbdd4f67d5f74ebd1b100ed0806da71bf76af481aa9"
+      },
+      "notices": [
+        "licenses/third-party/markdown/webview2-LICENSE.txt",
+        "licenses/third-party/markdown/webview2-NOTICE.txt"
+      ]
+    },
+    {
+      "id": "highlightjs",
+      "name": "highlight.js",
+      "version": "11.11.1",
+      "license_expression": "BSD-3-Clause",
+      "relationship": "bundled javascript and theme",
+      "artifacts": [
+        "markdown/vendor/highlight.min.js",
+        "markdown/vendor/highlight-theme.css"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/@highlightjs/cdn-assets/-/cdn-assets-11.11.1.tgz",
+        "archive_sha256": "28a06bf6ebcc2218c6e842bdb4f1c8353508a8cada59e85110f91892f5726195"
+      },
+      "notices": [
+        "licenses/third-party/notebook/highlight-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "yaml",
+      "name": "yaml",
+      "version": "2.9.1",
+      "license_expression": "ISC",
+      "relationship": "bundled JavaScript parser dependency",
+      "artifacts": [
+        "markdown/vendor/config-parsers.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/yaml/-/yaml-2.9.1.tgz",
+        "archive_sha256": "4ef6c54cf559b8a207b7b518378230805a1c84af239b14960e8c67c7d59de5d3",
+        "lock": "tools/config-preview/package-lock.json"
+      },
+      "notices": [
+        "licenses/third-party/config/yaml-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "toml-eslint-parser",
+      "name": "toml-eslint-parser",
+      "version": "1.0.3",
+      "license_expression": "MIT",
+      "relationship": "bundled JavaScript parser dependency",
+      "artifacts": [
+        "markdown/vendor/config-parsers.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/toml-eslint-parser/-/toml-eslint-parser-1.0.3.tgz",
+        "archive_sha256": "3554e44f8a9df916700c3d58f469f7110711174feb54799c282069a733e901fb",
+        "lock": "tools/config-preview/package-lock.json"
+      },
+      "notices": [
+        "licenses/third-party/config/toml-eslint-parser-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "eslint-visitor-keys",
+      "name": "eslint-visitor-keys",
+      "version": "5.0.1",
+      "license_expression": "Apache-2.0",
+      "relationship": "bundled JavaScript parser dependency",
+      "artifacts": [
+        "markdown/vendor/config-parsers.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-5.0.1.tgz",
+        "archive_sha256": "cc0945290fe3cc73aa7f04b03cdc0704ca7ac8d805ff19f43fa3f9e5e0b6728d",
+        "lock": "tools/config-preview/package-lock.json"
+      },
+      "notices": [
+        "licenses/third-party/config/eslint-visitor-keys-LICENSE.txt"
+      ]
+    },
+    {
+      "id": "exceldatareader",
+      "name": "ExcelDataReader",
+      "version": "3.9.0",
+      "license_expression": "MIT",
+      "relationship": "bundled managed assembly, on-demand spreadsheet helper",
+      "artifacts": [
+        "ExcelDataReader.dll"
+      ],
+      "origin": {
+        "url": "https://api.nuget.org/v3-flatcontainer/exceldatareader/3.9.0/exceldatareader.3.9.0.nupkg",
+        "archive_sha256": "a59df6b86a01cf67e45a6680f288a6ccc91b5a473232f76f00cb5104daa1543b",
+        "manifest": "tools/spreadsheet-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/spreadsheet/ExcelDataReader-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/spreadsheet/ExcelDataReader.dll",
+        "sha256": "03050036badc7651f357a57cdc150451fc021cdb56e31918f6a92d8d6629b844"
+      },
+      "notice_status": "MIT notice included by release packager"
+    },
+    {
+      "id": "excelnumberformat",
+      "name": "ExcelNumberFormat",
+      "version": "1.1.0",
+      "license_expression": "MIT",
+      "relationship": "bundled managed assembly, on-demand spreadsheet helper",
+      "artifacts": [
+        "ExcelNumberFormat.dll"
+      ],
+      "origin": {
+        "url": "https://api.nuget.org/v3-flatcontainer/excelnumberformat/1.1.0/excelnumberformat.1.1.0.nupkg",
+        "archive_sha256": "c48af3056098d8f123225b69c16d814f58ff28928e1f6a8fb6fba65fe35366f1",
+        "manifest": "tools/spreadsheet-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/spreadsheet/ExcelNumberFormat-LICENSE.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/spreadsheet/ExcelNumberFormat.dll",
+        "sha256": "03ccc71a42833102ef54ae9ecf39d9d62c0491c17359aa37d1d2ef0ec7397d04"
+      },
+      "notice_status": "MIT notice included by release packager"
+    },
+    {
+      "id": "system.valuetuple",
+      "name": "System.ValueTuple",
+      "version": "4.5.0",
+      "license_expression": "MIT",
+      "relationship": "bundled managed assembly, on-demand spreadsheet helper",
+      "artifacts": [
+        "System.ValueTuple.dll"
+      ],
+      "origin": {
+        "url": "https://api.nuget.org/v3-flatcontainer/system.valuetuple/4.5.0/system.valuetuple.4.5.0.nupkg",
+        "archive_sha256": "9e21fa9767d4e76bc0cee065c1d40cc34384a114bfec4d70e6c981168a926802",
+        "manifest": "tools/spreadsheet-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/spreadsheet/System.ValueTuple-LICENSE.txt",
+        "licenses/third-party/spreadsheet/System.ValueTuple-THIRD-PARTY-NOTICES.txt"
+      ],
+      "observed_library": {
+        "path": "third_party/spreadsheet/System.ValueTuple.dll",
+        "sha256": "e905d102585b22c6df04f219af5cbdbfa7bc165979e9788b62df6dcc165e10f4"
+      },
+      "notice_status": "MIT notice included by release packager"
+    },
+    {
+      "id": "docx-preview",
+      "name": "docx-preview browser renderer, modified by Folderwing",
+      "version": "0.4.1",
+      "license_expression": "Apache-2.0",
+      "relationship": "bundled patched browser JavaScript for on-demand Word helper",
+      "artifacts": [
+        "word/vendor/docx-preview.min.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/docx-preview/-/docx-preview-0.4.1.tgz",
+        "integrity": "sha512-Dv4g+LeE0swHpPvNC0lAT0YsR5Zq5pAxw7d3vHQ8EChBLgIrqqe9VPL5nVt2HBJap8bEZbXUI0TJob7kBeNU9w==",
+        "manifest": "tools/word-dependencies.json",
+        "patch": "tools/word-preview/docx-preview-0.4.1-folderwing.patch"
+      },
+      "notices": [
+        "licenses/third-party/word/docx-preview-LICENSE.txt"
+      ],
+      "notice_status": "Upstream license and prominent modification notice included"
+    },
+    {
+      "id": "jszip-word",
+      "name": "JSZip browser distribution with bundled dependencies",
+      "version": "3.10.2",
+      "license_expression": "MIT AND Zlib AND ISC",
+      "relationship": "bundled browser JavaScript for on-demand Word helper; MIT option selected",
+      "artifacts": [
+        "word/vendor/jszip.min.js"
+      ],
+      "origin": {
+        "url": "https://registry.npmjs.org/jszip/-/jszip-3.10.2.tgz",
+        "integrity": "sha512-3l+rb15IOWtUhU0H5MFqES/T6Kh7abYwjosBey/vD6hDt8zoEffkSC5Ws5SGtgVw3gBx2NEbhTeSW1+kWkpyTQ==",
+        "manifest": "tools/word-dependencies.json"
+      },
+      "notices": [
+        "licenses/third-party/word/jszip-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/core-util-is-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/immediate-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/inherits-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/isarray-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/lie-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/pako-zlib-notice.txt",
+        "licenses/third-party/word/jszip-dependencies/process-nextick-args-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/readable-stream-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/safe-buffer-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/setimmediate-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/string_decoder-LICENSE.txt",
+        "licenses/third-party/word/jszip-dependencies/util-deprecate-LICENSE.txt",
+        "licenses/third-party/word/pako-LICENSE.txt"
+      ],
+      "notice_status": "JSZip, pako/zlib and conservative dependency-closure notices included; exact embedded transitive versions not asserted"
     }
   ],
   "notice_files": [
@@ -2004,6 +2386,141 @@
       "path": "licenses/third-party/pdfium-gnu-runtime/RUNTIME.md",
       "sha256": "ac8fa37b30791d526fc7bbbc17119012a6e1191b84bf2a50897ac6454b2ab5bc",
       "origin": "tools/pdfium-build/gnu/RUNTIME.md"
+    },
+    {
+      "path": "licenses/third-party/markdown/markdown-it-LICENSE.txt",
+      "sha256": "792c48c5a849a15fdf9e37e8bcf9e6d1dd13b32b46c642a748a0a46a9919d473",
+      "origin": "licenses/third-party/markdown/markdown-it-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/markdown/mathjax-LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "origin": "licenses/third-party/markdown/mathjax-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/markdown/webview2-LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55",
+      "origin": "licenses/third-party/markdown/webview2-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/markdown/webview2-NOTICE.txt",
+      "sha256": "106423785c5b7eba0a8e61d1837f2132e9c828e20ad530f565d981c1df60dd90",
+      "origin": "licenses/third-party/markdown/webview2-NOTICE.txt"
+    },
+    {
+      "path": "licenses/third-party/notebook/highlight-LICENSE.txt",
+      "sha256": "6c081431591d9df696c82dc598fe1423765b8a299b200ed00b281afd0f64c490",
+      "origin": "licenses/third-party/notebook/highlight-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/config/yaml-LICENSE.txt",
+      "sha256": "5bba27375d93e9119f76c1015f7672cf9ad5f70952296e0842fb2243d6376869",
+      "origin": "licenses/third-party/config/yaml-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/config/toml-eslint-parser-LICENSE.txt",
+      "sha256": "e0074180337642e284567312cca2a5fe0474bbdabd2080822d42477f01e97b28",
+      "origin": "licenses/third-party/config/toml-eslint-parser-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/config/eslint-visitor-keys-LICENSE.txt",
+      "sha256": "d8bf34ff6d190640a01e7704ad78253fc181bc128949d71273fbbaa12f33c0b4",
+      "origin": "licenses/third-party/config/eslint-visitor-keys-LICENSE.txt"
+    },
+    {
+      "path": "licenses/third-party/spreadsheet/ExcelDataReader-LICENSE.txt",
+      "sha256": "52ba99951f976c3c89ac69d9b3bed7ca264f7aac0253c61c163dc3b658fd0f04",
+      "origin": "https://api.nuget.org/v3-flatcontainer/exceldatareader/3.9.0/exceldatareader.3.9.0.nupkg"
+    },
+    {
+      "path": "licenses/third-party/spreadsheet/ExcelNumberFormat-LICENSE.txt",
+      "sha256": "6650b0063a39e7dced886e53c6dac66fcd909beb8b9abb868452c9b621fa2018",
+      "origin": "https://api.nuget.org/v3-flatcontainer/excelnumberformat/1.1.0/excelnumberformat.1.1.0.nupkg"
+    },
+    {
+      "path": "licenses/third-party/spreadsheet/System.ValueTuple-LICENSE.txt",
+      "sha256": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b",
+      "origin": "https://api.nuget.org/v3-flatcontainer/system.valuetuple/4.5.0/system.valuetuple.4.5.0.nupkg"
+    },
+    {
+      "path": "licenses/third-party/spreadsheet/System.ValueTuple-THIRD-PARTY-NOTICES.txt",
+      "sha256": "7864a01e2fdef7e8fdf81b906efb1466f083206affea7ba7e6dadea429754765",
+      "origin": "https://api.nuget.org/v3-flatcontainer/system.valuetuple/4.5.0/system.valuetuple.4.5.0.nupkg"
+    },
+    {
+      "path": "licenses/third-party/word/docx-preview-LICENSE.txt",
+      "sha256": "8668bf4417d161e4eb4d47d6044526e4914d9eb3c748573d9bb7e87708c1253f",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-LICENSE.txt",
+      "sha256": "566c953c6090b1218ca6217dd7359d45dde46581968586dc607d59a78af6a9c4",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/core-util-is-LICENSE.txt",
+      "sha256": "33b734d60042d0fe0c92dd1fc1e874193a1c899ec3e276a2eb935d2d0bf5b710",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/immediate-LICENSE.txt",
+      "sha256": "809e66de579fb7d92503848bbe6d1f348f4f6521a71e5d294fe7cc0c87a3b4ff",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/inherits-LICENSE.txt",
+      "sha256": "5ffe28e7ade7d8f10d85d5337a73fd793dac5c462fb9a28fbf8c5046c7fbca3b",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/isarray-LICENSE.txt",
+      "sha256": "a1bd5deadb6a06dd74efa852c1b8b23f63b67f2214fbe9c8bd591da51da69268",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/lie-LICENSE.txt",
+      "sha256": "5c81b0caa98593408b03125efa25efe622341ed87ae55561968828cd887d64a4",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/pako-zlib-notice.txt",
+      "sha256": "b8b8e497c7f47c0cab90af90f087ccf77baf4f57539ca2be2e9be9f0cdb26dc3",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/process-nextick-args-LICENSE.txt",
+      "sha256": "ecdccbcf39024f624ded480c01c0b25458e1eca8f26ecf040933865ce56d9a4f",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/readable-stream-LICENSE.txt",
+      "sha256": "ec62dc96da0099b87f4511736c87309335527fb7031639493e06c95728dc8c54",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/safe-buffer-LICENSE.txt",
+      "sha256": "c7cc929b57080f4b9d0c6cf57669f0463fc5b39906344dfc8d3bc43426b30eac",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/setimmediate-LICENSE.txt",
+      "sha256": "c4b4ad3a5746f1f5249a6dd90396ec519264e1bb02e01e48a6522c48a3a97cb4",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/string_decoder-LICENSE.txt",
+      "sha256": "11f2aafb37d06b3ee5bdaf06e9811141d0da05263c316f3d627f45c20d43261b",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/jszip-dependencies/util-deprecate-LICENSE.txt",
+      "sha256": "0154425673db15cdfa80ecba2c9b1f1a867f7197a006764712849bfc3a93cbb7",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
+    },
+    {
+      "path": "licenses/third-party/word/pako-LICENSE.txt",
+      "sha256": "a04665b3b2de56c66730c1f720f528175739e4104f79073614aa611da1e85539",
+      "origin": "tools/word-dependencies.json and npm JSZip dependency notice closure"
     }
   ],
   "build_tools": [

@@ -1,0 +1,25 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+internal static class LibraryCatalogTests
+{
+ static int checks;static void Check(bool value,string claim){if(!value)throw new Exception(claim);checks++;Console.WriteLine("ok "+claim);}
+ static void Calibre(string path){var c=LibraryCatalog.Open(path,"calibre",CancellationToken.None);Check(c.Items.Count==3,"Calibre books loaded without folder traversal");var book=c.Items.Single(b=>b.Id==1);Check(book.Title=="First book"&&book.Creator=="Author One; Author Two","Calibre title and ordered authors");Check(book.Attachments.Count==2&&book.Attachments.Single(a=>a.Format=="PDF").Size==9000&&book.Attachments.Single(a=>a.Format=="EPUB").Size==99000,"sizes belong to each format");Check(book.Tags.Contains("Research")&&book.Series.StartsWith("Series One"),"Calibre grouping metadata");Check(c.Items.Single(b=>b.Id==2).Attachments[0].Path=="","escaping stored path refused");Check(c.Items.Single(b=>b.Id==3).Attachments.Count==0,"book without a format remains visible");}
+ static void Zotero(string path){var c=LibraryCatalog.Open(path,"zotero",CancellationToken.None);Check(c.Items.Count==2,"Zotero child attachments, notes and deleted references excluded");var b=c.Items.Single(i=>i.Id==1);Check(b.Title=="Research paper"&&b.Creator=="Ada Reader"&&b.Tags.Contains("Research"),"Zotero reference metadata joined");Check(b.Attachments.Count==3,"Zotero reference groups its attachments");Check(b.Attachments.Single(a=>a.Id==2).Path.EndsWith("storage\\ABCDEFGH\\paper.pdf"),"Zotero stored path resolved through attachment key");Check(b.Attachments.Single(a=>a.Id==3).Path.EndsWith("linked.pdf"),"Zotero absolute linked file supported");Check(b.Attachments.Single(a=>a.Id==4).Path==""&&b.Attachments.Single(a=>a.Id==4).Status.Contains("URL"),"URL attachment is not treated as a local file");Check(b.Collections.Contains(11)&&c.Groups.Single(g=>g.Id==11).Parent==10,"Zotero collection hierarchy preserved");Check(c.Items.Single(i=>i.Id==5).Attachments.Count==1,"standalone PDF remains browseable");}
+ static void Combined(string root){
+  var c=new LibrarySource{Kind="calibre",Path=Path.Combine(root,"calibre"),Name="Books"};var z=new LibrarySource{Kind="zotero",Path=Path.Combine(root,"zotero"),Name="Papers"};
+  var both=LibraryCatalog.OpenSelection(new[]{c,z},CancellationToken.None);
+  Check(both.Items.Count==5&&both.Sources.Count==2&&both.Failures.Count==0,"combined view includes Calibre and Zotero rows");
+  Check(both.Items.Select(i=>i.Id).Distinct().Count()==5&&both.Items.Select(i=>i.StableKey).Distinct().Count()==5,"colliding source row IDs remain distinct");
+  Check(both.Items.SelectMany(i=>i.Attachments).Select(a=>a.Id).Distinct().Count()==both.Items.Sum(i=>i.Attachments.Count),"combined attachment IDs are unique");
+  Check(both.Items.Count(i=>i.SourceName=="Books")==3&&both.Items.Count(i=>i.SourceName=="Papers")==2,"every row carries its parent library");
+  var reference=both.Items.Single(i=>i.Title=="Research paper");Check(reference.Collections.Contains(both.Groups.Single(g=>g.Name=="Reading").Id),"remapped collection membership stays with its source");
+  var reverse=LibraryCatalog.OpenSelection(new[]{z,c},CancellationToken.None);Check(reverse.Identity==both.Identity&&reverse.Items.Select(v=>v.StableKey).SequenceEqual(both.Items.Select(v=>v.StableKey)),"selection order does not change combined identity or row keys");
+  Check(LibraryCatalog.OpenSelection(new[]{c,c},CancellationToken.None).Items.Count==3,"duplicate source paths are counted once");
+  var missing=new LibrarySource{Kind="zotero",Path=Path.Combine(root,"missing"),Name="Unavailable"};var partial=LibraryCatalog.OpenSelection(new[]{c,missing},CancellationToken.None);
+  Check(partial.Items.Count==3&&partial.Failures.Count==1&&partial.Failures[0].Source.Name=="Unavailable","failed source is reported while available results remain usable");
+  bool allFailed=false;try{LibraryCatalog.OpenSelection(new[]{missing,new LibrarySource{Kind="calibre",Path=Path.Combine(root,"other-missing"),Name="Also unavailable"}},CancellationToken.None);}catch(IOException){allFailed=true;}Check(allFailed,"all failed sources produce an opening error");
+ }
+ static int Main(string[] args){try{if(args.Length==3&&args[0]=="--inspect"){var c=LibraryCatalog.Open(args[2],args[1],CancellationToken.None);Console.WriteLine(c.Kind+": "+c.Items.Count+" catalogue rows, "+c.Items.Sum(i=>i.Attachments.Count)+" attachments, "+c.Groups.Count+" collections");return 0;}if(args.Length!=1)return 2;Calibre(Path.Combine(args[0],"calibre"));Combined(args[0]);Zotero(Path.Combine(args[0],"zotero"));Check(LibraryCatalog.Open(Path.Combine(args[0],"empty"),"zotero",CancellationToken.None).Items.Count==0,"empty catalogue is valid");var token=new CancellationTokenSource();token.Cancel();bool cancelled=false;try{LibraryCatalog.Open(Path.Combine(args[0],"calibre"),"calibre",token.Token);}catch(OperationCanceledException){cancelled=true;}Check(cancelled,"cancelled catalogue query stops");Console.WriteLine(checks+" catalogue checks passed");return 0;}catch(Exception e){Console.Error.WriteLine(e);return 1;}}
+}

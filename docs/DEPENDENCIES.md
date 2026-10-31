@@ -141,3 +141,52 @@ The four accepted runtime/source/recipe artifacts are published under
 variables are configured. Their public downloads matched the pinned hashes.
 The default-package dependency review gate is complete. This does not claim a
 hosted application build, application source publication or public app release.
+
+## Markdown preview
+
+The Windows Markdown helper uses the installed WebView2 Runtime and ships the
+Microsoft WebView2 SDK 1.0.4258.31 managed bindings and x64 loader. The pinned
+NuGet package and each shipped SDK binary are SHA-256 checked. The loader imports
+Windows Kernel32; it does not import a Microsoft CRT DLL. Markdown-it 14.1.0 and
+MathJax 3.2.2 are bundled locally for offline rendering. Their license texts and
+the WebView2 SDK license and third-party notices accompany the package; the
+runtime itself is installed separately by Windows or the user.
+
+The notebook view additionally bundles highlight.js 11.11.1 and its dark theme
+for code coloring. Its BSD-3-Clause license is included in the third-party notices;
+the vendored assets are listed and checked in the release manifest.
+
+The YAML and TOML view bundles `yaml` 2.9.1 (ISC), `toml-eslint-parser` 1.0.3
+(MIT) and `eslint-visitor-keys` 5.0.1 (Apache-2.0). The checked-in browser bundle
+and each license are explicitly packaged. `tools/config-preview/build.py` verifies
+the bundle using the locked npm dependencies in an owned temporary directory.
+
+The XML view uses the platform .NET Framework XML reader and the existing WebView2
+host; it adds no third-party parser. DTD processing and external resolution are disabled.
+
+The on-demand Windows SQLite viewer builds `folderwing-sqlite.dll` from the same
+checksum-pinned public-domain SQLite 3.54.0 amalgamation used by the WSL helper.
+It disables loadable extensions and uses the platform .NET Framework/Windows Forms
+for its separate `folderwing-database.exe`; no SQLite runtime is downloaded at use time.
+
+## Excel workbook preview
+
+The on-demand spreadsheet helper uses ExcelDataReader 3.9.0,
+ExcelNumberFormat 1.1.0 and System.ValueTuple 4.5.0, all MIT-licensed.
+`tools/spreadsheet-dependencies.json` pins each NuGet package and DLL digest;
+`tools/get-spreadsheet.ps1` verifies them before publishing the assemblies.
+Their licenses and notices are included in `licenses/third-party/spreadsheet` and
+in the release inventory. WebView2 remains an installed runtime prerequisite.
+The helper only reads workbook data and cached results; it does not execute VBA
+or evaluate formulas. Its formula pass uses the same bounded workbook snapshot.
+
+## Word document preview
+
+The read-only Windows Word helper bundles the browser distribution of docx-preview
+0.4.1 (Apache-2.0) with JSZip 3.10.2 under its MIT option. Folderwing carries a
+small, documented Office Math patch to docx-preview. Package origins, exact
+upstream and delivered asset hashes, the patch and notice provenance are recorded
+in `tools/word-dependencies.json` and `tools/word-preview/README.md`.
+The JSZip browser bundle contains pako; its related MIT, ISC and zlib notices are
+preserved conservatively in `licenses/third-party/word`. MathJax is reused from the
+existing Markdown preview. The installed WebView2 Runtime remains a prerequisite.

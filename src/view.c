@@ -9,7 +9,9 @@ struct fpe_view {
     uint32_t     *vis;   /* rows that pass hidden/filter checks, in sort order */
     uint32_t     *tmp;
     uint32_t      n;
-    uint32_t      nvis;
+    uint32_t      nvis, nbase;
+    fpe_view_matcher match;
+    void *match_context;
     wchar_t      *needle; /* folded */
     uint32_t      needle_len;
     int64_t       accounted; /* bytes reported to the view gauge */
@@ -137,10 +139,13 @@ static void rebuild_vis(fpe_view *v, int narrowing)
     const uint32_t *src = narrowing ? v->vis : v->order;
     uint32_t n = narrowing ? v->nvis : v->n, k = 0;
 
+    if (!narrowing) v->nbase = 0;
     for (uint32_t i = 0; i < n; i++) {
         uint32_t idx = src[i];
         const fpe_entry *e = ents + idx;
         if (!narrowing && !passes_hidden(v, e)) continue;
+        if (!narrowing) v->nbase++;
+        if (v->match && !v->match(v->dir, e, names + e->name, v->match_context)) continue;
         if(v->needle_len){
             const wchar_t *name=names+e->name;size_t length=e->name_len;wchar_t literal[256];
             if(fpe_dir_is_linux(v->dir)&&!(e->flags&FPE_ENTRY_ASCII)){
@@ -291,6 +296,15 @@ FPE_API fpe_err fpe_view_set_filter(fpe_view *v, const wchar_t *needle)
     revised(v);
     return 0;
 }
+
+FPE_API void fpe_view_set_matcher(fpe_view *v, fpe_view_matcher match, void *context)
+{
+    v->match = match;
+    v->match_context = context;
+    rebuild_vis(v, 0);
+    revised(v);
+}
+FPE_API uint32_t fpe_view_unfiltered_count(const fpe_view *v) { return v->nbase; }
 
 FPE_API fpe_dir *fpe_view_dir(const fpe_view *v) { return v->dir; }
 FPE_API uint32_t fpe_view_count(const fpe_view *v) { return v->nvis; }

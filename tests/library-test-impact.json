@@ -1,0 +1,75 @@
+{
+  "schema": "folderwing-library-tests/v1",
+  "selectors": [
+    {
+      "id": "library_catalog_tests.ps1",
+      "primary": "app contract",
+      "owner": "Library browser v0",
+      "command": "tests/library_catalog_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/library",
+        "app/libraryview.c",
+        "app/libraryview.h",
+        "app/sqlite",
+        "build.ps1",
+        "tests/library_fixtures.py",
+        "tests/library_catalog_tests.ps1",
+        "docs/LIBRARY_BROWSER.md",
+        "tests/library_catalog_tests.cs"
+      ],
+      "fixtures": "Owned Calibre and Zotero schemas; per-format sizes, ordered authors, stored/linked/URL attachments, deleted and empty catalogues, cancellation and relative-path escape refusal; combined Calibre/Zotero rows, collision-free source identities, collection remapping, order-independent selection identity, duplicate source suppression and partial/all-source failures"
+    },
+    {
+      "id": "library_ui_tests.ps1",
+      "primary": "UI acceptance",
+      "owner": "Library browser v0",
+      "command": "tests/library_ui_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/library",
+        "app/libraryview.c",
+        "app/libraryview.h",
+        "app/sqlite",
+        "build.ps1",
+        "tests/library_fixtures.py",
+        "tests/library_ui_tests.ps1",
+        "docs/LIBRARY_BROWSER.md",
+        "tests/library_ui_tests.cs"
+      ],
+      "fixtures": "Owned off-screen catalogue UI; responsive 260\u20131180 px geometry, persistent Title/format-size visibility, metadata filters, consistent sampled attachment sizes, filenames and remembered choices, missing-PDF fallback, follow/pin and close semantics, stale-session feedback, root switching and saved preferences; bounded searchable grouping and categories, provisional selection, duplicate collection IDs, legacy-label migration, cancel/retry/empty/no-results states, themed headers/selectors and queued popup keyboard events; typed root-set handoff, responsive Library column, cross-source tags/collections and PDF follow/pin, independently saved joint views, source disappearance/recovery, duplicate Zotero IDs and rejected truncated payloads"
+    },
+    {
+      "id": "library_host_tests.ps1",
+      "primary": "UI acceptance",
+      "owner": "Library browser v0",
+      "command": "tests/library_host_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/library",
+        "app/libraryview.c",
+        "app/libraryview.h",
+        "app/sqlite",
+        "build.ps1",
+        "tests/library_fixtures.py",
+        "tests/library_host_tests.ps1",
+        "docs/LIBRARY_BROWSER.md",
+        "tests/fixtures/native/library_host.c",
+        "app/fpdemo.c",
+        "app/pdfview.c",
+        "app/pdfview.h",
+        "app/archiveview.c",
+        "tests/fixtures/native/library_pdf_probe.c"
+      ],
+      "fixtures": "Owned actual explorer, process-bound helper, bottom library zone, hidden-selection authority, real PDF third pane, active-root focus without reload, reader acknowledgements, close/follow race rejection, native reopen, root switching and return to normal file navigation; checkbox hit regions, combined catalogue counts, persisted membership, Space/arrow/name navigation, last-uncheck return to Files and separate combined reader split"
+    }
+  ],
+  "budgets": {
+    "skips": 0,
+    "quarantine": 0,
+    "automatic_retries": 0
+  },
+  "profile": {
+    "workers": 1,
+    "physical_input": false,
+    "wsl_stopped": false,
+    "network": "none; optional real-library inspection is read-only and explicitly requested"
+  }
+}

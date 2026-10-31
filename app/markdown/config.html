@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
+<link rel="stylesheet" href="structured.css"><script defer src="vendor/config-parsers.js"></script><script defer src="config-parser.js"></script><script defer src="structured.js"></script>
+<link rel="stylesheet" href="navigation.css"><script defer src="navigation.js"></script></head><body><header><strong id="heading">Structured preview</strong><span id="status"></span></header>
+<div id="ini-controls" hidden><label>Encoding <select id="ini-encoding"><option value="auto">Automatic</option><option value="utf8">UTF-8 / BOM</option><option value="windows1252">Windows-1252</option></select></label></div>
+<section id="documents" hidden><div id="document-list"></div></section>
+<section id="records" hidden><div id="record-list"></div><button id="more">Load more records</button> <button id="restart">Back to first record</button></section>
+<div id="tools" hidden><input id="find" type="search" placeholder="Find keys or values"><button id="next">Find next</button><span id="find-status"></span></div>
+<main id="tree">Loading preview…</main></body></html>

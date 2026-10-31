@@ -195,6 +195,13 @@ FPE_API void             fpe_view_get_opts(const fpe_view *v, fpe_view_opts *out
 /* Case-insensitive substring filter on names. NULL or "" clears it.
  * Narrowing an existing filter only rescans the currently visible rows. */
 FPE_API fpe_err          fpe_view_set_filter(fpe_view *v, const wchar_t *needle);
+/* Optional additional UI-thread predicate. Context is borrowed until cleared or
+ * the view is destroyed. Setting it always rebuilds, including changed context.
+ * It must not mutate the view or retain borrowed entries/names. */
+typedef int (*fpe_view_matcher)(const fpe_dir *, const fpe_entry *, const wchar_t *, void *);
+FPE_API void             fpe_view_set_matcher(fpe_view *v, fpe_view_matcher match, void *context);
+/* Items eligible under hidden/system options, before text/predicate filtering. */
+FPE_API uint32_t         fpe_view_unfiltered_count(const fpe_view *v);
 FPE_API fpe_dir         *fpe_view_dir(const fpe_view *v); /* borrowed */
 FPE_API uint32_t         fpe_view_count(const fpe_view *v);
 FPE_API const fpe_entry *fpe_view_at(const fpe_view *v, uint32_t i);

@@ -964,6 +964,74 @@ while a preview covers its list; Operations shows the source and destination bef
   XML/HTML/SVG source, SQL and Markdown; common extensionless names such as README, LICENSE, Makefile and Dockerfile.
   A lightweight lexical highlighter colours keywords, strings, numbers, comments, configuration keys and Markdown
   headings. It is an inspection aid rather than a full language parser. The reader is read only.
+- **Library browser (v0)**: a permanent Libraries zone in the tree opens registered Calibre and Zotero
+  catalogues in a dedicated catalogue/details/PDF layout. Search metadata, filter formats/tags/series or
+  Zotero collections, and sort by the selected format's size. The existing PDF reader provides bookmarks
+  and position memory. Source catalogues stay read-only; view preferences are saved by Folderwing.
+  Responsive columns keep Title and format size visible, with a persistent attachment chooser
+  and a PDF reader that follows selection or stays pinned. Tick library checkboxes for a combined
+  catalogue with a sortable parent Library column and independent view preferences. Search grouping names by category,
+  clear filters together, and recover directly from empty, loading or failed catalogue states.
+  See [Library browser](docs/LIBRARY_BROWSER.md) for registration, attachment handling and current limits.
+- **Reading rails and personal bookmarks**: scrollable document, structured-data and table previews use
+  a right-edge rail with section labels, a hover wave, click-to-jump and drag-to-scrub. Headings/keys/cells
+  provide ticks when available; otherwise they mark 5% steps. The ribbon or Ctrl+D saves a personal
+  position; Ctrl+Shift+D lists marks. Table ticks cover loaded rows, not an unscanned whole file.
+  Source, SQLite rows/schema and archive entries are covered too. See [preview navigation](docs/PREVIEW_NAVIGATION.md).
+- **Rendered Markdown**: Markdown files, including supported archive entries, open in an offline rendered view with
+  a **Source** switch for the existing reader. Math supports `\(...\)`, conservative `$...$`, standalone `\[` / `\]`
+  display blocks, `$$` display blocks, and `math`, `tex` or `latex` fenced blocks. Escaped inline brackets remain
+  text. Ambiguous numeric-dollar expressions can be inspected in Source. Raw HTML and automatic image loading are
+  disabled; links do not navigate the preview. The renderer reads UTF-8 and BOM-tagged Unicode independently of
+  the source reader's encoding setting, and uses the configured byte limit. The WebView2 Runtime must be installed;
+  when it cannot start, Folderwing returns to Source. Search-result navigation also selects Source.
+- **Structured JSON**: `.json` opens as an expandable tree, with key/value search and buttons to copy the original
+  value or its JSON path. The parser preserves the spelling of numbers and strings, including integers beyond the
+  JavaScript precision limit. Malformed JSON reports an error while Source remains available. The configured text
+  byte limit also applies to structured JSON; very large or deeply nested documents may need Source.
+- **YAML and TOML**: `.yaml`, `.yml` and `.toml` open in the same structured tree with Source available for
+  comments and original formatting. YAML previews support multiple documents and show anchors, aliases and
+  unresolved-tag warnings without constructing custom objects. TOML tables and arrays of tables are grouped
+  hierarchically; scalar values retain their original spelling, including large integers and dates. Synthetic
+  table groups do not offer a misleading raw-value copy. Invalid or oversized input reports a message and remains
+  available in Source. The configuration helper works on archive entries that fit the archive preview limit.
+- **INI**: `.ini` files use the configuration tree, retaining repeated sections and keys in source order. Values
+  are displayed as text without interpolation, and unfamiliar non-comment lines are shown as unparsed rather than
+  discarded. Ambiguous repeated names do not offer a path copy. Source preserves comments and formatting; the
+  preview supports UTF-8, BOM-tagged Unicode and Windows-1252, with an encoding selector and a labelled fallback
+  guess. This view also works for archive entries within the archive preview limit.
+- **XML**: `.xml`, `.xaml`, `.rss` and `.atom` open in a read-only structured tree with a Source switch. Elements,
+  attributes, namespace declarations, text, whitespace, comments, CDATA and processing instructions remain in
+  document order. Search the tree, copy individual values and copy namespace-aware XPath expressions for elements
+  and attributes. The XML reader honors declared encodings and decodes standard XML entities; Source retains the
+  original spelling. DTDs and external resources are disabled. Malformed or oversized files report an error in
+  Structured while Source remains available. The configured text preview size limit, 50,000-node limit, 128-level
+  depth limit and bounded model size apply. Entries in archives use the same preview within the archive size limit.
+- **JSON Lines**: `.jsonl` and `.ndjson` show records independently, loading up to 64 at a time. Select a line to
+  inspect its tree; an invalid line does not prevent opening other records. The record list has a bounded cache;
+  use **Back to first record** to revisit lines released from it. Records over 1,048,576 UTF-16 units are identified rather than
+  loaded into the tree. These structured views also use the archive entry preview and WebView2 Runtime.
+- **CSV and TSV**: select a delimited file for a table with a Source switch, an optional header row, and comma,
+  tab or semicolon delimiters and UTF-8/BOM or Windows-1252 encoding. Quoted delimiters, quotes and line breaks are preserved; cell text is not converted
+  to numbers or dates. Load additional rows in batches, filter or sort the loaded rows, and click a cell to inspect
+  or copy it. A bounded row cache and column pages keep large tables manageable; restart to revisit released rows.
+  Rows over 1,048,576 UTF-16 units or 4,096 columns are reported. The table helper uses the same offline WebView2
+  infrastructure, including for archive entries.
+- **Jupyter notebooks**: `.ipynb` files open in a read-only notebook view with rendered Markdown and LaTeX,
+  syntax coloring for bundled languages, saved text and PNG/JPEG outputs, and a contents list from Markdown headings. The preview
+  never runs cells and does not load saved HTML, scripts or remote resources. Cells load in batches; a notebook
+  exceeding the configured text-preview byte limit shows a message and remains available in Source. Individual
+  text outputs are bounded, and unsupported saved output formats are identified. The same view works for notebook
+  entries in archives when they fit the archive preview limit.
+- **SQLite databases**: `.db`, `.db3`, `.sqlite`, `.sqlite3` and `.sqlitedb` open in an on-demand,
+  read-only database helper. Browse tables and views, inspect columns and CREATE statements, page through rows,
+  click column headings to sort, search text values, and select or copy cells. Search is ASCII case-insensitive;
+  BLOBs show their size rather than their contents. Large values are shortened, and exceptionally wide tables,
+  expensive queries and oversized values are bounded. Refresh reloads the table list and current page; a database
+  being changed by another application can differ between pages. The SQLite reader may use or create SQLite's
+  normal WAL shared-memory sidecars while reading, but does not write the database. Archive entries use the same
+  third pane within its size limit; WAL-mode entries are refused because their companion files are not extracted.
+  WSL-hosted databases are not supported by this preview yet.
 - **Encoding**: UTF-8 and BOM-tagged UTF-16/UTF-32 in either byte order, with conservative BOM-less UTF-16 detection.
   Invalid UTF-8 without a BOM falls back to Windows-1252 and is explicitly labelled as guessed. `[preview.text]
   encoding` can force `utf8`, `utf16le`, `utf16be`, `utf32le`, `utf32be` or `windows1252`; `auto` restores detection.
@@ -1607,3 +1675,41 @@ waits for worker completion through the message pump. The actual pane and tree c
 the UI thread. Painting uses CPU-backed buffers and preserves dirty-region clips, so a pane status
 update repaints its footer without redrawing the file list. Temporary pixel buffers are released
 after presentation rather than retained while idle. The 16 ms dispatch limit is unchanged.
+
+### Excel workbook preview
+
+Select an `.xlsx` or `.xlsm` file to browse it read-only in the preview pane;
+entries in ZIP archives open in the third pane. Choose a sheet (including hidden
+sheets), load rows in batches, page through columns, and filter or sort the
+loaded rows. Click a cell, Shift-click another to select a rectangle, and use
+**Copy selected cells** or Ctrl+C. Double-click a cell for its saved value and
+formula details; **Show formulas** switches the grid to formula text.
+
+The preview displays saved formula results, which can be absent or stale. Shared
+formula followers identify their template instead of guessing relative references.
+It does not calculate formulas, execute macros, edit workbooks or fetch external
+sources. Number formatting covers common formats but is not a full Excel layout
+engine. Password-protected files and Windows previews of WSL paths are not yet
+supported. Preview bounds include a 128 MiB workbook snapshot, 256 MiB total
+XML parts, 4,096 columns, bounded cell text, and a 512-row/4 million UTF-16-unit display cache (plus UI overhead);
+individual wide rows can be truncated and are marked. Automatic archive entry
+preview retains the existing 64 MiB extraction limit. The viewer requires the
+installed WebView2 Runtime.
+
+### Word document preview
+
+Select a `.docx` or `.docm` file for a read-only, reflowing preview; supported
+archive entries open in the third pane. The viewer shows ordinary formatting,
+headings, lists, tables and supported embedded images, with an outline, search,
+and text selection/copy. Native Word equations render as MathML. Literal LaTeX
+in a paragraph is rendered even when the delimiters or expression span Word
+formatting runs; unmatched or unrenderable expressions remain as text.
+
+The preview does not execute macros, fetch linked content, or open external links;
+it reports omitted content or unsupported equation structures where detected.
+It does not reproduce exact Word pagination, all equation styles, tracked changes,
+embedded fonts, or every image/attachment format. Word text boxes are reflowed into reading order, and low-contrast text colors may be adjusted for readability. Direct WSL-file preview and
+legacy `.doc` files are not supported yet. The helper bounds input to a 32 MiB
+snapshot, 128 MiB of uncompressed package parts, 4,096 entries and 256 images;
+individual parts are capped at 32 MiB. Automatic archive preview retains the
+existing 64 MiB extraction limit. WebView2 Runtime is required.

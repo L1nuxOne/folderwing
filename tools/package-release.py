@@ -27,6 +27,8 @@ def package(build,source_archive,output,publish_ready=False):
         files[name]=path
     for name in spec['binaries']:
         expected=receipt['binaries'].get(name);need(expected,'Binary missing from build receipt: '+name);add(name,build/name,expected)
+    for name,source in spec.get('assets',{}).items():
+        expected=receipt.get('assets',{}).get(name);need(expected and expected==sha(plain(ROOT/source)),'Asset missing from build receipt: '+name);add(name,build/name,expected)
     need(receipt['binaries']['libmpv-2.dll']==mpv['runtime_sha256'],'Media runtime mismatch')
     pdfium=next(x for x in inventory['components'] if x['id']=='pdfium')
     if pdfium.get('observed_binary_sha256'):need(receipt['binaries']['pdfium.dll']==pdfium['observed_binary_sha256'],'PDFium runtime mismatch')

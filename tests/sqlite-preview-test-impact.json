@@ -1,0 +1,84 @@
+{
+  "schema": "folderwing-sqlite-preview-tests/v1",
+  "owner": "Windows SQLite preview",
+  "selectors": [
+    {
+      "id": "sqlite_preview_tests.ps1",
+      "kind": "read-only SQLite engine contract",
+      "command": "tests/sqlite_preview_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/navigation",
+        "app/sqlite/SqliteReader.cs",
+        "build.ps1",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/sqlite_preview_tests.cs",
+        "tests/sqlite_preview_tests.ps1",
+        "tools/get-sqlite.ps1"
+      ],
+      "fixtures": "owned ordinary databases, live WAL, quoted identifiers, views, bounded pages, literal search and locked extended-length archive path"
+    },
+    {
+      "id": "sqlite_preview_ui_tests.ps1",
+      "kind": "embedded Windows helper acceptance",
+      "command": "tests/sqlite_preview_ui_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/navigation",
+        "app/sqlite/DatabaseHost.cs",
+        "app/sqlite/SqliteReader.cs",
+        "build.ps1",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/sqlite_preview_ui_tests.cs",
+        "tests/sqlite_preview_ui_tests.ps1"
+      ],
+      "fixtures": "owned off-screen parent and real helper process; paging, search, ordinary and archive-style paths; no physical input"
+    },
+    {
+      "id": "sqlite_preview_host_tests.ps1",
+      "kind": "main app and archive integration acceptance",
+      "command": "tests/sqlite_preview_host_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/archiveclient.c",
+        "app/archiveview.c",
+        "app/fpdemo.c",
+        "app/navigation",
+        "app/sqlite",
+        "app/textutil.c",
+        "app/textview.c",
+        "app/textview.h",
+        "build.ps1",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/native/sqlite_preview_host.c",
+        "tests/fixtures/native/sqlite_preview_host_fixtures.py",
+        "tests/sqlite_preview_host_tests.ps1"
+      ],
+      "fixtures": "owned off-screen app, private synthetic database and ZIP, ordinary and archive entry routing, WAL-entry refusal; no physical input"
+    },
+    {
+      "id": "preview_navigation.ps1",
+      "kind": "native source, managed storage and SQLite navigation acceptance",
+      "command": "tests/preview_navigation.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/navigation",
+        "app/docmarks.c",
+        "app/docmarks.h",
+        "app/readingrail.h",
+        "app/textnav.inc",
+        "app/textview.c",
+        "app/textview.h",
+        "app/fpdemo.c",
+        "app/archiveview.c",
+        "app/sqlite",
+        "app/markdown/MarkdownHost.cs",
+        "build.ps1",
+        "tests/preview_navigation_tests.c",
+        "tests/navigation_managed_tests.cs",
+        "tests/navigation_bridge_tests.cs",
+        "tests/preview_navigation.ps1",
+        "docs/PREVIEW_NAVIGATION.md"
+      ],
+      "fixtures": "Owned off-screen readers, native/managed store interoperability, large synthetic text, archive identities, actual WebView helper bridge, immutable SQLite fixture; no physical input or WSL changes"
+    }
+  ],
+  "skips": 0,
+  "wsl": "not stopped or exercised"
+}

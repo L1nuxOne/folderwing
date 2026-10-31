@@ -1,0 +1,386 @@
+{
+  "schema": "folderwing-markdown-tests/v1",
+  "owner": "Windows Markdown preview",
+  "selectors": [
+    {
+      "id": "markdown_parser_test.js",
+      "kind": "parser and security contract",
+      "command": "node tests/markdown_parser_test.js",
+      "sources": [
+        "app/markdown/renderer.js",
+        "app/markdown/vendor/markdown-it.min.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/markdown_parser_test.js"
+      ],
+      "fixtures": "synthetic; optional private local documents are passed as arguments and are never included in the repository"
+    },
+    {
+      "id": "delimited_reader_tests.ps1",
+      "kind": "streaming CSV and TSV parsing contract",
+      "command": "tests/delimited_reader_tests.ps1",
+      "sources": [
+        "app/markdown/DelimitedReader.cs",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/delimited_reader_tests.cs",
+        "tests/delimited_reader_tests.ps1"
+      ],
+      "fixtures": "synthetic delimiters, quoted fields and line breaks, malformed rows, and bounded recovery"
+    },
+    {
+      "id": "structured_json_test.js",
+      "kind": "lossless structured JSON parser contract",
+      "command": "node tests/structured_json_test.js",
+      "sources": [
+        "app/markdown/json-parser.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/structured_json_test.js"
+      ],
+      "fixtures": "synthetic JSON, numeric precision, invalid and independent JSONL records"
+    },
+    {
+      "id": "config_parser_test.js",
+      "kind": "lossless YAML and TOML syntax-tree contract",
+      "command": "node tests/config_parser_test.js",
+      "sources": [
+        "app/markdown/config-parser.js",
+        "app/markdown/vendor/config-parsers.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/config_parser_test.js",
+        "tools/config-preview"
+      ],
+      "fixtures": "synthetic YAML anchors, aliases, tags, multiple documents, TOML tables and precise values"
+    },
+    {
+      "id": "ini_parser_test.js",
+      "kind": "lossless INI display contract",
+      "command": "node tests/ini_parser_test.js",
+      "sources": [
+        "app/markdown/config-parser.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/ini_parser_test.js"
+      ],
+      "fixtures": "synthetic repeated sections and keys, ordering, literal values, unrecognized lines and bounds"
+    },
+    {
+      "id": "ini_encoding_ui_test.ps1",
+      "kind": "Windows INI encoding acceptance",
+      "command": "tests/ini_encoding_ui_test.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/markdown/MarkdownHost.cs",
+        "app/markdown/config-parser.js",
+        "app/markdown/config.html",
+        "app/markdown/structured.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/ini_encoding_ui_fixture.js",
+        "tests/ini_encoding_ui_test.ps1",
+        "tests/markdown_host_smoke.cs"
+      ],
+      "fixtures": "owned off-screen helper, private asset copy and synthetic Windows-1252 document"
+    },
+    {
+      "id": "config_ui_test.ps1",
+      "kind": "offline configuration browser acceptance",
+      "command": "tests/config_ui_test.ps1",
+      "sources": [
+        "app/markdown/config-parser.js",
+        "app/markdown/config.html",
+        "app/markdown/structured.css",
+        "app/markdown/structured.js",
+        "app/markdown/vendor/config-parsers.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/config_ui_fixture.js",
+        "tests/config_ui_test.ps1",
+        "tests/navigation_mock_bridge.js"
+      ],
+      "fixtures": "synthetic YAML document selection and anchor navigation, TOML tables, search and untrusted content"
+    },
+    {
+      "id": "notebook_util_test.js",
+      "kind": "notebook cell and saved-output contract",
+      "command": "node tests/notebook_util_test.js",
+      "sources": [
+        "app/markdown/notebook-util.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/notebook_util_test.js"
+      ],
+      "fixtures": "synthetic notebook cells, text and image outputs, unsupported formats, and size limits"
+    },
+    {
+      "id": "notebook_ui_test.ps1",
+      "kind": "offline notebook browser acceptance",
+      "command": "tests/notebook_ui_test.ps1",
+      "sources": [
+        "app/markdown/math-config.js",
+        "app/markdown/notebook-util.js",
+        "app/markdown/notebook.css",
+        "app/markdown/notebook.html",
+        "app/markdown/notebook.js",
+        "app/markdown/renderer.js",
+        "app/markdown/vendor",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/navigation_mock_bridge.js",
+        "tests/notebook_ui_fixture.js",
+        "tests/notebook_ui_test.ps1"
+      ],
+      "fixtures": "synthetic notebook, saved PNG, math, code, paging, outline and disabled HTML/remote image rendering"
+    },
+    {
+      "id": "markdown_host_smoke.ps1",
+      "kind": "Windows browser acceptance",
+      "command": "tests/markdown_host_smoke.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/markdown",
+        "tests/markdown_host_smoke.cs",
+        "tests/markdown_host_smoke.ps1"
+      ],
+      "fixtures": "owned off-screen Windows parent and private document; -ArchiveLockedPath adds a read lock and extended-length path; requires installed WebView2 Runtime"
+    },
+    {
+      "id": "xml_preview_reader_tests.ps1",
+      "kind": "bounded secure XML parser contract",
+      "command": "tests/xml_preview_reader_tests.ps1",
+      "sources": [
+        "app/markdown/XmlPreviewReader.cs",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/xml_preview_reader_tests.cs",
+        "tests/xml_preview_reader_tests.ps1"
+      ],
+      "fixtures": "synthetic XML encodings, namespaces, ordered mixed content, DTD prohibition, malformed input and resource bounds"
+    },
+    {
+      "id": "xml_util_test.js",
+      "kind": "namespace-aware XPath contract",
+      "command": "node tests/xml_util_test.js",
+      "sources": [
+        "app/markdown/xml-util.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/xml_util_test.js"
+      ],
+      "fixtures": "repeated names, differing namespace URIs, quoted URI literals and attribute paths"
+    },
+    {
+      "id": "xml_ui_test.ps1",
+      "kind": "offline structured XML browser acceptance",
+      "command": "tests/xml_ui_test.ps1",
+      "sources": [
+        "app/markdown/structured.css",
+        "app/markdown/xml-util.js",
+        "app/markdown/xml.html",
+        "app/markdown/xml.js",
+        "app/navigation",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/navigation_mock_bridge.js",
+        "tests/xml_ui_fixture.js",
+        "tests/xml_ui_test.ps1"
+      ],
+      "fixtures": "synthetic XML model, real XPath evaluation, search, lazy children, safe text rendering and parser errors"
+    },
+    {
+      "id": "xml_preview_host_tests.ps1",
+      "kind": "main app and archive integration acceptance",
+      "command": "tests/xml_preview_host_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/archiveclient.c",
+        "app/archiveview.c",
+        "app/fpdemo.c",
+        "app/markdown/MarkdownHost.cs",
+        "app/markdown/XmlPreviewReader.cs",
+        "app/markdown/xml-util.js",
+        "app/markdown/xml.html",
+        "app/markdown/xml.js",
+        "app/navigation",
+        "app/textutil.c",
+        "app/textview.c",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/native/xml_preview_host.c",
+        "tests/fixtures/native/xml_preview_host_fixtures.py",
+        "tests/xml_preview_host_tests.ps1"
+      ],
+      "fixtures": "owned off-screen app, synthetic files and ZIP, preview routing and Structured/Source switching without physical input"
+    },
+    {
+      "id": "spreadsheet_reader_tests.ps1",
+      "kind": "bounded workbook, value formatting and formula parsing",
+      "command": "tests/spreadsheet_reader_tests.ps1",
+      "sources": [
+        "app/navigation",
+        "app/spreadsheet/FormulaCursor.cs",
+        "app/spreadsheet/SpreadsheetReader.cs",
+        "app/spreadsheet/WorkbookPackage.cs",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/spreadsheet",
+        "tests/spreadsheet_reader_tests.cs",
+        "tests/spreadsheet_reader_tests.ps1",
+        "tools/spreadsheet-dependencies.json"
+      ],
+      "fixtures": "Synthetic cached and uncached formulas, shared formulas, sparse rows, hidden sheets, moved sheet parts, bounded and malformed packages."
+    },
+    {
+      "id": "spreadsheet_ui_test.ps1",
+      "kind": "offline spreadsheet browser acceptance",
+      "command": "tests/spreadsheet_ui_test.ps1",
+      "sources": [
+        "app/navigation",
+        "app/spreadsheet/index.html",
+        "app/spreadsheet/style.css",
+        "app/spreadsheet/viewer.js",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/navigation_mock_bridge.js",
+        "tests/spreadsheet_ui_fixture.js",
+        "tests/spreadsheet_ui_test.ps1"
+      ],
+      "fixtures": "Synthetic sheets, safe rendering, formulas, paging, filter and rectangular copy."
+    },
+    {
+      "id": "spreadsheet_host_smoke.ps1",
+      "kind": "real WebView2 helper acceptance",
+      "command": "tests/spreadsheet_host_smoke.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/spreadsheet",
+        "tests/markdown_host_smoke.cs",
+        "tests/spreadsheet_host_smoke.ps1",
+        "tests/fixtures/spreadsheet"
+      ],
+      "fixtures": "Owned off-screen parent, locked extended path and malformed workbook."
+    },
+    {
+      "id": "spreadsheet_preview_host_tests.ps1",
+      "kind": "main app and archive integration acceptance",
+      "command": "tests/spreadsheet_preview_host_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/textutil.c",
+        "app/textview.c",
+        "app/fpdemo.c",
+        "app/archiveview.c",
+        "app/spreadsheet",
+        "tests/fixtures/native/spreadsheet_preview_host.c",
+        "tests/fixtures/native/spreadsheet_preview_host_fixtures.py",
+        "tests/spreadsheet_preview_host_tests.ps1"
+      ],
+      "fixtures": "Owned off-screen app, real helper and synthetic ZIP; no physical input."
+    },
+    {
+      "id": "word_math_test.js",
+      "kind": "Word LaTeX delimiter contract",
+      "command": "node tests/word_math_test.js",
+      "sources": [
+        "app/navigation",
+        "app/word/word-util.js",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/word_math_test.js"
+      ],
+      "fixtures": "Synthetic delimiters, escaping, currency and bounds."
+    },
+    {
+      "id": "word_package_tests.ps1",
+      "kind": "bounded Word package and content handling",
+      "command": "tests/word_package_tests.ps1",
+      "sources": [
+        "app/navigation",
+        "app/word/WordPackage.cs",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/word",
+        "tests/word_package_tests.cs",
+        "tests/word_package_tests.ps1"
+      ],
+      "fixtures": "Synthetic snapshot, DTD, unsafe relationships, macros, malformed packages and size bounds."
+    },
+    {
+      "id": "word_ui_test.ps1",
+      "kind": "offline Word browser acceptance",
+      "command": "tests/word_ui_test.ps1",
+      "sources": [
+        "app/markdown/math-config.js",
+        "app/markdown/vendor/tex-svg.js",
+        "app/navigation",
+        "app/word",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/word",
+        "tests/navigation_mock_bridge.js",
+        "tests/word_ui_fixture.js",
+        "tests/word_ui_test.ps1"
+      ],
+      "fixtures": "Synthetic native Word math, cross-run LaTeX, safe markup, outline, selection and search."
+    },
+    {
+      "id": "word_host_smoke.ps1",
+      "kind": "Word WebView2 helper acceptance",
+      "command": "tests/word_host_smoke.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/word",
+        "tests/word_host_probe.cs",
+        "tests/word_host_smoke.ps1",
+        "tests/fixtures/word"
+      ],
+      "fixtures": "Per-monitor-aware owned host, locked extended path, VML textbox and invalid package."
+    },
+    {
+      "id": "word_preview_host_tests.ps1",
+      "kind": "Word main app and archive acceptance",
+      "command": "tests/word_preview_host_tests.ps1 -BuildDirectory <build>",
+      "sources": [
+        "app/textutil.c",
+        "app/textview.c",
+        "app/fpdemo.c",
+        "app/archiveview.c",
+        "app/word",
+        "tests/fixtures/native/word_preview_host.c",
+        "tests/fixtures/native/word_preview_host_fixtures.py",
+        "tests/word_preview_host_tests.ps1",
+        "tests/fixtures/word/synthetic.docx",
+        "tests/fixtures/word/make_textbox_fixture.py"
+      ],
+      "fixtures": "Owned app, ordinary file, ZIP third pane and a VML textbox document; no physical input."
+    },
+    {
+      "id": "word_textbox_ui_test.ps1",
+      "kind": "Word textbox visibility and safety acceptance",
+      "command": "tests/word_textbox_ui_test.ps1",
+      "sources": [
+        "app/markdown/math-config.js",
+        "app/markdown/vendor/tex-svg.js",
+        "app/navigation",
+        "app/word/style.css",
+        "app/word/vendor",
+        "app/word/viewer.js",
+        "app/word/word-util.js",
+        "docs/PREVIEW_NAVIGATION.md",
+        "tests/fixtures/word/make_textbox_fixture.py",
+        "tests/fixtures/word/synthetic.docx",
+        "tests/navigation_mock_bridge.js",
+        "tests/word_textbox_ui_fixture.js",
+        "tests/word_textbox_ui_test.ps1"
+      ],
+      "fixtures": "Synthetic positioned VML text boxes, low-contrast text, overlapping zero-width image, equations, search, copy and active markup."
+    },
+    {
+      "id": "navigation_browser_tests.ps1",
+      "kind": "offline reading rail and bookmark browser acceptance",
+      "command": "tests/navigation_browser_tests.ps1",
+      "sources": [
+        "app/navigation",
+        "app/markdown",
+        "app/word",
+        "app/spreadsheet",
+        "tests/navigation_browser_fixture.js",
+        "tests/navigation_browser_tests.ps1",
+        "tests/fixtures/word/synthetic.docx",
+        "build.ps1",
+        "docs/PREVIEW_NAVIGATION.md"
+      ],
+      "fixtures": "Eleven real browser renderers, synthetic documents, bounded mock bridge; anchors, loaded rows, context switching, jumps, stale replies, idle suppression and later notebook cells; no physical input"
+    }
+  ],
+  "browser_acceptance": "WebView2 host, local assets, and a real rendered document; run separately in an owned Windows session"
+}

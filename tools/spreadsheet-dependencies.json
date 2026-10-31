@@ -1,0 +1,26 @@
+{
+  "schema": "folderwing-spreadsheet-dependencies/v1",
+  "packages": [
+    {
+      "id": "exceldatareader", "version": "3.9.0", "license": "MIT",
+      "url": "https://api.nuget.org/v3-flatcontainer/exceldatareader/3.9.0/exceldatareader.3.9.0.nupkg",
+      "archive_sha256": "a59df6b86a01cf67e45a6680f288a6ccc91b5a473232f76f00cb5104daa1543b", "archive_bytes": 719695,
+      "entry": "lib/net462/ExcelDataReader.dll", "dll": "ExcelDataReader.dll",
+      "dll_sha256": "03050036badc7651f357a57cdc150451fc021cdb56e31918f6a92d8d6629b844"
+    },
+    {
+      "id": "excelnumberformat", "version": "1.1.0", "license": "MIT",
+      "url": "https://api.nuget.org/v3-flatcontainer/excelnumberformat/1.1.0/excelnumberformat.1.1.0.nupkg",
+      "archive_sha256": "c48af3056098d8f123225b69c16d814f58ff28928e1f6a8fb6fba65fe35366f1", "archive_bytes": 60488,
+      "entry": "lib/net20/ExcelNumberFormat.dll", "dll": "ExcelNumberFormat.dll",
+      "dll_sha256": "03ccc71a42833102ef54ae9ecf39d9d62c0491c17359aa37d1d2ef0ec7397d04"
+    },
+    {
+      "id": "system.valuetuple", "version": "4.5.0", "license": "MIT",
+      "url": "https://api.nuget.org/v3-flatcontainer/system.valuetuple/4.5.0/system.valuetuple.4.5.0.nupkg",
+      "archive_sha256": "9e21fa9767d4e76bc0cee065c1d40cc34384a114bfec4d70e6c981168a926802", "archive_bytes": 204904,
+      "entry": "lib/net47/System.ValueTuple.dll", "dll": "System.ValueTuple.dll",
+      "dll_sha256": "e905d102585b22c6df04f219af5cbdbfa7bc165979e9788b62df6dcc165e10f4"
+    }
+  ]
+}
