@@ -1,0 +1,111 @@
+--- a/docx-preview.js
++++ b/docx-preview.js
+@@ -1406,6 +1406,11 @@
+         "e": DomType.MmlBase,
+         "sSup": DomType.MmlSuperscript,
+         "sSub": DomType.MmlSubscript,
++        "sSubSup": "fwSubSup",
++        "acc": "fwAccent",
++        "limUpp": "fwUpperLimit",
++        "borderBox": "fwBorderBox",
++        "phant": "fwPhantom",
+         "sPre": DomType.MmlPreSubSuper,
+         "sup": DomType.MmlSuperArgument,
+         "sub": DomType.MmlSubArgument,
+@@ -2014,6 +2019,9 @@
+                     case "pos":
+                         result.position = globalXmlParser.attr(el, "val");
+                         break;
++                    case "type":
++                        result.kind = globalXmlParser.attr(el, "val");
++                        break;
+                     case "degHide":
+                         result.hideDegree = globalXmlParser.boolAttr(el, "val");
+                         break;
+@@ -3283,30 +3291,30 @@
+         }
+         renderDefaultStyle() {
+             var c = this.className;
+-            var wrapperStyle = `
+-.${c}-wrapper { background: gray; padding: 30px; padding-bottom: 0px; display: flex; flex-flow: column; align-items: center; } 
++            var wrapperStyle = `
++.${c}-wrapper { background: gray; padding: 30px; padding-bottom: 0px; display: flex; flex-flow: column; align-items: center; } 
+ .${c}-wrapper>section.${c} { background: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); margin-bottom: 30px; }`;
+             if (this.options.hideWrapperOnPrint) {
+                 wrapperStyle = `@media not print { ${wrapperStyle} }`;
+             }
+-            var styleText = `${wrapperStyle}
+-.${c} { color: black; hyphens: auto; text-underline-position: from-font; }
+-section.${c} { box-sizing: border-box; display: flex; flex-flow: column nowrap; position: relative; overflow: hidden; }
+-section.${c}>article { margin-bottom: auto; z-index: 1; }
+-section.${c}>footer { z-index: 1; }
+-.${c} table { border-collapse: collapse; }
+-.${c} table td, .${c} table th { vertical-align: top; }
+-.${c} p { margin: 0pt; min-height: 1em; }
+-.${c} span { white-space: pre-wrap; overflow-wrap: break-word; }
+-.${c} a { color: inherit; text-decoration: inherit; }
+-.${c} svg { fill: transparent; }
++            var styleText = `${wrapperStyle}
++.${c} { color: black; hyphens: auto; text-underline-position: from-font; }
++section.${c} { box-sizing: border-box; display: flex; flex-flow: column nowrap; position: relative; overflow: hidden; }
++section.${c}>article { margin-bottom: auto; z-index: 1; }
++section.${c}>footer { z-index: 1; }
++.${c} table { border-collapse: collapse; }
++.${c} table td, .${c} table th { vertical-align: top; }
++.${c} p { margin: 0pt; min-height: 1em; }
++.${c} span { white-space: pre-wrap; overflow-wrap: break-word; }
++.${c} a { color: inherit; text-decoration: inherit; }
++.${c} svg { fill: transparent; }
+ `;
+             if (this.options.renderComments) {
+-                styleText += `
+-.${c}-comment-ref { cursor: default; }
+-.${c}-comment-popover { display: none; z-index: 1000; padding: 0.5rem; background: white; position: absolute; box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.25); width: 30ch; }
+-.${c}-comment-ref:hover~.${c}-comment-popover { display: block; }
+-.${c}-comment-author,.${c}-comment-date { font-size: 0.875rem; color: #888; }
++                styleText += `
++.${c}-comment-ref { cursor: default; }
++.${c}-comment-popover { display: none; z-index: 1000; padding: 0.5rem; background: white; position: absolute; box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.25); width: 30ch; }
++.${c}-comment-ref:hover~.${c}-comment-popover { display: block; }
++.${c}-comment-author,.${c}-comment-date { font-size: 0.875rem; color: #888; }
+ `;
+             }
+             return [
+@@ -3461,8 +3469,35 @@
+                     return this.renderContainerNS(elem, ns.mathML, "math", { xmlns: ns.mathML });
+                 case DomType.MmlMathParagraph:
+                     return this.renderContainer(elem, "span");
+-                case DomType.MmlFraction:
+-                    return this.renderContainerNS(elem, ns.mathML, "mfrac");
++                case DomType.MmlFraction: {
++                    if (elem.props?.kind == "lin") {
++                        const parts = this.renderElements(elem.children) ?? [];
++                        const slash = this.createMathMLElement("mo", null, ["/"]);
++                        return this.createMathMLElement("mrow", null, [parts[0], slash, parts[1]].filter(Boolean));
++                    }
++                    const result = this.renderContainerNS(elem, ns.mathML, "mfrac");
++                    if (elem.props?.kind == "noBar") result.setAttribute("linethickness", "0");
++                    if (elem.props?.kind == "skw") result.setAttribute("bevelled", "true");
++                    return result;
++                }
++                case "fwSubSup":
++                    return this.renderContainerNS(elem, ns.mathML, "msubsup");
++                case "fwUpperLimit":
++                    return this.renderContainerNS(elem, ns.mathML, "mover");
++                case "fwBorderBox": {
++                    const result = this.renderContainerNS(elem, ns.mathML, "menclose");
++                    result.setAttribute("notation", "box");
++                    return result;
++                }
++                case "fwPhantom":
++                    return this.renderContainerNS(elem, ns.mathML, "mphantom");
++                case "fwAccent": {
++                    const parts = this.renderElements(elem.children) ?? [];
++                    const mark = this.createMathMLElement("mo", null, [elem.props?.char ?? "\u0302"]);
++                    const result = this.createMathMLElement("mover", null, [parts[0], mark].filter(Boolean));
++                    result.setAttribute("accent", "true");
++                    return result;
++                }
+                 case DomType.MmlBase:
+                     return this.renderContainerNS(elem, ns.mathML, elem.parent.type == DomType.MmlMatrixRow ? "mtd" : "mrow");
+                 case DomType.MmlNumerator:

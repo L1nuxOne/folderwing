@@ -34,7 +34,7 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: build/downloads
-          key: folderwing-downloads-${{ runner.os }}-${{ hashFiles('tools/release-inputs.json', 'tools/media-dependencies.json') }}
+          key: folderwing-downloads-${{ runner.os }}-${{ hashFiles('tools/release-inputs.json', 'tools/media-dependencies.json', 'tools/spreadsheet-dependencies.json') }}
       - name: Restore pinned inputs
         run: python tools/bootstrap-release.py --with-toolchain-source
       - name: Audit native test registry
@@ -43,8 +43,56 @@ jobs:
           if ($LASTEXITCODE) { throw 'Native registry audit failed' }
           python tools/native-impact.py self-check
           if ($LASTEXITCODE) { throw 'Native registry self-check failed' }
+          node tests/markdown_parser_test.js
+          if ($LASTEXITCODE) { throw 'Markdown parser checks failed' }
+          node tests/structured_json_test.js
+          if ($LASTEXITCODE) { throw 'Structured JSON parser checks failed' }
+          node tests/config_parser_test.js
+          if ($LASTEXITCODE) { throw 'Configuration parser checks failed' }
+          node tests/ini_parser_test.js
+          if ($LASTEXITCODE) { throw 'INI parser checks failed' }
+          node tests/xml_util_test.js
+          if ($LASTEXITCODE) { throw 'XML XPath checks failed' }
+          node tests/word_math_test.js
+          if ($LASTEXITCODE) { throw 'Word math checks failed' }
+          ./tests/word_package_tests.ps1
+          if ($LASTEXITCODE) { throw 'Word package checks failed' }
+          ./tests/word_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'Word browser checks failed' }
+          ./tests/word_textbox_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'Word textbox browser checks failed' }
+          ./tests/spreadsheet_reader_tests.ps1
+          if ($LASTEXITCODE) { throw 'Spreadsheet reader checks failed' }
+          ./tests/spreadsheet_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'Spreadsheet browser checks failed' }
+          ./tests/xml_preview_reader_tests.ps1
+          if ($LASTEXITCODE) { throw 'XML reader checks failed' }
+          ./tests/xml_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'XML browser checks failed' }
+          ./tests/config_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'Configuration browser checks failed' }
+          node tests/notebook_util_test.js
+          if ($LASTEXITCODE) { throw 'Notebook data checks failed' }
+          ./tests/notebook_ui_test.ps1
+          if ($LASTEXITCODE) { throw 'Notebook browser checks failed' }
+          ./tests/navigation_browser_tests.ps1
+          if ($LASTEXITCODE) { throw 'Preview navigation browser checks failed' }
+          ./tests/delimited_reader_tests.ps1
+          if ($LASTEXITCODE) { throw 'CSV/TSV parser checks failed' }
       - name: Build full feature set, run smoke and package
         run: ./tools/build-release.ps1 -SkipBootstrap
+      - name: Check read-only SQLite previews
+        run: ./tests/sqlite_preview_tests.ps1 -BuildDirectory build/release-candidate
+      - name: Verify source, SQLite and browser bookmark persistence
+        run: ./tests/preview_navigation.ps1 -BuildDirectory build/release-candidate
+      - name: Verify read-only library catalogues and saved views
+        run: |
+          ./tests/library_catalog_tests.ps1 -BuildDirectory build/release-candidate
+          ./tests/library_ui_tests.ps1 -BuildDirectory build/release-candidate
+      - name: Verify spreadsheet preview helper
+        run: ./tests/spreadsheet_host_smoke.ps1 -BuildDirectory build/release-candidate
+      - name: Verify Word preview helper
+        run: ./tests/word_host_smoke.ps1 -BuildDirectory build/release-candidate
       - name: Verify package boundaries and extracted app
         run: ./tests/release_packaging.ps1 -BuildDirectory build/release-candidate -DistributionDirectory build/distribution -ResultDirectory build/package-acceptance
       - name: Verify release artifact checksums

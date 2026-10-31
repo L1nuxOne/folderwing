@@ -9,6 +9,8 @@
 
 #include "app.h"
 #include "pdfpos.h"
+#include "docmarks.h"
+#include <limits.h>
 #include "pdfproto.h"
 #include "pdftext.h"
 #include "previewlaunch.h"
@@ -90,6 +92,14 @@ static struct {
     uint32_t   doc, npages;
     pdfp_page *pages;
     pdfp_opened info;
+    pdfp_outline_entry *outline;
+    uint32_t outline_count;
+    docmark marks[DOCMARK_PER_FILE];
+    uint32_t mark_count;
+    wchar_t *mark_file, *mark_identity;
+    int mark_identity_failed;
+    DWORD mark_error;
+    int mark_fallback, rail_hover, rail_mouse_y, rail_drag, bookmark_hover;
     int        opened, err;
 
     /* view, in device pixels */
@@ -132,6 +142,7 @@ static struct {
 static int head_h(void) { return app_px(30); }
 static int gap(void) { return app_px(10); }
 static int pad(void) { return app_px(14); }
+static int view_w(void){int width=R.cw-app_px(28);return width>1?width:1;}
 static int view_h(void) { return R.ch - head_h() > 0 ? R.ch - head_h() : 0; }
 static float px_per_pt(void) { return (float)app_px(96) / 72.0f; }
 static void pos_restore(void);
@@ -288,7 +299,7 @@ static float min_scale(void)
     float widest = 1;
     for (uint32_t i = 0; i < R.npages; i++)
         if (R.pages[i].w > widest) widest = R.pages[i].w;
-    float s = (float)R.cw * 0.25f / widest;
+    float s = (float)view_w() * 0.25f / widest;
     return s > 0.02f ? s : 0.02f;
 }
 
@@ -311,10 +322,10 @@ static void clamp_view(void)
     double max_top = R.total - view_h();
     if (R.top > max_top) R.top = max_top;
     if (R.top < 0) R.top = 0;
-    if (R.docw <= R.cw) {
-        R.left = -(R.cw - R.docw) / 2.0;
+    if (R.docw <= view_w()) {
+        R.left = -(view_w() - R.docw) / 2.0;
     } else {
-        double lo = -pad(), hi = R.docw - R.cw + pad();
+        double lo = -pad(), hi = R.docw - view_w() + pad();
         if (R.left < lo) R.left = lo;
         if (R.left > hi) R.left = hi;
     }
@@ -325,7 +336,7 @@ static void apply_fit(void)
 {
     float tw = R.info.fit_x1 - R.info.fit_x0;
     if (tw < 1 || R.cw < 1) return;
-    float s = (float)(R.cw - 2 * pad()) / tw;
+    float s = (float)(view_w() - 2 * pad()) / tw;
     if (s > max_scale()) s = max_scale();
     if (s < min_scale()) s = min_scale();
     R.scale = s;
@@ -450,7 +461,7 @@ static void need_tiles(double y0, double y1, int thumbs_only)
         double a = y0 - R.ys[i], b = y1 - R.ys[i];
         int ty0 = a < 0 ? 0 : (int)(a / PDFP_TILE), ty1 = (int)((b < ph ? b : ph - 1) / PDFP_TILE);
         int tx0 = R.left < 0 ? 0 : (int)(R.left / PDFP_TILE);
-        int tx1 = (int)(((R.left + R.cw) < pw ? R.left + R.cw : pw - 1) / PDFP_TILE);
+        int tx1 = (int)(((R.left + view_w()) < pw ? R.left + view_w() : pw - 1) / PDFP_TILE);
         for (int ty = ty0; ty <= ty1; ty++)
             for (int tx = tx0; tx <= tx1; tx++) need(i, (uint16_t)tx, (uint16_t)ty);
     }
@@ -861,7 +872,7 @@ static void find_show(int i)
     double s = R.scale, y0 = R.ys[h->page] + h->t * s, y1 = R.ys[h->page] + h->b * s;
     double x0 = h->l * s, x1 = h->r * s;
     if (y0 < R.top || y1 > R.top + view_h()) R.top = y0 - view_h() / 3.0;
-    if (x0 < R.left || x1 > R.left + R.cw) R.left = (x0 + x1) / 2 - R.cw / 2.0;
+    if (x0 < R.left || x1 > R.left + view_w()) R.left = (x0 + x1) / 2 - view_w() / 2.0;
     view_changed();
 }
 
@@ -1076,6 +1087,8 @@ static void paint_page(HDC dc, uint32_t i, int x, int y)
         }
 }
 
+#include "pdfnav.inc"
+
 static void paint(HDC dc)
 {
     int hh = head_h();
@@ -1084,7 +1097,7 @@ static void paint(HDC dc)
     fill(dc, 0, 0, R.cw, R.ch, C_BG);
 
     if (R.opened && R.npages) {
-        HRGN clip = CreateRectRgn(0, hh, R.cw, R.ch);
+        HRGN clip = CreateRectRgn(0, hh, view_w(), R.ch);
         SelectClipRgn(dc, clip);
         caret lo, hi;
         int sel = sel_bounds(&lo, &hi);
@@ -1150,13 +1163,14 @@ static void paint(HDC dc)
         }
         count[63] = 0;
         int cx = er.right + app_px(14);
-        text(dc, count, cx, 0, R.cw - 2 * pad() - sz.cx - cx, hh, cc, DT_LEFT);
+        text(dc, count, cx, 0, R.cw - 2 * pad() - app_px(32) - sz.cx - cx, hh, cc, DT_LEFT);
     } else {
         const wchar_t *name = R.path ? wcsrchr(R.path, L'\\') : NULL;
         name = name ? name + 1 : R.path ? R.path : L"";
-        text(dc, name, pad(), 0, R.cw - 3 * pad() - sz.cx, hh, C_TEXT, DT_LEFT);
+        text(dc, name, pad(), 0, R.cw - 3 * pad() - app_px(32) - sz.cx, hh, C_TEXT, DT_LEFT);
     }
-    text(dc, right, R.cw - pad() - sz.cx, 0, sz.cx, hh, C_DIM, DT_LEFT);
+    text(dc, right, R.cw - pad() - app_px(32) - sz.cx, 0, sz.cx, hh, C_DIM, DT_LEFT);
+    nav_paint(dc);bookmark_paint(dc);
     SelectObject(dc, old_font);
 }
 
@@ -1208,6 +1222,7 @@ static void key(WPARAM vk, int sys)
         case VK_TAB: app_focus_cycle(shift ? -1 : 1); return;
         default: break;
         }
+        if(ctrl&&vk=='D'){if(shift)nav_menu(1,0);else bookmark_toggle();return;}
         /* with text selected, Ctrl+C copies it (Shift: lines as on the page); without, the keys are the app's */
         caret lo, hi;
         if (ctrl && (vk == 'C' || vk == VK_INSERT) && sel_state(&lo, &hi) != 0) {
@@ -1225,7 +1240,7 @@ static void key(WPARAM vk, int sys)
         }
         if (ctrl && (vk == VK_OEM_PLUS || vk == VK_ADD || vk == VK_OEM_MINUS || vk == VK_SUBTRACT)) {
             float f = vk == VK_OEM_PLUS || vk == VK_ADD ? 1.25f : 0.8f;
-            zoom_at(R.scale * f, R.cw / 2, view_h() / 2);
+            zoom_at(R.scale * f, view_w() / 2, view_h() / 2);
             view_changed();
             return;
         }
@@ -1305,9 +1320,15 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
                 pos_restore(); /* the first lookup reads the file */
                 FPE_PROF_END("pdf.positions_restore", t0);
                 view_changed();
+                bookmarks_reload();send_req(PDFP_OUTLINE,R.doc,0,NULL,0);
                 if (find_open()) find_restart(); /* the same words, in the next PDF */
             }
             InvalidateRect(h, NULL, FALSE);
+        } else if(mm->head.type==PDFP_OUTLINED&&mm->head.doc==R.doc&&R.opened&&mm->head.size>=sizeof(pdfp_outline)){
+            pdfp_outline head;memcpy(&head,mm->data,sizeof head);int valid=head.count<=PDFP_OUTLINE_MAX&&mm->head.size==sizeof head+head.count*sizeof(pdfp_outline_entry);
+            const pdfp_outline_entry *entries=(const pdfp_outline_entry*)(mm->data+sizeof head);
+            if(valid)for(uint32_t i=0;i<head.count;i++)if(entries[i].page>=R.npages||entries[i].depth>32||!isfinite(entries[i].y)||entries[i].y<0||entries[i].y>R.pages[entries[i].page].h||!wmemchr((const wchar_t*)entries[i].title,0,PDFP_OUTLINE_TITLE)){valid=0;break;}
+            if(valid){pdfp_outline_entry *copy=head.count?malloc(head.count*sizeof *copy):NULL;if(!head.count||copy){if(copy)memcpy(copy,entries,head.count*sizeof *copy);free(R.outline);R.outline=copy;R.outline_count=head.count;InvalidateRect(h,NULL,FALSE);}}
         } else if (mm->head.type == PDFP_TEXTED && mm->head.doc == R.doc && R.opened) {
             text_arrived(mm);
         } else if (mm->head.type == PDFP_FOUND && mm->head.doc == R.doc && R.opened) {
@@ -1408,6 +1429,10 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         int64_t t0 = fpe_prof_begin();
         app_focus_window(h);
         FPE_PROF_END("pdf.press/focus", t0);
+        POINT point={GET_X_LPARAM(l),GET_Y_LPARAM(l)};RECT button=bookmark_rect();
+        if(PtInRect(&button,point)){bookmark_toggle();return 0;}
+        if(R.opened&&R.npages&&point.y>=head_h()&&point.x>=view_w()){
+            int distance,index=nav_nearest(point.y,&distance);if(distance<=app_px(6))nav_jump(index);else nav_scrub(point.y);R.rail_drag=1;SetCapture(h);return 0;}
         caret k;
         t0 = fpe_prof_begin();
         int on_page = GET_Y_LPARAM(l) >= head_h() && point_caret(GET_X_LPARAM(l), GET_Y_LPARAM(l), &k);
@@ -1421,15 +1446,21 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         return 0;
     }
 
+    case WM_CONTEXTMENU: {
+        POINT point={GET_X_LPARAM(l),GET_Y_LPARAM(l)};if(l==-1){if(R.bookmark_hover||R.rail_hover){nav_menu(R.bookmark_hover,R.rail_mouse_y);return 0;}break;}ScreenToClient(h,&point);RECT button=bookmark_rect();
+        if(PtInRect(&button,point)){nav_menu(1,0);return 0;}if(point.x>=view_w()&&point.y>=head_h()){nav_menu(0,point.y);return 0;}break;
+    }
     case WM_RBUTTONDOWN:
         app_focus_window(h);
         return 0;
 
     case WM_LBUTTONDBLCLK:
+        if(GET_X_LPARAM(l)>=view_w()||GET_Y_LPARAM(l)<head_h())return 0;
         if (!select_word(GET_X_LPARAM(l), GET_Y_LPARAM(l))) back_to_fit(); /* off the text: fit again */
         return 0;
 
     case WM_LBUTTONUP:
+        if(R.rail_drag){R.rail_drag=0;if(GetCapture()==h)ReleaseCapture();return 0;}
         if (R.selecting) {
             R.selecting = 0;
             KillTimer(h, TIMER_EDGE);
@@ -1468,6 +1499,10 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
 
     case WM_MOUSEMOVE: {
         int x = GET_X_LPARAM(l), y = GET_Y_LPARAM(l);
+        POINT point={x,y};RECT button=bookmark_rect();int rail=R.opened&&R.npages&&x>=view_w()&&y>=head_h(),hover=PtInRect(&button,point);
+        if(rail||hover||R.rail_hover||R.bookmark_hover){TRACKMOUSEEVENT track={sizeof track,TME_LEAVE,h,0};TrackMouseEvent(&track);R.rail_hover=rail;R.rail_mouse_y=y;R.bookmark_hover=hover;InvalidateRect(h,NULL,FALSE);}
+        if(R.rail_drag){nav_scrub(y);return 0;}
+        if((rail||hover)&&!R.panning&&!R.selecting)return 0;
         if (R.panning) {
             R.top = R.pan_top - (y - R.pan_y);
             R.left = R.pan_left - (x - R.pan_x);
@@ -1483,8 +1518,10 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         return 0;
     }
 
+    case WM_MOUSELEAVE:R.rail_hover=R.bookmark_hover=0;InvalidateRect(h,NULL,FALSE);return 0;
     case WM_MBUTTONUP:
     case WM_CAPTURECHANGED:
+        if(m==WM_CAPTURECHANGED)R.rail_drag=0;
         if (R.panning) {
             R.panning = 0;
             if (m == WM_MBUTTONUP) ReleaseCapture();
@@ -1503,7 +1540,9 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
             caret k;
             GetCursorPos(&pt);
             ScreenToClient(h, &pt);
-            if (R.panning) {
+            RECT button=bookmark_rect();
+            if(R.opened&&((pt.x>=view_w()&&pt.y>=head_h())||PtInRect(&button,pt))){cur=IDC_HAND;}
+            else if (R.panning) {
                 cur = IDC_SIZEALL;
             } else if (R.selecting) {
                 cur = IDC_IBEAM;
@@ -1587,7 +1626,18 @@ static void pos_restore(void)
     R.top = R.ys[e->page] + e->y * R.scale;
 }
 
-void pdfview_set_memory(const wchar_t *file, uint32_t max) { pdfpos_open(file, max); }
+void pdfview_set_memory(const wchar_t *file, uint32_t max) {
+    pdfpos_open(file,max);wchar_t path[32768]={0};R.mark_fallback=0;
+    if(file&&*file){wcsncpy(path,file,32767);wchar_t *slash=wcsrchr(path,L'\\');if(slash)wcscpy(slash+1,L"pdf-bookmarks.fwb");else path[0]=0;}
+    if(!path[0]){DWORD n=GetEnvironmentVariableW(L"LOCALAPPDATA",path,32700);if(!n||n>=32700)path[0]=0;else{wcscat(path,L"\\Folderwing\\pdf-bookmarks.fwb");R.mark_fallback=1;}}
+    free(R.mark_file);R.mark_file=path[0]?_wcsdup(path):NULL;if(R.opened)bookmarks_reload();
+}
+
+void pdfview_set_bookmark_identity(const wchar_t *identity){
+    wchar_t *copy=identity&&*identity&&wcslen(identity)<32768?_wcsdup(identity):NULL;
+    free(R.mark_identity);R.mark_identity=copy;R.mark_identity_failed=!copy;
+    if(R.opened)bookmarks_reload();
+}
 
 void pdfview_clear(void)
 {
@@ -1600,7 +1650,7 @@ void pdfview_clear(void)
     R.doc++; /* replies for the old document are ignored */
     free(R.path);
     free(R.pages);
-    free(R.ys);
+    free(R.ys);free(R.mark_identity);R.mark_identity=NULL;R.mark_identity_failed=0;free(R.outline);R.outline=NULL;R.outline_count=R.mark_count=0;R.mark_error=0;R.rail_drag=R.rail_hover=R.bookmark_hover=0;if(R.hwnd&&GetCapture()==R.hwnd)ReleaseCapture();
     R.path = NULL;
     R.size = 0;
     R.mtime = 0;
@@ -1628,6 +1678,7 @@ void pdfview_stop(void)
         DeleteObject(R.bmp);
         DeleteDC(R.bdc);
     }
+    free(R.mark_file);
     memset(&R, 0, sizeof R);
 }
 

@@ -92,6 +92,7 @@
 #include "linkdialog.h"
 #include "panelproto.h"
 #include "sidepanel.h"
+#include "libraryview.h"
 #include "actiondock.h"
 #include "brand.h"
 #include "settingspath.h"
@@ -101,6 +102,8 @@
 #include "shell.h"
 #include "dropwarm.h"
 #include "typeicons.h"
+#include "panefilter.h"
+#include <commctrl.h>
 
 #define WM_APP_LOADED  (WM_APP + 1)
 #define WM_APP_JOB     (WM_APP + 3)
@@ -163,6 +166,9 @@ typedef struct Tab {
     int           nback, nfwd;
     fpe_view_opts opts;
     wchar_t       cursor[260]; /* the name under the cursor when it was left */
+    wchar_t filter[256];
+    unsigned filter_types;
+    int filter_hide_folders;
     int           workspace_restore; /* not yet successfully opened */
     DWORD         load_error;
 } Tab;
@@ -210,6 +216,10 @@ typedef struct Pane {
 
     wchar_t filter[256];
     int     filter_len;
+    unsigned filter_types;
+    int filter_hide_folders, filter_sync, restore_filter;
+    HWND filter_edit, filter_type_button, filter_clear;
+    WNDPROC filter_edit_proc, filter_button_proc;
 
     wchar_t *back[HIST_MAX], *fwd[HIST_MAX];
     int      nback, nfwd;
@@ -310,7 +320,7 @@ static struct {
     int      me_on,me_volume,me_muted; UINT me_linger_ms;
     int      tx_on, tx_wrap, tx_lines; uint32_t tx_limit_mb, tx_encoding; UINT tx_linger_ms;
     int      im_on; uint32_t im_cache_mb, im_background; UINT im_linger_ms;
-    int      ar_on,ar_kind,ar_readers;double ar_ratio;wchar_t *ar_path;uint64_t ar_size;int ar_gap,ar_left,ar_width;
+    int      ar_on,ar_kind,ar_readers;double ar_ratio;wchar_t *ar_path, *ar_identity;uint64_t ar_size;int ar_gap,ar_left,ar_width;
     int      pv_want_kind; uint64_t pv_want_size; int64_t pv_want_mtime;
     int      pv_on;       /* switched on and the helper is there */
     int      pv_shown, pv_swapped, pv_lingering;
@@ -615,6 +625,11 @@ static void on_loaded(void *user, uint64_t ticket, fpe_err err, fpe_dir *dir)
     }
 }
 
+static int g_library_active;
+static double g_library_ratio=.60;
+static void library_leave(void);
+static void library_action(unsigned action,const wchar_t *path);
+static void library_selected(void);
 static struct {Pane *pane;uint64_t ticket;wchar_t *path;uint32_t line,column;uint64_t bytes;int64_t mtime;wchar_t expected[CF_QUERY];} g_content_preview;
 static void content_preview_forget(void);
 static void content_preview_try(Pane *pane,uint64_t ticket);
@@ -664,6 +679,10 @@ static void p_place_address_control(Pane *p,HWND control,int x,int y,int w,int h
     }
     if(MoveWindow(control,x,y,w,h,FALSE))InvalidateRect(control,NULL,FALSE);
 }
+static void p_filter_place(Pane *p);
+static void p_filter_sync(Pane *p);
+static void apply_filter(Pane *p);
+static int p_filter_active(const Pane *p){return p->filter_len||p->filter_types||p->filter_hide_folders;}
 static void p_place_edit(Pane *p)
 {
     int64_t trace = fpe_prof_begin();
@@ -677,9 +696,10 @@ static void p_place_edit(Pane *p)
         if(visible!=(badge!=0))ShowWindow(p->distro_label,badge?SW_SHOW:SW_HIDE);
     }
     p_place_address_control(p,p->edit,x,y,w,h);
+    p_filter_place(p);
     FPE_PROF_END("pane.address_layout", trace);
 }
-static int p_list_bottom(const Pane *p) { return p->ch - g.status_h; }
+static int p_list_bottom(const Pane *p) { return p->ch - g.status_h - S(32); }
 
 static thumb_grid p_grid(const Pane *p)
 {
@@ -943,12 +963,13 @@ static void p_show_dir(Pane *p, fpe_dir *d, const wchar_t *select, int push)
         while (p->nfwd) free(p->fwd[--p->nfwd]);
     }
 
-    p->filter_len = 0;
-    p->filter[0] = 0;
+    if(!(p->path&&same_path(p->path,np))&&!(p->restore_filter&&restoring->path&&same_path(restoring->path,np))){p->filter_len=0;p->filter[0]=0;p->filter_types=0;p->filter_hide_folders=0;}
+    p->restore_filter=0;
     if (next) {
         if (p->view) fpe_view_destroy(p->view);
         p->view = next;
     } else {
+        fpe_view_set_matcher(p->view,NULL,NULL);
         fpe_view_set_filter(p->view, NULL);
         fpe_view_set_dir(p->view, d);
     }
@@ -958,6 +979,7 @@ static void p_show_dir(Pane *p, fpe_dir *d, const wchar_t *select, int push)
     free(p->tabs[p->tab].path);
     p->tabs[p->tab].path = wdup(np);
     p->tabs[p->tab].workspace_restore=0;p->tabs[p->tab].load_error=0;
+    apply_filter(p);p_filter_sync(p);
     recent_note(p->path);
     p_sel_reset(p, fpe_dir_count(d));
 
@@ -1024,6 +1046,7 @@ static void p_refresh_in_place(Pane *p, fpe_dir *d)
 
 static void p_navigate(Pane *p, const wchar_t *path, const wchar_t *select, int push)
 {
+    if(g_library_active)library_leave();
     if(g_content_preview.pane==p)content_preview_forget();
     p->down_armed = p->down_deferred = 0; /* navigation may await a new snapshot */
     int64_t t = fpe_prof_begin();
@@ -1139,7 +1162,7 @@ static void workspace_placeholder(Pane *p){
     free(p->nav_path);p->nav_path=NULL;
     if(p->view){fpe_view_destroy(p->view);p->view=NULL;}
     free(p->path);p->path=path;p_sel_reset(p,0);p->cursor=p->anchor=0;p->top=0;
-    p->filter_len=0;p->filter[0]=0;p->down_armed=p->down_deferred=0;
+    p->filter_len=0;p->filter[0]=0;p->filter_types=0;p->filter_hide_folders=0;p_filter_sync(p);p->down_armed=p->down_deferred=0;
     folderwatch_clear((unsigned)p->idx);
     workspace_address(p);p_redraw(p);
 }
@@ -1154,6 +1177,7 @@ static void tab_save(Pane *p)
     t->nfwd = p->nfwd;
     p->nback = p->nfwd = 0;
     t->opts = p->opts;
+    wcscpy(t->filter,p->filter);t->filter_types=p->filter_types;t->filter_hide_folders=p->filter_hide_folders;
     const wchar_t *cn = p->view ? fpe_view_name(p->view, p->cursor) : NULL;
     wcsncpy(t->cursor, cn ? cn : L"", 259);
     t->cursor[259] = 0;
@@ -1172,6 +1196,7 @@ static void tab_show(Pane *p, int i)
     p->opts = t->opts;
     p->opts.show_hidden = p->opts.show_system = (uint8_t)g.show_hidden;
     if(t->workspace_restore)workspace_placeholder(p);
+    wcscpy(p->filter,t->filter);p->filter_len=(int)wcslen(p->filter);p->filter_types=t->filter_types;p->filter_hide_folders=t->filter_hide_folders;p->restore_filter=1;p_filter_sync(p);
     if (p->view) fpe_view_set_opts(p->view, &p->opts);
     if (t->path) p_navigate(p, t->path, t->cursor, 0);
     if(t->workspace_restore&&!p->nav_ticket&&!p->view&&!t->load_error){t->load_error=ERROR_NOT_ENOUGH_MEMORY;set_status(p,1,L"Workspace folder could not be opened; retry with Refresh");}
@@ -1450,7 +1475,20 @@ static void p_keep_cursor_after(Pane *p, void (*change)(Pane *))
 }
 
 static void apply_opts(Pane *p) { fpe_view_set_opts(p->view, &p->opts); }
-static void apply_filter(Pane *p) { fpe_view_set_filter(p->view, p->filter_len ? p->filter : NULL); }
+static int pane_filter_match(const fpe_dir *dir,const fpe_entry *e,const wchar_t *name,void *context){
+    Pane *p=context;int folder=fpe_entry_is_dir(e);wchar_t literal[1024];
+    if(folder&&p->filter_hide_folders)return 0;
+    if(!folder&&p->filter_types&&!(p->filter_types&(1u<<pf_group(ti_of_name(name,e->name_len,e->ext,e->attrs)))))return 0;
+    if(!p->filter_len)return 1;
+    if(fpe_dir_is_linux(dir)){if(!fpe_lx_literal(name,literal,1024,0))return 0;name=literal;}
+    return pf_text_matches(name,p->filter);
+}
+static void apply_filter(Pane *p){
+    fpe_view_set_filter(p->view,NULL);
+    fpe_view_set_matcher(p->view,p_filter_active(p)?pane_filter_match:NULL,p);
+    if(p->nsel){fpe_dir *dir=fpe_view_dir(p->view);const fpe_entry *entries=fpe_dir_entries(dir);
+        for(uint32_t i=0;i<fpe_dir_count(dir)&&i<p->sel_cap;i++)if(p->sel[i]&&!pane_filter_match(dir,entries+i,fpe_dir_name(dir,entries+i),p)){p->sel[i]=0;p->nsel--;}}
+}
 
 /* Preferences contain only explicit choices. Unset fields follow the current
  * defaults, and disabling thumbnail support keeps its saved mode intact. */
@@ -1528,7 +1566,9 @@ static void p_set_sort(Pane *p, fpe_sort_key k)
 
 static void p_filter_changed(Pane *p)
 {
+    p_filter_sync(p);
     if (!p->view) return;
+    p->down_armed=p->down_deferred=0;
     int64_t t = fpe_prof_begin();
     p_keep_cursor_after(p, apply_filter);
     FPE_PROF_END("pane.filter", t);
@@ -2348,7 +2388,7 @@ static void p_paint(Pane *p, HDC dc)
         }
     }
     if (!n && p->view) {
-        text(dc, p->filter_len ? L"No items match the filter" : L"This folder is empty", -1, 0, y0 + S(20), p->cw,
+        text(dc, p_filter_active(p) ? L"No items match the filter" : L"This folder is empty", -1, 0, y0 + S(20), p->cw,
              g.row_h, C_DIM, DT_CENTER);
     }
     RestoreDC(dc,list_clip);
@@ -2357,12 +2397,14 @@ static void p_paint(Pane *p, HDC dc)
         frame(dc, 1, y0 + 1, p->cw - 2, y1 - y0 - 2, C_ACCENT);
     }
 
+    /* Filter controls occupy a separate row above the status text. */
+    fill(dc,0,p_list_bottom(p),p->cw,S(32),C_STATUS);
     /* pane footer */
     int sy = p->ch - g.status_h;
     fill(dc, 0, sy, p->cw, g.status_h, C_STATUS);
     if(damage.bottom>sy){
     wchar_t left[700];
-    int k = _snwprintf(left, 700, L"%u items", n);
+    int k = p_filter_active(p)&&p->view?_snwprintf(left,700,L"%u of %u items",n,fpe_view_unfiltered_count(p->view)):_snwprintf(left,700,L"%u items",n);
     if (p->nsel) k += _snwprintf(left + k, 700 - k, L"   %u selected", p->nsel);
     if (p->loading) k += _snwprintf(left + k, 700 - k, L"   Loading\x2026");
     if (p->status[0]) k += _snwprintf(left + k, 700 - k, L"   %ls", p->status);
@@ -2381,16 +2423,7 @@ static void p_paint(Pane *p, HDC dc)
     }
 
     }
-    if (p->filter_len&&damage.top<hy+g.header_h&&damage.bottom>hy) {
-        wchar_t f[300];
-        _snwprintf(f, 300, L"  filter: %ls  ", p->filter);
-        f[299] = 0;
-        SIZE sz;
-        GetTextExtentPoint32W(dc, f, (int)wcslen(f), &sz);
-        int fx = p->cw - g.pad - sz.cx - S(8), fy = hy + (g.header_h - sz.cy) / 2 - S(1);
-        fill(dc, fx, fy, sz.cx, sz.cy + S(2), C_SEL);
-        text(dc, f, -1, fx, fy, sz.cx, sz.cy + S(2), C_TEXT, DT_LEFT);
-    }
+
 }
 
 static int p_row_at(Pane *p, int x, int y)
@@ -2781,15 +2814,15 @@ static uint32_t pane_gather(fn_ctx *c)
 static void pane_ctx(fn_ctx *c, Pane *p, int from, int items)
 {
     memset(c, 0, sizeof *c);
-    c->where = FN_PANE;
+    c->where = g_library_active?FN_ANYWHERE:FN_PANE;
     c->from = from;
     if (from == FN_FROM_MENU) c->menu_revision = fn_revision();
     c->pane = p;
     c->dir = c->dest = p->path;
     c->gather = pane_gather;
     if (g.dual) c->state |= FN_S_DUAL;
-    if (p->path) c->state |= FN_S_FOLDER;
-    if (items && p->path && p_count(p)) {
+    if (!g_library_active && p->path) c->state |= FN_S_FOLDER;
+    if (!g_library_active && items && p->path && p_count(p)) {
         c->n = p->nsel ? p->nsel : 1;
         c->state |= FN_S_ITEMS;
         if (c->n == 1) {
@@ -4191,9 +4224,9 @@ static void focus_cycle(HWND from, int dir)
     int n = 0;
     if(actiondock_window()&&IsWindowVisible(actiondock_window()))order[n++]=actiondock_window();
     if (g.show_tree) order[n++] = T.hwnd;
-    order[n++] = g.panes[g.pv_swapped].hwnd;
+    order[n++] = g_library_active?libraryview_window():g.panes[g.pv_swapped].hwnd;
     if (g.pv_shown) {order[n++]=g.pv_shown==5?mediaview_window():g.pv_shown==4?archiveview_window():g.pv_shown==3?textview_window():g.pv_shown==2?imageview_window():pdfview_window();if(g.pv_shown==4&&g.ar_kind)order[n++]=g.ar_kind==5?mediaview_window():g.ar_kind==3?textview_window():g.ar_kind==2?imageview_window():pdfview_window();}
-    else if (g.dual) order[n++] = g.panes[1].hwnd;
+    else if (g.dual&&!g_library_active) order[n++] = g.panes[1].hwnd;
     int at = 0;
     for (int i = 0; i < n; i++)
         if (order[i] == from) at = i;
@@ -4248,7 +4281,7 @@ static void toggle_hidden(void)
 static const fn_def *preview_def(void) { return fn_find("preview.pdf"); }
 static const fn_def *preview_kind_def(int kind) { return fn_find(kind==5?"preview.media":kind==4?"preview.archive":kind==3?"preview.text":kind==2?"preview.image":"preview.pdf"); }
 static HWND archive_content_window(void){return g.ar_kind==5?mediaview_window():g.ar_kind==3?textview_window():g.ar_kind==2?imageview_window():g.ar_kind==1?pdfview_window():NULL;}
-static void archive_content_clear(void){int kind=g.ar_kind;if(!kind)return;g.ar_kind=0;if(kind==5)mediaview_clear();else if(kind==3)textview_clear();else if(kind==2)imageview_clear();else pdfview_clear();free(g.ar_path);g.ar_path=NULL;fn_release(preview_kind_def(kind));layout();}
+static void archive_content_clear(void){int kind=g.ar_kind;if(!kind)return;g.ar_kind=0;if(kind==5)mediaview_clear();else if(kind==3)textview_clear();else if(kind==2)imageview_clear();else pdfview_clear();free(g.ar_path);g.ar_path=NULL;free(g.ar_identity);g.ar_identity=NULL;fn_release(preview_kind_def(kind));layout();}
 static HWND preview_window(void) { return g.pv_shown==5?mediaview_window():g.pv_shown==4?archiveview_window():g.pv_shown==3?textview_window():g.pv_shown==2?imageview_window():pdfview_window(); }
 
 static int is_pdf(const fpe_entry *e, const wchar_t *name)
@@ -4416,6 +4449,7 @@ static int preview_media_active(void){return g.pv_shown==5||(g.pv_shown==4&&g.ar
  * different PDF or off PDFs. */
 static void preview_note(Pane *p)
 {
+    if(g_library_active)return;
     if ((!g.pv_on && !g.im_on && !g.tx_on && !g.ar_on && !g.me_on) || p != active_pane()) return;
     const wchar_t *name = NULL;
     const fpe_entry *e = NULL;
@@ -4468,13 +4502,14 @@ static void preview_show(void)
     if (g.pv_shown && g.pv_shown!=g.pv_want_kind) preview_hide();
     if (!g.pv_shown) {
         if (fn_hold(d)) { if(g.pv_want_kind==5)g.me_on=0;else if(g.pv_want_kind==4)g.ar_on=0;else if(g.pv_want_kind==3)g.tx_on=0;else if(g.pv_want_kind==2)g.im_on=0;else g.pv_on=0;return; }
-        g.pv_swapped=g.dual && g.pv_src->idx==1;g.pv_shown=g.pv_want_kind;
+        g.pv_swapped=!g_library_active&&g.dual&&g.pv_src&&g.pv_src->idx==1;g.pv_shown=g.pv_want_kind;
         if(g.pv_shown==5)mediaview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);else if(g.pv_shown==4)archiveview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);else if(g.pv_shown==3)textview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);else if(g.pv_shown==2){if(g.image_preserve||image_browse_context(g.pv_src))imageview_open_browse(g.pv_want,g.pv_want_size,g.pv_want_mtime);else imageview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);}else pdfview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);
         layout();
     } else if(g.pv_shown==5)mediaview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);else if(g.pv_shown==4)archiveview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);else if(g.pv_shown==3)textview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);
     else if(g.pv_shown==2){if(g.image_preserve||image_browse_context(g.pv_src))imageview_open_browse(g.pv_want,g.pv_want_size,g.pv_want_mtime);else imageview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);}
     else pdfview_open(g.pv_want,g.pv_want_size,g.pv_want_mtime);
     if(g.pv_shown==2)image_browse_note(g.pv_src);
+    if(g_library_active&&g.pv_shown==1)libraryview_reader(1,g.pv_want);
 }
 
 static void preview_hide(void)
@@ -4488,20 +4523,35 @@ static void preview_hide(void)
     HWND f = GetFocus(), reader = preview_window();
     int had_focus = f && reader && (f == reader || IsChild(reader, f)); /* the reader or its find box */
     archive_content_clear();if(g.pv_shown==5)mediaview_clear();else if(g.pv_shown==4)archiveview_clear();else if(g.pv_shown==3)textview_clear();else if(g.pv_shown==2)imageview_clear();else pdfview_clear();
+    if(g_library_active&&g.pv_shown==1)libraryview_reader(0,NULL);
     g.pv_shown = g.pv_swapped = 0;
     layout();
-    if (had_focus) focus(active_pane()->hwnd);
+    if (had_focus) focus(g_library_active?libraryview_window():active_pane()->hwnd);
     fn_release(d);
 }
 
 void app_preview_close(void) { if(g.pv_shown==4&&g.ar_kind)archive_content_clear();else preview_hide(); }
+static void library_leave(void){if(!g_library_active)return;preview_hide();free(g.pv_want);g.pv_want=NULL;g.pv_want_kind=0;g.pv_src=NULL;g_library_active=0;libraryview_activate(0);layout();}
+static void library_selected(void){preview_hide();free(g.pv_want);g.pv_want=NULL;g.pv_want_kind=0;g.pv_src=NULL;sidepanel_close();g_library_active=1;g_library_ratio=libraryview_reader_ratio();libraryview_activate(1);}
+static void library_action(unsigned action,const wchar_t *path){
+ if(action==5&&(!g_library_active||g.pv_shown!=1)){libraryview_reader(0,NULL);return;}
+ if(action==0){library_leave();return;}if(action==4){preview_hide();return;}
+ if(action==2){library_leave();app_reveal(active_pane(),path);return;}
+ if(action==3){uint64_t request=app_clipboard_begin(g.hwnd);size_t bytes=(wcslen(path)+1)*sizeof(wchar_t);HGLOBAL mem=GlobalAlloc(GMEM_MOVEABLE,bytes);void *to=mem?GlobalLock(mem):NULL;if(to){memcpy(to,path,bytes);GlobalUnlock(mem);}else{if(mem)GlobalFree(mem);mem=NULL;}app_clipboard_submit(request,CF_UNICODETEXT,mem,0,NULL,L"Attachment path copied");return;}
+ const wchar_t *ext=wcsrchr(path,L'.');WIN32_FILE_ATTRIBUTE_DATA attrs;if((action!=1&&action!=5)||!ext||_wcsicmp(ext,L".pdf")||!GetFileAttributesExW(path,GetFileExInfoStandard,&attrs)||attrs.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY)return;
+ if(g.pv_shown!=1){preview_hide();if(fn_hold(preview_def())){app_status(NULL,1,L"Enable PDF preview to read library attachments");return;}g.pv_shown=1;g.pv_swapped=0;}
+ free(g.pv_want);g.pv_want=wdup(path);g.pv_want_kind=1;g.pv_src=NULL;g.pv_want_size=((uint64_t)attrs.nFileSizeHigh<<32)|attrs.nFileSizeLow;g.pv_want_mtime=(int64_t)(((uint64_t)attrs.ftLastWriteTime.dwHighDateTime<<32)|attrs.ftLastWriteTime.dwLowDateTime);pdfview_open(path,g.pv_want_size,g.pv_want_mtime);layout();libraryview_reader(1,path);
+}
+
 void app_archive_close(void){preview_hide();}
 int app_archive_preview_kind(const wchar_t *name){if(!name)return 0;const wchar_t *ext=name?wcsrchr(name,L'.'):NULL;return g.me_on&&media_extension(name)?5:g.pv_on&&ext&&!_wcsicmp(ext,L".pdf")?1:g.im_on&&image_extension(name)?2:g.tx_on&&text_file_language(name)>=0?3:0;}
-static void archive_content_show(int kind,const wchar_t *path,uint64_t bytes){
- wchar_t *copy=path?_wcsdup(path):NULL;archive_content_clear();if(!copy||!kind||g.pv_shown!=4){free(copy);return;}const fn_def *d=preview_kind_def(kind);if(fn_hold(d)){free(copy);return;}g.ar_kind=kind;g.ar_readers|=1<<(kind-1);g.ar_path=copy;g.ar_size=bytes;
- if(kind==5)mediaview_open(copy,bytes,0);else if(kind==1)pdfview_open(copy,bytes,0);else if(kind==2)imageview_open(copy,bytes,0);else textview_open(copy,bytes,0);layout();
+static void archive_content_show_key(int kind,const wchar_t *path,uint64_t bytes,const wchar_t *identity){
+ wchar_t *copy=path?_wcsdup(path):NULL,*key=identity?_wcsdup(identity):NULL;archive_content_clear();if(!copy||!kind||g.pv_shown!=4){free(copy);free(key);return;}const fn_def *d=preview_kind_def(kind);if(fn_hold(d)){free(copy);free(key);return;}g.ar_kind=kind;g.ar_readers|=1<<(kind-1);g.ar_path=copy;g.ar_identity=key;g.ar_size=bytes;
+ if(kind==5)mediaview_open(copy,bytes,0);else if(kind==1){pdfview_open(copy,bytes,0);pdfview_set_bookmark_identity(key);}else if(kind==2)imageview_open(copy,bytes,0);else textview_open_archive_key(copy,bytes,0,key);layout();
 }
-void app_archive_preview(const wchar_t *name,const wchar_t *path,uint64_t bytes){if(!path){archive_content_clear();return;}archive_content_show(app_archive_preview_kind(name),path,bytes);}
+static void archive_content_show(int kind,const wchar_t *path,uint64_t bytes){archive_content_show_key(kind,path,bytes,g.ar_identity);}
+void app_archive_preview_identity(const wchar_t *name,const wchar_t *path,uint64_t bytes,const wchar_t *identity){if(!path){archive_content_clear();return;}archive_content_show_key(app_archive_preview_kind(name),path,bytes,identity);}
+void app_archive_preview(const wchar_t *name,const wchar_t *path,uint64_t bytes){app_archive_preview_identity(name,path,bytes,NULL);}
 static int archive_start(void){return archiveview_start(g.hwnd);}
 static void archive_stop(void){if(g.pv_shown==4){archive_content_clear();g.pv_shown=g.pv_swapped=0;layout();}archiveview_stop();}
 static void configure_archive(void){g.ar_on=fn_active(fn_find("preview.archive"))&&archiveview_available();if(!g.ar_on&&g.pv_shown==4)preview_hide();if(g.ar_on)preview_note(active_pane());}
@@ -4658,11 +4708,11 @@ static void configure_media(void){const fn_def *d=fn_find("preview.media");int w
 }
 
 static int text_start(void) {
-    int rc=textview_start(g.hwnd);if(!rc)textview_configure(g.tx_limit_mb,g.tx_wrap,g.tx_lines,g.tx_encoding);return rc;
+    int rc=textview_start(g.hwnd);if(!rc){textview_configure(g.tx_limit_mb,g.tx_wrap,g.tx_lines,g.tx_encoding);textview_set_bookmark_memory(g.session[0]?g.session:NULL);}return rc;
 }
 static void text_stop(void){if(g.pv_shown==3){g.pv_shown=g.pv_swapped=0;layout();}textview_stop();}
-static int text_shown(const fn_ctx *c){return g.pv_shown==3||g.ar_kind==3;}
-static int text_key_scope(const fn_ctx *c){return (g.pv_shown==3||g.ar_kind==3)&&(c->from!=FN_FROM_KEY||textview_key_scope());}
+static int text_shown(const fn_ctx *c){return !textview_is_binary_preview()&&(g.pv_shown==3||g.ar_kind==3);}
+static int text_key_scope(const fn_ctx *c){return text_shown(c)&&(c->from!=FN_FROM_KEY||textview_key_scope());}
 static int text_copy_scope(const fn_ctx *c){return text_key_scope(c)&&textview_selected();}
 static void run_text_wrap(fn_ctx *c){textview_action(TEXTVIEW_WRAP);}
 static void run_text_lines(fn_ctx *c){textview_action(TEXTVIEW_LINES);}
@@ -5111,7 +5161,7 @@ static int g_settings_open_builder;
 static void panel_closed(int had_focus)
 {
     g_settings_open_builder=0;
-    if (had_focus) focus(active_pane()->hwnd);
+    if (had_focus) focus(g_library_active?libraryview_window():active_pane()->hwnd);
     InvalidateRect(g.hwnd, NULL, FALSE);
 }
 
@@ -6030,7 +6080,7 @@ DWORD app_workspace_apply(const session *snapshot){
         SetPropW(p->hwnd,L"Address.Loading",NULL);SetPropW(p->hwnd,L"Address.Error",NULL);free(p->nav_path);p->nav_path=NULL;
         for(int k=0;k<p->ntabs;k++)tab_free(&p->tabs[k]);
         while(p->nback)free(p->back[--p->nback]);while(p->nfwd)free(p->fwd[--p->nfwd]);
-        if(p->view){fpe_view_destroy(p->view);p->view=NULL;}free(p->path);p->path=shown[i];p_sel_reset(p,0);p->cursor=p->anchor=0;p->top=0;p->filter_len=0;p->filter[0]=0;
+        if(p->view){fpe_view_destroy(p->view);p->view=NULL;}free(p->path);p->path=shown[i];p_sel_reset(p,0);p->cursor=p->anchor=0;p->top=0;p->filter_len=0;p->filter[0]=0;p->filter_types=0;p->filter_hide_folders=0;p_filter_sync(p);
         p->want_rename=0;p->want_select[0]=0;p->down_armed=p->down_deferred=0;
         p->ntabs=fresh.ntabs[i];p->tab=fresh.cur[i];p->tabs_epoch++;
         for(int k=0;k<p->ntabs;k++){Tab *t=&p->tabs[k];t->path=fresh.tabs[i][k].path;fresh.tabs[i][k].path=NULL;t->opts=p->opts;t->opts.key=(fpe_sort_key)fresh.tabs[i][k].sort;t->opts.descending=fresh.tabs[i][k].desc;t->opts.show_hidden=t->opts.show_system=(uint8_t)fresh.hidden;t->workspace_restore=1;}
@@ -6764,10 +6814,17 @@ static void layout(void)
     if(g_dock_position==AD_HIDDEN){if(actiondock_contains(GetFocus()))focus(active_pane()->hwnd);actiondock_destroy();}
     else{if(!actiondock_window())actiondock_create(g.hwnd,&dock_host);actiondock_place(&g_dock_geometry,g.dpi,g_dock_labels,g.font);}
     h-=g.body_y;int x=g.body_x;
-    if(space_main){unplace(T.hwnd);unplace(g.panes[0].hwnd);unplace(g.panes[1].hwnd);unplace(pdfview_window());unplace(imageview_window());unplace(textview_window());unplace(archiveview_window());unplace(mediaview_window());g.gap_tree_x=g.gap_pane_x=g.ar_gap=-1000;sidepanel_place(x,g.body_y,g.cw-x,h);goto layout_finish;}
-    if(g.show_tree){RECT r=g_dock_geometry.tree;place(T.hwnd,r.left,r.top,r.right-r.left,r.bottom-r.top);g.gap_tree_x=g.body_x+g.tree_w;x=g.gap_tree_x+g.split;}
-    else{unplace(T.hwnd);g.gap_tree_x=-1000;}
+    if(space_main){unplace(libraryview_tree());unplace(libraryview_window());unplace(T.hwnd);unplace(g.panes[0].hwnd);unplace(g.panes[1].hwnd);unplace(pdfview_window());unplace(imageview_window());unplace(textview_window());unplace(archiveview_window());unplace(mediaview_window());g.gap_tree_x=g.gap_pane_x=g.ar_gap=-1000;sidepanel_place(x,g.body_y,g.cw-x,h);goto layout_finish;}
+    if(g.show_tree){RECT r=g_dock_geometry.tree;int lh=libraryview_count()?libraryview_height():0;if(lh>(r.bottom-r.top)*2/3)lh=(r.bottom-r.top)*2/3;place(T.hwnd,r.left,r.top,r.right-r.left,r.bottom-r.top-lh);if(lh)place(libraryview_tree(),r.left,r.bottom-lh,r.right-r.left,lh);else unplace(libraryview_tree());g.gap_tree_x=g.body_x+g.tree_w;x=g.gap_tree_x+g.split;}
+    else{unplace(T.hwnd);unplace(libraryview_tree());g.gap_tree_x=-1000;}
 
+    if(g_library_active){
+        unplace(g.panes[0].hwnd);unplace(g.panes[1].hwnd);unplace(imageview_window());unplace(textview_window());unplace(archiveview_window());unplace(mediaview_window());int avail=g.cw-x;int tools=sidepanel_width(avail);if(tools){avail-=tools;sidepanel_place(x+avail,g.body_y,tools,h);}
+        if(g.pv_shown==1){int width=(int)((avail-g.split)*g_library_ratio);if(avail>=S(540)+g.split){if(width<S(300))width=S(300);if(width>avail-g.split-S(240))width=avail-g.split-S(240);}place(libraryview_window(),x,g.body_y,width,h);place(pdfview_window(),x+width+g.split,g.body_y,avail-width-g.split,h);g.gap_pane_x=x+width;}
+        else{place(libraryview_window(),x,g.body_y,avail,h);unplace(pdfview_window());g.gap_pane_x=-1000;}
+        goto layout_finish;
+    }
+    unplace(libraryview_window());
     int avail = g.cw - x;
     int side = sidepanel_width(avail);
     if (side) {
@@ -6851,7 +6908,7 @@ static int hit_splitter(int x, int y)
     int slop = S(2);
     if(g.pv_shown==4&&g.ar_kind&&x>=g.ar_gap-slop&&x<g.ar_gap+g.split+slop)return 3;
     if (g.show_tree && x >= g.gap_tree_x - slop && x < g.gap_tree_x + g.split + slop) return 1;
-    if ((g.dual || g.pv_shown) && x >= g.gap_pane_x - slop && x < g.gap_pane_x + g.split + slop) return 2;
+    if ((g.dual || g.pv_shown || g_library_active) && x >= g.gap_pane_x - slop && x < g.gap_pane_x + g.split + slop) return 2;
     return 0;
 }
 
@@ -6901,8 +6958,10 @@ static void update_metrics(void)
     g.status_h = S(24);
     g.pad = S(6);
     g.split = S(4);
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++) {
         if (g.panes[i].edit) SendMessageW(g.panes[i].edit, WM_SETFONT, (WPARAM)g.font, TRUE);
+        HWND filters[]={g.panes[i].filter_edit,g.panes[i].filter_type_button,g.panes[i].filter_clear};for(int f=0;f<3;f++)if(filters[f])SendMessageW(filters[f],WM_SETFONT,(WPARAM)g.font,TRUE);
+    }
     if (g.mono) DeleteObject(g.mono);
     g.mono = CreateFontW(-MulDiv(9, (int)g.dpi, 72), 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
                          CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, FIXED_PITCH | FF_MODERN, L"Consolas");
@@ -6965,6 +7024,57 @@ static void note_first_frame(void)
 
 /* ---- window procedures ----------------------------------------------------- */
 
+/* Footer edits use the native text editor (selection, paste and IME included). */
+static void p_filter_place(Pane *p){
+    if(!p->filter_edit)return;
+    int gap=S(6),height=S(24),y=p_list_bottom(p)+S(4),type=p->cw/3;if(type>S(138))type=S(138);if(type<S(40))type=S(40);
+    int clear=S(24),x=gap+type+gap,width=p->cw-x-clear-2*gap;if(width<1)width=1;
+    p_place_address_control(p,p->filter_type_button,gap,y,type,height);
+    p_place_address_control(p,p->filter_edit,x,y,width,height);
+    p_place_address_control(p,p->filter_clear,x+width+gap,y,clear,height);
+}
+static void p_filter_sync(Pane *p){
+    if(!p->filter_edit)return;
+    wchar_t text[256];GetWindowTextW(p->filter_edit,text,256);
+    p->filter_sync=1;if(wcscmp(text,p->filter))SetWindowTextW(p->filter_edit,p->filter);p->filter_sync=0;
+    wchar_t label[128]=L"All types";unsigned count=0,first=0;
+    for(unsigned i=0;i<PF_GROUPS;i++)if(p->filter_types&(1u<<i)){if(!count)first=i;count++;}
+    if(count==1)swprintf(label,128,L"%ls",pf_labels[first]);else if(count)swprintf(label,128,L"%ls +%u",pf_labels[first],count-1);
+    size_t n=wcslen(label);swprintf(label+n,128-n,L" ▾");SetWindowTextW(p->filter_type_button,label);
+}
+static void p_filter_menu(Pane *p){
+    HMENU menu=CreatePopupMenu();if(!menu)return;
+    AppendMenuW(menu,MF_STRING|(!p->filter_types?MF_CHECKED:0),1,L"All types");AppendMenuW(menu,MF_SEPARATOR,0,NULL);
+    for(unsigned i=0;i<PF_GROUPS;i++)AppendMenuW(menu,MF_STRING|((p->filter_types&(1u<<i))?MF_CHECKED:0),10+i,pf_labels[i]);
+    AppendMenuW(menu,MF_SEPARATOR,0,NULL);AppendMenuW(menu,MF_STRING|(!p->filter_hide_folders?MF_CHECKED:0),2,L"Keep folders visible");
+    RECT r;GetWindowRect(p->filter_type_button,&r);unsigned command=TrackPopupMenu(menu,TPM_RETURNCMD|TPM_NONOTIFY|TPM_LEFTALIGN,r.left,r.bottom,0,p->hwnd,NULL);DestroyMenu(menu);
+    if(!command)return;if(command==1)p->filter_types=0;else if(command==2)p->filter_hide_folders=!p->filter_hide_folders;
+    else if(command>=10&&command<10+PF_GROUPS){p->filter_types^=1u<<(command-10);if(p->filter_types==(1u<<PF_GROUPS)-1)p->filter_types=0;}
+    p_filter_changed(p);
+}
+static LRESULT CALLBACK filter_control_proc(HWND h,UINT m,WPARAM w,LPARAM l){
+    Pane *p=(Pane*)GetWindowLongPtrW(h,GWLP_USERDATA);int edit=h==p->filter_edit;
+    if(m==WM_SETFOCUS)set_active(p->idx);
+    if(m==WM_KEYDOWN){
+        if(w==VK_ESCAPE){p->filter[0]=0;p->filter_len=0;p->filter_types=0;p->filter_hide_folders=0;p_filter_changed(p);focus(p->hwnd);return 0;}
+        if(w==VK_RETURN){if(edit)focus(p->hwnd);else SendMessageW(h,BM_CLICK,0,0);return 0;}
+        if(w==VK_TAB){HWND controls[]={p->filter_type_button,p->filter_edit,p->filter_clear};int i=h==controls[0]?0:h==controls[1]?1:2;i+=GetKeyState(VK_SHIFT)<0?-1:1;focus(i<0||i>2?p->hwnd:controls[i]);return 0;}
+    }
+    if(m==WM_CHAR&&(w==27||w==L'\t'||w==L'\r'))return 0;
+    if(m==WM_GETDLGCODE)return DLGC_WANTALLKEYS;
+    return CallWindowProcW(edit?p->filter_edit_proc:p->filter_button_proc,h,m,w,l);
+}
+static void p_filter_create(Pane *p){
+    HINSTANCE instance=GetModuleHandleW(NULL);
+    p->filter_type_button=CreateWindowExW(0,L"BUTTON",L"All types ▾",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_OWNERDRAW,0,0,0,0,p->hwnd,(HMENU)5101,instance,NULL);
+    p->filter_edit=CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",L"",WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL,0,0,0,0,p->hwnd,(HMENU)5102,instance,NULL);
+    p->filter_clear=CreateWindowExW(0,L"BUTTON",L"×",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_OWNERDRAW,0,0,0,0,p->hwnd,(HMENU)5103,instance,NULL);
+    HWND controls[]={p->filter_type_button,p->filter_edit,p->filter_clear};
+    for(int i=0;i<3;i++){SetWindowLongPtrW(controls[i],GWLP_USERDATA,(LONG_PTR)p);WNDPROC previous=(WNDPROC)SetWindowLongPtrW(controls[i],GWLP_WNDPROC,(LONG_PTR)filter_control_proc);if(i==1)p->filter_edit_proc=previous;else p->filter_button_proc=previous;SendMessageW(controls[i],WM_SETFONT,(WPARAM)g.font,FALSE);SetWindowTheme(controls[i],L"DarkMode_Explorer",NULL);}
+    SendMessageW(p->filter_edit,EM_SETLIMITTEXT,255,0);SendMessageW(p->filter_edit,EM_SETCUEBANNER,TRUE,(LPARAM)L"Filter name or extension…");
+    SetWindowTextW(p->filter_edit,p->filter);p_filter_place(p);
+}
+
 static LRESULT CALLBACK edit_proc(HWND h, UINT m, WPARAM w, LPARAM l)
 {
     Pane *p = (Pane *)GetWindowLongPtrW(h, GWLP_USERDATA);
@@ -7004,6 +7114,7 @@ static void p_keydown(Pane *p, WPARAM vk)
         p_filter_changed(p);
         return;
     }
+    if(ctrl&&!shift&&vk=='F'){focus(p->filter_edit);SendMessageW(p->filter_edit,EM_SETSEL,0,-1);return;}
     if (pane_key(p, vk, 0, 0)) return;
     switch (vk) {
     case VK_UP: p_move_cursor(p, cur - p_columns_count(p), shift, ctrl); break;
@@ -7019,7 +7130,7 @@ static void p_keydown(Pane *p, WPARAM vk)
         break;
     case VK_ESCAPE:
         if(p->address_resolving) {p_address_cancel(p);p->loading=0;KillTimer(p->hwnd,TIMER_LOADING);set_status(p,0,L"Linux path resolution cancelled");p_address_text(p,0);p_redraw(p);break;}
-        if (p->filter_len) { p->filter_len = 0; p->filter[0] = 0; p_filter_changed(p); }
+        if (p_filter_active(p)) { p->filter_len = 0; p->filter[0] = 0;p->filter_types=0;p->filter_hide_folders=0; p_filter_changed(p); }
         else { p_clear_sel(p); p_redraw(p); }
         break;
     default: break;
@@ -7039,6 +7150,8 @@ static LRESULT CALLBACK pane_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         break;
 
     case WM_CREATE:
+        p_filter_create(p);
+        SetWindowLongPtrW(h,GWL_STYLE,GetWindowLongPtrW(h,GWL_STYLE)|WS_CLIPCHILDREN);
         p->distro_label=CreateWindowExW(0,L"STATIC",L"WSL: ",WS_CHILD|SS_LEFT|SS_CENTERIMAGE|SS_ENDELLIPSIS,0,0,0,0,h,NULL,GetModuleHandleW(NULL),NULL);
         SendMessageW(p->distro_label,WM_SETFONT,(WPARAM)g.font,FALSE);
         p->edit = CreateWindowExW(0, L"EDIT", L"", WS_CHILD | (g.crumbs ? 0 : WS_VISIBLE) | ES_AUTOHSCROLL, 0, 0, 0, 0, h, NULL,
@@ -7048,6 +7161,24 @@ static LRESULT CALLBACK pane_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         SendMessageW(p->edit, WM_SETFONT, (WPARAM)g.font, FALSE);
         SetWindowTheme(h, L"DarkMode_Explorer", NULL);
         return 0;
+
+    case WM_DRAWITEM: {
+        DRAWITEMSTRUCT *item=(DRAWITEMSTRUCT*)l;
+        if(item&&(item->hwndItem==p->filter_type_button||item->hwndItem==p->filter_clear)){
+            RECT r=item->rcItem;int width=r.right-r.left,height=r.bottom-r.top;
+            fill(item->hDC,r.left,r.top,width,height,(item->itemState&(ODS_SELECTED|ODS_FOCUS))?C_SEL:C_EDIT);
+            frame(item->hDC,r.left,r.top,width,height,C_BORDER);
+            wchar_t label[128];GetWindowTextW(item->hwndItem,label,128);HGDIOBJ old=SelectObject(item->hDC,g.font);int mode=SetBkMode(item->hDC,TRANSPARENT);
+            text(item->hDC,label,-1,r.left+S(3),r.top,width-S(6),height,C_TEXT,DT_CENTER);
+            SetBkMode(item->hDC,mode);SelectObject(item->hDC,old);return TRUE;
+        }
+        break;
+    }
+    case WM_COMMAND:
+        if((HWND)l==p->filter_edit&&HIWORD(w)==EN_CHANGE&&!p->filter_sync){p->filter_len=GetWindowTextW(p->filter_edit,p->filter,256);p_filter_changed(p);return 0;}
+        if(HIWORD(w)==BN_CLICKED&&(HWND)l==p->filter_type_button){set_active(p->idx);p_filter_menu(p);return 0;}
+        if(HIWORD(w)==BN_CLICKED&&(HWND)l==p->filter_clear){p->filter_len=0;p->filter[0]=0;p_filter_changed(p);focus(p->filter_edit);return 0;}
+        break;
 
     case PM_ADDRESS_DONE: {
         pathentry_result *result=(pathentry_result*)l;
@@ -7140,6 +7271,7 @@ static LRESULT CALLBACK pane_proc(HWND h, UINT m, WPARAM w, LPARAM l)
 
     case WM_CHAR: {
         uint8_t vk = ctrl_char_key(w);
+        if(vk=='F'){focus(p->filter_edit);SendMessageW(p->filter_edit,EM_SETSEL,0,-1);return 0;}
         if (vk) {
             fn_ctx c;
             pane_ctx(&c, p, FN_FROM_KEY, 1);
@@ -7595,6 +7727,7 @@ static LRESULT CALLBACK main_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         for (int i = 0; i < 2; i++)
             CreateWindowExW(0, L"OpenPilotPane", L"", WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 0, 0,
                             h, NULL, inst, &g.panes[i]);
+        library_callbacks libraries={layout,library_action,library_selected};libraryview_start(h,g.session[0]?g.session:NULL,&libraries);
         g.dbg = CreateWindowExW(0, L"OpenPilotDebug", L"", WS_CHILD | WS_CLIPSIBLINGS, 0, 0, 0, 0, h, NULL, inst, NULL);
         return 0;
     }
@@ -7708,6 +7841,7 @@ static LRESULT CALLBACK main_proc(HWND h, UINT m, WPARAM w, LPARAM l)
             int x0 = g.body_x+(g.show_tree ? g.tree_w + g.split : 0);
             int avail = g.cw - x0 - sidepanel_width(g.cw - x0) - g.split;
             if (avail > 0) {
+                if(g_library_active){g_library_ratio=(double)(GET_X_LPARAM(l)-x0)/avail;if(g_library_ratio<.25)g_library_ratio=.25;if(g_library_ratio>.85)g_library_ratio=.85;layout_now();return 0;}
                 g.ratio = (double)(GET_X_LPARAM(l) - x0) / avail;
                 if (g.ratio < 0.15) g.ratio = 0.15;
                 if (g.ratio > 0.85) g.ratio = 0.85;
@@ -7719,6 +7853,7 @@ static LRESULT CALLBACK main_proc(HWND h, UINT m, WPARAM w, LPARAM l)
     case WM_LBUTTONUP:
     case WM_CAPTURECHANGED:
         if (g.drag) {
+            if(g_library_active&&g.drag==2)libraryview_save_ratio(g_library_ratio);
             g.drag = 0;
             if (m == WM_LBUTTONUP) ReleaseCapture();
         }
@@ -7830,6 +7965,7 @@ static LRESULT CALLBACK main_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         free(g.svg_source);g.svg_source=NULL;
         dock_end();actiondock_destroy();
         sidepanel_shutdown();
+        libraryview_stop();g_library_active=0;
         free(g_space_root);g_space_root=NULL;
         git_model_free(&g_git_model);free(g_git_folder);g_git_folder=NULL;
         for(uint32_t i=0;i<DUPLICATE_ROOTS;i++){free(g_duplicate_roots[i]);g_duplicate_roots[i]=NULL;}memset(&g_duplicate_request,0,sizeof g_duplicate_request);

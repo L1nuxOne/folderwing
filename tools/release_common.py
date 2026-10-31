@@ -44,6 +44,15 @@ def seal_build(build,compiler):
     spec=read(ROOT/'tools/release-files.json');lock=read(ROOT/'tools/release-inputs.json');mpv=read(ROOT/spec['media_manifest'])
     need(sha(plain(compiler))==lock['zig']['executable_sha256'],'Compiler mismatch')
     binaries={n:sha(plain(build/n)) for n in spec['binaries']}
+    webview={'Microsoft.Web.WebView2.Core.dll':'d60e6e94245078cb56e44ebd5f360dc04bf18e460136be93bfc4cfca43b98505','Microsoft.Web.WebView2.WinForms.dll':'6a9e6856f23c463783c3afb0ca5d78f56324c86657162ccb16d5227b3233b32a','WebView2Loader.dll':'3426dcc55fdfb8b5e7ac623cf33b4ccf283fbf68a0c5a65bddfdb4d749a8abee'}
+    for name,expected in webview.items():need(binaries[name]==expected,'WebView2 SDK binary mismatch: '+name)
+    for item in read(ROOT/'tools/spreadsheet-dependencies.json')['packages']:
+        need(binaries[item['dll']]==item['dll_sha256'],'Spreadsheet library mismatch: '+item['dll'])
+    assets={n:sha(plain(build/n)) for n in spec.get('assets',{})}
+    for n,source in spec.get('assets',{}).items():need(assets[n]==sha(plain(ROOT/source)),'Release asset mismatch: '+n)
+    for item in read(ROOT/'tools/word-dependencies.json')['assets']:
+        need(sha(plain(ROOT/item['source']))==item['sha256'],'Word dependency mismatch: '+item['id'])
+        if item.get('patch'):need(sha(plain(ROOT/item['patch']))==item['patch_sha256'],'Word patch mismatch: '+item['id'])
     need(binaries['libmpv-2.dll']==mpv['runtime_sha256'],'Media DLL mismatch')
     need(binaries['pdfium.dll']==sha(plain(ROOT/'third_party/pdfium/bin/pdfium.dll')),'PDFium DLL does not match restored input')
     need(binaries['pdfium.dll']==lock['dependencies']['pdfium']['source_sha256']['bin/pdfium.dll'],'PDFium DLL does not match the accepted GNU runtime pin')
@@ -51,5 +60,5 @@ def seal_build(build,compiler):
     bootstrap=read(ROOT/'build/bootstrap-receipt.json');need(bootstrap['outcome']=='passed','Bootstrap not accepted')
     need(bootstrap['inputs_sha256']==sha(ROOT/'tools/release-inputs.json'),'Bootstrap inputs changed')
     snapshot=source_snapshot()
-    result={'schema':'folderwing-release-build/v1','outcome':'built','version':version(),'platform':'windows-x64','revision':revision(),'source_digest':digest(snapshot),'source_files':snapshot,'binaries':binaries,'compiler_sha256':sha(compiler),'bootstrap_sha256':sha(ROOT/'build/bootstrap-receipt.json'),'release_files_sha256':sha(ROOT/'tools/release-files.json'),'media_manifest_sha256':sha(ROOT/spec['media_manifest'])}
+    result={'schema':'folderwing-release-build/v1','outcome':'built','version':version(),'platform':'windows-x64','revision':revision(),'source_digest':digest(snapshot),'source_files':snapshot,'binaries':binaries,'assets':assets,'compiler_sha256':sha(compiler),'bootstrap_sha256':sha(ROOT/'build/bootstrap-receipt.json'),'release_files_sha256':sha(ROOT/'tools/release-files.json'),'media_manifest_sha256':sha(ROOT/spec['media_manifest'])}
     (build/'BUILD-RECEIPT.json').write_text(json.dumps(result,indent=2)+'\n');return result

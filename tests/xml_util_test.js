@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('assert');
+require('../app/markdown/xml-util.js');
+const api=global.FolderwingXML;
+const item=(type,name,local,ns,children)=>({type,name,local,ns,children:children||null});
+const a=item('element','a:item','item','urn:test',[]),other=item('element','q:item','item','urn:other',[]),b=item('element','b:item','item','urn:test',[]);
+const attr=item('attribute','id','id','',null);b.children.push(attr);
+const root=item('element','root','root','', [a,other,b]),doc=item('document','Document',null,null,[root]);
+api.prepare(doc);
+assert.strictEqual(a.position,1);assert.strictEqual(other.position,1);assert.strictEqual(b.position,2);
+assert.strictEqual(api.xpath(b),"/*[local-name()='root' and namespace-uri()=''][1]/*[local-name()='item' and namespace-uri()='urn:test'][2]");
+assert.strictEqual(api.xpath(attr),api.xpath(b)+"/@*[local-name()='id' and namespace-uri()='']");
+assert.strictEqual(api.xpath({type:'namespace'}),null);
+assert.strictEqual(api.literal('a\'b"c'),`concat('a', "'", 'b"c')`);
+console.log('XML namespace-safe XPath checks passed.');

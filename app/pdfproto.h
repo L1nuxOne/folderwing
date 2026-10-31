@@ -34,12 +34,14 @@ enum {
     PDFP_TEXT,     /* payload: uint32_t page; never skipped, answered in order */
     PDFP_FIND,     /* payload: pdfp_find, then the UTF-16 query, NUL-terminated; empty: stop */
     PDFP_THUMB_OPEN, /* OPEN for first-page thumbnail: reports only page 0, skips fit analysis */
+    PDFP_OUTLINE, /* bounded document outline; request has no payload */
     /* helper -> app */
     PDFP_OPENED = 101, /* payload: pdfp_opened, then npages pdfp_page */
     PDFP_RENDERED,     /* payload: pdfp_rendered */
     PDFP_TEXTED,       /* payload: pdfp_text, then n pdfp_char */
     PDFP_FOUND,        /* payload: pdfp_found, then n pdfp_hit: one page searched */
     PDFP_FIND_DONE,    /* payload: pdfp_found (page: pages searched, n: hits in all) */
+    PDFP_OUTLINED,     /* payload: pdfp_outline, then count pdfp_outline_entry */
 };
 
 typedef struct pdfp_head {
@@ -126,3 +128,13 @@ typedef struct pdfp_hit {
     uint32_t index, count; /* characters, as numbered in PDFP_TEXT */
     float    l, t, r, b;   /* their cells' union, points from the page's top-left */
 } pdfp_hit;
+
+/* Titles are fixed, bounded UTF-16; destinations refer only to this document. */
+#define PDFP_OUTLINE_MAX 2048
+#define PDFP_OUTLINE_TITLE 160
+typedef struct pdfp_outline { uint32_t count, truncated; } pdfp_outline;
+typedef struct pdfp_outline_entry {
+    uint32_t page, depth;
+    float y; /* points from the displayed page's top edge */
+    uint16_t title[PDFP_OUTLINE_TITLE];
+} pdfp_outline_entry;

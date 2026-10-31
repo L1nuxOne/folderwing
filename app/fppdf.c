@@ -16,6 +16,7 @@
 #include <wctype.h>
 
 #include "fpdf_edit.h"
+#include "fpdf_doc.h"
 #include "fpdf_text.h"
 #include "fpdfview.h"
 #include "pdfproto.h"
@@ -455,6 +456,37 @@ static void open_doc(const msg *m)
     free(pages);
 }
 
+/* No external links/actions are followed. Depth, visits and output are all
+ * bounded, and repeated handles stop malformed cyclic outline graphs. */
+static void outline_doc(const msg *m){
+ if(!D.doc||m->head.doc!=D.id||m->head.size)return;
+ pdfp_outline_entry *out=calloc(PDFP_OUTLINE_MAX,sizeof *out);if(!out)return;
+ FPDF_BOOKMARK stack[33]={0},seen[4096];uint32_t visited=0,n=0,depth=0,truncated=0;
+ FPDF_BOOKMARK item=FPDFBookmark_GetFirstChild(D.doc,NULL);
+ while(item){
+  int repeated=0;for(uint32_t i=0;i<visited;i++)if(seen[i]==item){repeated=1;break;}
+  if(repeated||visited==4096||n==PDFP_OUTLINE_MAX){truncated=1;break;}seen[visited++]=item;
+  FPDF_DEST dest=FPDFBookmark_GetDest(D.doc,item);
+  if(!dest){FPDF_ACTION action=FPDFBookmark_GetAction(item);if(action&&FPDFAction_GetType(action)==PDFACTION_GOTO)dest=FPDFAction_GetDest(D.doc,action);}
+  int page=dest?FPDFDest_GetDestPageIndex(D.doc,dest):-1;
+  if(page>=0&&(uint32_t)page<D.npages){
+   pdfp_outline_entry *e=out+n;e->page=(uint32_t)page;e->depth=depth;
+   unsigned long bytes=FPDFBookmark_GetTitle(item,NULL,0);
+   if(bytes>=2&&bytes<=65536&&!(bytes%2)){wchar_t *title=calloc(1,bytes);if(title){FPDFBookmark_GetTitle(item,title,bytes);title[bytes/2-1]=0;size_t length=wcslen(title);if(length>=PDFP_OUTLINE_TITLE)length=PDFP_OUTLINE_TITLE-1;memcpy(e->title,title,length*2);free(title);}}
+   if(!e->title[0])swprintf((wchar_t*)e->title,PDFP_OUTLINE_TITLE,L"Page %u",e->page+1);
+   FPDF_BOOL hasx=0,hasy=0,haszoom=0;float x=0,y=0,zoom=0;
+   if(FPDFDest_GetLocationInPage(dest,&hasx,&hasy,&haszoom,&x,&y,&zoom)&&hasy&&isfinite(y)){
+    FPDF_PAGE p=page_at(e->page);if(p){xform matrix=page_xform(p);double py=matrix.b*(hasx&&isfinite(x)?x:0)+matrix.d*y+matrix.f;float height=FPDF_GetPageHeightF(p);if(isfinite(py))e->y=(float)fmax(0,fmin(height,py));}
+   }
+   n++;
+  }
+  FPDF_BOOKMARK child=FPDFBookmark_GetFirstChild(D.doc,item),next=FPDFBookmark_GetNextSibling(D.doc,item);
+  if(child&&depth<32){stack[depth++]=next;item=child;}
+  else{if(child)truncated=1;item=next;while(!item&&depth)item=stack[--depth];}
+ }
+ pdfp_outline head={n,truncated};send_msg(PDFP_OUTLINED,D.id,0,&head,sizeof head,out,n*sizeof *out);free(out);
+}
+
 /* ---- dark mode ------------------------------------------------------------------- */
 
 /* Collects the pictures among objs (a page's, or a form's under the matrix
@@ -845,6 +877,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE prev, PWSTR cmd, int show)
             break;
         case PDFP_TEXT: text_page(m); break;
         case PDFP_FIND: find_start(m); break;
+        case PDFP_OUTLINE: outline_doc(m); break;
         case PDFP_QUIT: free(m); goto done;
         default: break;
         }

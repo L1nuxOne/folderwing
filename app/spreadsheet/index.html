@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'"><link rel="stylesheet" href="style.css"><script defer src="viewer.js"></script><link rel="stylesheet" href="navigation.css"><script defer src="navigation.js"></script></head><body>
+<header><strong>Spreadsheet preview</strong><span id="status">Opening workbook…</span></header>
+<div class="toolbar"><label>Sheet <select id="sheet" disabled></select></label><input id="filter" type="search" placeholder="Filter loaded rows"><label><input id="formulas" type="checkbox"> Show formulas</label><button id="more" disabled>Load more rows</button><button id="restart" disabled>Back to first row</button><button id="copy" disabled>Copy selected cells</button></div>
+<div class="toolbar columns"><button id="prev">Previous columns</button><span id="column-status"></span><button id="next">Next columns</button><span id="sort-status"></span><span id="hint">Click to select · Shift-click a range · Double-click for details</span></div>
+<div class="grid"><table><thead id="head"></thead><tbody id="body"></tbody></table></div>
+<div id="detail" hidden><div class="detail-actions"><strong>Cell details</strong><button id="copy-detail">Copy value</button><button id="close">Close</button></div><pre id="value"></pre></div>
+</body></html>

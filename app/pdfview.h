@@ -20,6 +20,8 @@ int  pdfview_start(HWND parent);  /* the reader window, hidden; the helper start
 void pdfview_stop(void);
 HWND pdfview_window(void);
 void pdfview_open(const wchar_t *path, uint64_t size, int64_t mtime); /* unchanged file does nothing */
+/* Archive previews supply a stable source/member key after opening staging data. */
+void pdfview_set_bookmark_identity(const wchar_t *identity);
 void pdfview_clear(void);               /* closes the document, keeps the helper */
 const wchar_t *pdfview_path(void);      /* NULL when none */
 /* Find: Ctrl+F opens the box in the header (or selects what it holds) and

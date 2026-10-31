@@ -10,6 +10,8 @@
 #include "app.h"
 #include "menu.h"
 #include "theme.h"
+#include "docmarks.h"
+#include "readingrail.h"
 #include "textutil.h"
 #include "previewlaunch.h"
 #include "previewreader.h"
@@ -17,10 +19,13 @@
 #define WM_TEXT_MSG (WM_APP + 80)
 #define WM_TEXT_GONE (WM_APP + 81)
 #define WM_TEXT_LAUNCHED (WM_APP + 82)
+#define WM_MARKDOWN_READY (WM_APP + 83)
+#define WM_MARKDOWN_FAILED (WM_APP + 84)
 #define TIMER_FIND 1
 #define TIMER_WATCHDOG 2
 #define TIMER_EDGE 3
 #define TIMER_CLIPBOARD 4
+#define TIMER_MARKDOWN 5
 typedef struct msg {
     struct msg *next;
     textp_head head;
@@ -44,6 +49,8 @@ static struct {
     uint8_t *pixels;
     int gone;
     wchar_t *path;
+    wchar_t *nav_file,*nav_identity,*nav_key;
+    reading_rail rail;docmark nav_marks[DOCMARK_PER_FILE];uint32_t nav_count;int nav_loaded,nav_targets_count;reading_target nav_targets[RR_CAPACITY];
     uint64_t size;
     int64_t mtime;
     uint32_t doc, ticket, limit_mb, encoding;
@@ -66,15 +73,20 @@ static struct {
     uint64_t clipboard_until;
     DWORD clipboard_sequence;
     uint64_t started;
+    HANDLE markdown_process, markdown_job;
+    DWORD markdown_pid;
+    HWND markdown_hwnd;
+    int markdown, markdown_rendered, markdown_wait, archived;
 } R;
 /* Keyboard scope follows the receiving viewer during dispatch. This keeps
  * selection/copy local even when background input leaves OS focus elsewhere. */
 static HWND key_receiver;
+static int view_width(void){return R.markdown_rendered?R.cw:R.cw-app_px(28);}
 static int head_h(void) { return app_px(R.find ? 84 : 54); }
 static int gutter(void) { return R.lines ? R.cell * 8 : app_px(12); }
 static uint32_t columns(void)
 {
-    int n = (R.cw - gutter() - app_px(12)) / R.cell;
+    int n = (view_width() - gutter() - app_px(12)) / R.cell;
     return R.wrap ? (uint32_t)(n < 4 ? 4 : n) : 0;
 }
 static void request_work(void);
@@ -82,6 +94,79 @@ static void helper_stop(void);
 static void title_update(void);
 static void search_start(void);
 static void find_close(void);
+static int binary_preview(void) { return R.markdown == 6 || R.markdown == 8 || R.markdown == 9; }
+static void markdown_stop(void)
+{
+    if (R.hwnd) KillTimer(R.hwnd, TIMER_MARKDOWN);
+    if (R.markdown_process) {
+        TerminateProcess(R.markdown_process, 0);
+        CloseHandle(R.markdown_process);
+    }
+    if (R.markdown_job) CloseHandle(R.markdown_job);
+    R.markdown_job = NULL; R.markdown_process = NULL; R.markdown_hwnd = NULL; R.markdown_pid = 0; R.markdown_wait = 0;
+}
+static void markdown_place(void)
+{
+    if (!R.markdown_hwnd) return;
+    DWORD pid = 0;
+    GetWindowThreadProcessId(R.markdown_hwnd, &pid);
+    if (pid != R.markdown_pid) { R.markdown_hwnd = NULL; return; }
+    int top = head_h();
+    SetWindowPos(R.markdown_hwnd, NULL, 0, top, R.cw > 0 ? R.cw : 1,
+                 R.ch > top ? R.ch - top : 1, SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS);
+    ShowWindowAsync(R.markdown_hwnd, R.markdown_rendered ? SW_SHOWNA : SW_HIDE);
+}
+static void markdown_start(void)
+{
+    wchar_t dir[MAX_PATH], exe[MAX_PATH + 40], *cmd;
+    if (!R.path || R.markdown_process) return;
+    DWORD n = GetModuleFileNameW(NULL, dir, MAX_PATH);
+    wchar_t *slash = n && n < MAX_PATH ? wcsrchr(dir, L'\\') : NULL;
+    if (!slash) { R.markdown_rendered = 0; if (binary_preview()) R.err = E_FAIL; return; }
+    slash[1] = 0;
+    _snwprintf(exe, MAX_PATH + 40, L"%ls%ls", dir, R.markdown == 1 ? L"folderwing-markdown.exe" : R.markdown == 2 ? L"folderwing-json.exe" : R.markdown == 3 ? L"folderwing-table.exe" : R.markdown == 4 ? L"folderwing-notebook.exe" : R.markdown == 5 ? L"folderwing-config.exe" : R.markdown == 6 ? L"folderwing-database.exe" : R.markdown == 7 ? L"folderwing-xml.exe" : R.markdown == 8 ? L"folderwing-spreadsheet.exe" : L"folderwing-word.exe");
+    if (GetFileAttributesW(exe) == INVALID_FILE_ATTRIBUTES) { R.markdown_rendered = 0; if (binary_preview()) R.err = E_FAIL; return; }
+    size_t cap = wcslen(exe) + wcslen(R.path) + (R.nav_file?wcslen(R.nav_file):0) + (R.nav_identity?wcslen(R.nav_identity):0) + 120;
+    cmd = malloc(cap * sizeof *cmd);
+    if (!cmd) { R.markdown_rendered = 0; if (binary_preview()) R.err = E_OUTOFMEMORY; return; }
+    if (R.markdown == 6)
+        _snwprintf(cmd, cap, L"\"%ls\" %llu %u \"%ls\" %d", exe,
+                   (unsigned long long)(uintptr_t)R.hwnd, R.limit_mb * 1024u * 1024u, R.path, R.archived);
+    else
+        _snwprintf(cmd, cap, L"\"%ls\" %llu %u \"%ls\"", exe,
+                   (unsigned long long)(uintptr_t)R.hwnd, R.limit_mb * 1024u * 1024u, R.path);
+    size_t used=wcslen(cmd);_snwprintf(cmd+used,cap-used,L" \"%ls\" \"%ls\"",R.nav_file?R.nav_file:L"",R.nav_identity?R.nav_identity:L"");
+    STARTUPINFOW si = {sizeof si}; PROCESS_INFORMATION pi = {0};
+    HANDLE job = NULL;
+    if (R.markdown == 8 || R.markdown == 9) {
+        job = CreateJobObjectW(NULL, NULL);
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION bounds = {0};
+        bounds.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_PROCESS_MEMORY;
+        bounds.ProcessMemoryLimit = (SIZE_T)1024 * 1024 * 1024;
+        if (!job || !SetInformationJobObject(job, JobObjectExtendedLimitInformation, &bounds, sizeof bounds)) {
+            if (job) CloseHandle(job);
+            free(cmd); R.markdown_rendered = 0; R.err = E_FAIL; return;
+        }
+    }
+    DWORD flags = CREATE_NO_WINDOW | (job ? CREATE_SUSPENDED : 0);
+    if (CreateProcessW(exe, cmd, NULL, NULL, FALSE, flags, NULL, dir, &si, &pi)) {
+        if (job && (!AssignProcessToJobObject(job, pi.hProcess) || ResumeThread(pi.hThread) == (DWORD)-1)) {
+            TerminateProcess(pi.hProcess, 1); CloseHandle(pi.hProcess); CloseHandle(pi.hThread); CloseHandle(job);
+            R.markdown_rendered = 0; R.err = E_FAIL;
+        } else {
+            R.markdown_job = job; R.markdown_process = pi.hProcess; R.markdown_pid = pi.dwProcessId; CloseHandle(pi.hThread);
+            SetTimer(R.hwnd, TIMER_MARKDOWN, 1000, NULL);
+        }
+    } else { if (job) CloseHandle(job); R.markdown_rendered = 0; if (binary_preview()) R.err = E_FAIL; }
+    free(cmd);
+}
+static void markdown_mode(int rendered)
+{
+    R.markdown_rendered = !!rendered;
+    if (R.markdown_rendered) markdown_start();
+    markdown_place();
+    InvalidateRect(R.hwnd, NULL, FALSE);
+}
 static void exe_dir(wchar_t *buf, size_t cap)
 {
     DWORD n = GetModuleFileNameW(NULL, buf, (DWORD)cap);
@@ -265,7 +350,7 @@ static void clamp_view(void)
     uint32_t max = R.info.rows > page_rows() ? R.info.rows - page_rows() : 0;
     if (R.top > max)
         R.top = max;
-    uint32_t visible = (R.cw > gutter() ? (uint32_t)(R.cw - gutter()) / R.cell : 1),
+    uint32_t visible = (view_width() > gutter() ? (uint32_t)(view_width() - gutter()) / R.cell : 1),
              mx = R.info.max_columns > visible ? R.info.max_columns - visible : 0;
     if (R.wrap)
         R.left = 0;
@@ -274,7 +359,7 @@ static void clamp_view(void)
     SCROLLINFO si = {sizeof si,   SIF_RANGE | SIF_PAGE | SIF_POS,
                      0,           (int)(R.info.rows ? R.info.rows - 1 : 0),
                      page_rows(), (int)R.top};
-    SetScrollInfo(R.hwnd, SB_VERT, &si, TRUE);
+    SetScrollInfo(R.hwnd, SB_VERT, &si, FALSE);ShowScrollBar(R.hwnd,SB_VERT,FALSE);
 }
 static void title_update(void)
 {
@@ -283,6 +368,8 @@ static void title_update(void)
     name = name ? name + 1 : R.path;
     if (!R.path)
         wcscpy(s, L"Text preview");
+    else if (binary_preview())
+        _snwprintf(s, 512, L"%ls | %ls | Read only", name, R.markdown == 6 ? L"SQLite database" : R.markdown == 8 ? L"Spreadsheet" : L"Word document");
     else if (FAILED(R.err))
         _snwprintf(s, 512, L"%ls | Text unavailable (0x%08lX)", name, (unsigned long)R.err);
     else if (!R.loaded)
@@ -462,10 +549,13 @@ static void apply_location(void)
 }
 int textview_goto_match(const wchar_t *path,uint32_t line,uint32_t column,const wchar_t *expected)
 {
+    if (binary_preview()) return 0;
     if(!R.path||!path||!fpe_path_equal(path,R.path)||!line||!column||!expected||!*expected||wcslen(expected)>=TEXTP_QUERY_MAX)return 0;
+    if (R.markdown) markdown_mode(0);
     R.jump_doc=R.doc;R.jump_line=line;R.jump_column=column;wcscpy(R.jump_expected,expected);apply_location();return 1;
 }
 int textview_selected(void) { return R.loaded && R.anchor != R.caret; }
+int textview_is_binary_preview(void) { return binary_preview(); }
 int textview_key_scope(void) { return R.hwnd && (key_receiver == R.hwnd || GetFocus() == R.hwnd); }
 static void fill(HDC dc, int x, int y, int w, int h, COLORREF c)
 {
@@ -490,6 +580,8 @@ static int match_at(uint32_t at, uint32_t *index)
     }
     return 0;
 }
+#include "textnav.inc"
+
 static void paint(HDC dc)
 {
     fill(dc, 0, 0, R.cw, R.ch, C_BG);
@@ -499,9 +591,24 @@ static void paint(HDC dc)
     fill(dc, 0, 0, R.cw, head_h(), C_HEADER);
     wchar_t s[512];
     GetWindowTextW(R.hwnd, s, 512);
-    RECT rect = {app_px(10), app_px(5), R.cw - app_px(12), app_px(28)};
+    RECT rect = {app_px(10), app_px(5), R.cw - app_px(40), app_px(28)};
+    if (R.markdown && !binary_preview()) rect.right = R.cw - app_px(199);
     DrawTextW(dc, s, -1, &rect, DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX);
-    if (FAILED(R.err))
+    if (R.markdown && !binary_preview()) {
+        RECT a = {R.cw - app_px(192), app_px(5), R.cw - app_px(117), app_px(26)};
+        RECT b = {R.cw - app_px(112), app_px(5), R.cw - app_px(37), app_px(26)};
+        fill(dc, a.left, a.top, a.right-a.left, a.bottom-a.top, R.markdown_rendered ? C_ACCENT : C_BG);
+        fill(dc, b.left, b.top, b.right-b.left, b.bottom-b.top, !R.markdown_rendered ? C_ACCENT : C_BG);
+        SetTextColor(dc, R.markdown_rendered ? C_BG : C_TEXT); DrawTextW(dc, R.markdown == 1 ? L"Rendered" : R.markdown == 2 || R.markdown == 5 || R.markdown == 7 ? L"Structured" : R.markdown == 3 ? L"Table" : L"Notebook", -1, &a, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+        SetTextColor(dc, !R.markdown_rendered ? C_BG : C_TEXT); DrawTextW(dc, L"Source", -1, &b, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    }
+    if (R.markdown == 6)
+        wcscpy(s, R.err == HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED) ? L"Database preview is not yet available for WSL files." : FAILED(R.err) ? L"Database preview unavailable. Check that the database helper is installed." : L"Tables, views and rows are opened read-only.");
+    else if (R.markdown == 8)
+        wcscpy(s, R.err == HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED) ? L"Spreadsheet preview is not yet available for WSL files." : FAILED(R.err) ? L"Spreadsheet preview unavailable. Check that the spreadsheet helper is installed." : L"Read only. Formula results come from the workbook and may be stale.");
+    else if (R.markdown == 9)
+        wcscpy(s, R.err == HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED) ? L"Word preview is not yet available for WSL files." : FAILED(R.err) ? L"Word preview unavailable. Check that the Word helper is installed." : L"Read-only document preview.");
+    else if (FAILED(R.err))
         wcscpy(s, R.info.flags & TEXTP_BINARY ? L"Binary data cannot be previewed as text."
                   : R.err == HRESULT_FROM_WIN32(ERROR_TIMEOUT)
                       ? L"Loading timed out. Select a different file to retry."
@@ -516,6 +623,7 @@ static void paint(HDC dc)
                    R.lines ? L"Line numbers" : L"No line numbers",
                    textview_selected() ? L"Text selected" : L"Read only");
     s[511] = 0;
+    rect.right = R.cw - app_px(12);
     rect.top = app_px(29);
     rect.bottom = app_px(52);
     SetTextColor(dc, FAILED(R.err) ? C_ERROR : C_DIM);
@@ -533,8 +641,7 @@ static void paint(HDC dc)
         SetTextColor(dc, C_DIM);
         DrawTextW(dc, s, -1, &rect, DT_SINGLELINE | DT_RIGHT | DT_NOPREFIX);
     }
-    if (!R.loaded || R.front < 0 || FAILED(R.err))
-        return;
+    if (!R.loaded || R.front < 0 || FAILED(R.err)){textnav_paint(dc);return;}
     const wchar_t *text = content();
     const uint8_t *style = styles();
     SelectObject(dc, R.font);
@@ -546,7 +653,7 @@ static void paint(HDC dc)
                                       RGB(100, 200, 210)};
     uint32_t a = R.anchor < R.caret ? R.anchor : R.caret, b = R.anchor > R.caret ? R.anchor : R.caret;
     SaveDC(dc);
-    IntersectClipRect(dc, 0, head_h(), R.cw, R.ch);
+    IntersectClipRect(dc, 0, head_h(), view_width(), R.ch);
     for (uint32_t k = R.top; k < R.info.rows && k < R.top + page_rows() + 1; ++k) {
         textp_row row = row_at(k);
         int y = head_h() + (int)(k - R.top) * R.line;
@@ -562,7 +669,7 @@ static void paint(HDC dc)
         while (i < row.end && glyphs < 2048) {
             uint32_t col = column_at(i), match = 0;
             int x = gutter() + ((int64_t)col - base - R.left) * R.cell;
-            if (x >= R.cw)
+            if (x >= view_width())
                 break;
             int selected = i < b && i >= a, found = match_at(i, &match);
             unsigned color = style[i] < sizeof colors / sizeof *colors ? style[i] : 0;
@@ -600,6 +707,7 @@ static void paint(HDC dc)
         }
     }
     RestoreDC(dc, -1);
+    textnav_paint(dc);
 }
 static void find_place(void)
 {
@@ -750,6 +858,8 @@ void textview_action(int action)
 {
     if (!R.hwnd || !R.path)
         return;
+    if (binary_preview() && action != TEXTVIEW_OPEN) return;
+    if (R.markdown && R.markdown_rendered && action != TEXTVIEW_OPEN) markdown_mode(0);
     if (action == TEXTVIEW_OPEN) {
         if(!fpe_wsl_requires_native(R.path))ShellExecuteW(app_window(),L"open",R.path,NULL,NULL,SW_SHOWNORMAL);
         return;
@@ -802,6 +912,7 @@ void textview_action(int action)
 static void key(WPARAM vk, int sys)
 {
     int ctrl = GetKeyState(VK_CONTROL) < 0, shift = GetKeyState(VK_SHIFT) < 0;
+    if(!sys&&ctrl&&vk=='D'){if(R.markdown_rendered&&R.markdown_hwnd)PostMessageW(R.markdown_hwnd,WM_APP+(shift?91:90),0,0);else if(shift)textnav_menu(1);else textnav_toggle();return;}
     if (!sys && shift && R.loaded &&
         (vk == VK_LEFT || vk == VK_RIGHT || vk == VK_UP || vk == VK_DOWN || vk == VK_HOME || vk == VK_END)) {
         uint32_t at = R.caret;
@@ -904,6 +1015,7 @@ static void key(WPARAM vk, int sys)
 }
 static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
 {
+    if(textnav_input(h,m,w,l))return 0;
     switch (m) {
     case WM_CREATE:
         SetWindowTheme(h, L"DarkMode_Explorer", NULL);
@@ -911,6 +1023,7 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
     case WM_SIZE:
         R.cw = LOWORD(l);
         R.ch = HIWORD(l);
+        markdown_place();
         find_place();
         if (R.loaded) {
             R.restore_at = row_at(R.top).start;
@@ -919,6 +1032,20 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         }
         view_changed();
         return 0;
+    case WM_MARKDOWN_READY: {
+        DWORD pid = 0; HWND child = (HWND)w;
+        GetWindowThreadProcessId(child, &pid);
+        if (R.markdown_process && pid == R.markdown_pid && GetParent(child) == h) {
+            R.markdown_hwnd = child; markdown_place();
+        }
+        return 0;
+    }
+    case WM_MARKDOWN_FAILED:
+        { DWORD pid = 0; GetWindowThreadProcessId((HWND)w, &pid);
+        if (R.markdown_process && pid == R.markdown_pid) {
+            markdown_stop(); R.markdown_rendered = 0; if (binary_preview()) R.err = E_FAIL; view_changed();
+        }
+        return 0; }
     case WM_ERASEBKGND:
         return 1;
     case WM_PAINT: {
@@ -949,7 +1076,7 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         if (!R.process) {
             helper_stop();
             R.gone = 1;
-            R.err = E_FAIL;
+            if (!binary_preview()) R.err = E_FAIL;
             view_changed();
         }
         return 0;
@@ -960,7 +1087,7 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
             R.loaded = 0;
             R.finding = R.copying = 0;
             R.gone = 1;
-            R.err = E_FAIL;
+            if (!binary_preview()) R.err = E_FAIL;
             KillTimer(h, TIMER_WATCHDOG);
             view_changed();
         }
@@ -1058,6 +1185,14 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
         }
         break;
     case WM_TIMER:
+        if (w == TIMER_MARKDOWN) {
+            DWORD exit_code = 0;
+            if (R.markdown_process && ((!R.markdown_hwnd && ++R.markdown_wait > 30) || !GetExitCodeProcess(R.markdown_process, &exit_code) || exit_code != STILL_ACTIVE)) {
+                markdown_stop(); R.markdown_rendered = 0; if (binary_preview()) R.err = E_FAIL; view_changed();
+                app_status(NULL, 1, R.markdown == 6 ? L"Database preview unavailable" : R.markdown == 8 ? L"Spreadsheet preview unavailable" : R.markdown == 9 ? L"Word preview unavailable" : L"Enhanced preview unavailable; showing source");
+            }
+            return 0;
+        }
         if (w == TIMER_CLIPBOARD) {
             clipboard_publish();
             return 0;
@@ -1145,6 +1280,9 @@ static LRESULT CALLBACK reader_proc(HWND h, UINT m, WPARAM w, LPARAM l)
     }
     case WM_LBUTTONDOWN:
         app_focus_window(h);
+        if (R.markdown && !binary_preview() && GET_Y_LPARAM(l) < app_px(28) && GET_X_LPARAM(l) >= R.cw - app_px(192) && GET_X_LPARAM(l) < R.cw-app_px(32)) {
+            markdown_mode(GET_X_LPARAM(l) < R.cw - app_px(114)); return 0;
+        }
         if (R.loaded && GET_Y_LPARAM(l) >= head_h()) {
             uint32_t at = hit(GET_X_LPARAM(l), GET_Y_LPARAM(l));
             if (!(w & MK_SHIFT))
@@ -1225,6 +1363,7 @@ int textview_start(HWND parent)
         return 0;
     memset(&R, 0, sizeof R);
     R.front = -1;
+    R.nav_file=docmarks_location(NULL,L"preview-bookmarks.fwb");
     R.limit_mb = 4;
     R.wrap = R.lines = 1;
     R.cell = 8;
@@ -1248,7 +1387,7 @@ int textview_start(HWND parent)
     R.line = tm.tmHeight + app_px(3);
     SelectObject(dc, old);
     ReleaseDC(parent, dc);
-    R.hwnd = CreateWindowExW(0, cls.lpszClassName, L"Text preview", WS_CHILD | WS_CLIPSIBLINGS | WS_VSCROLL,
+    R.hwnd = CreateWindowExW(0, cls.lpszClassName, L"Text preview", WS_CHILD | WS_CLIPSIBLINGS,
                              0, 0, 0, 0, parent, NULL, cls.hInstance, NULL);
     if (!R.hwnd || !R.font) {
         textview_stop();
@@ -1259,6 +1398,7 @@ int textview_start(HWND parent)
 HWND textview_window(void) { return R.hwnd; }
 void textview_clear(void)
 {
+    markdown_stop(); R.markdown = R.markdown_rendered = R.archived = 0;
     if (R.to)
         send_req(TEXTP_CLOSE, ++R.doc, 0, NULL, 0);
     else
@@ -1277,11 +1417,12 @@ void textview_clear(void)
     R.loaded = R.want_open = R.want_layout = R.copying = R.selecting = 0;
     R.top = R.left = R.anchor = R.caret = R.restore_at = 0;
     R.jump_doc=R.jump_line=R.jump_column=0;R.jump_expected[0]=0;
-    R.match_count = R.finding = 0;
+    if(GetCapture()==R.hwnd)ReleaseCapture();
+    R.match_count = R.finding = 0;R.nav_count=0;R.nav_loaded=0;R.nav_targets_count=0;memset(&R.rail,0,sizeof R.rail);
     R.find_gen++;
     memset(&R.info, 0, sizeof R.info);
     free(R.path);
-    R.path = NULL;
+    R.path = NULL;free(R.nav_identity);free(R.nav_key);R.nav_identity=R.nav_key=NULL;
     R.err = S_OK;
     if (R.hwnd)
         view_changed();
@@ -1302,32 +1443,54 @@ void textview_stop(void)
     }
     if (R.font)
         DeleteObject(R.font);
+    free(R.nav_file);
     memset(&R, 0, sizeof R);
 }
-void textview_open(const wchar_t *path, uint64_t bytes, int64_t mtime)
+static void textview_open_impl(const wchar_t *path, uint64_t bytes, int64_t mtime, int archived,const wchar_t *identity)
 {
     if (!R.hwnd || !path || wcslen(path) >= TEXTP_PATH_MAX)
         return;
-    if (R.path && fpe_path_equal(R.path, path) && R.size == bytes && R.mtime == mtime && !R.gone)
+    if (R.path && fpe_path_equal(R.path, path) && R.size == bytes && R.mtime == mtime && R.archived == archived && R.nav_identity && fpe_path_equal(R.nav_identity,identity?identity:archived?L"":path) && !R.gone)
         return;
     textview_clear();
     if (R.gone)
         helper_stop();
     R.path = _wcsdup(path);
+    R.nav_identity=_wcsdup(identity?identity:archived?L"":path);R.nav_key=docmarks_identity(R.nav_identity,L"source");
     R.size = bytes;
     R.mtime = mtime;
+    R.archived = archived;
+    const wchar_t *extension = wcsrchr(path, L'.');
+    R.markdown = extension && (!_wcsicmp(extension, L".md") || !_wcsicmp(extension, L".markdown") || !_wcsicmp(extension, L".mdown"));
+    if (extension && (!_wcsicmp(extension, L".json") || !_wcsicmp(extension, L".jsonl") || !_wcsicmp(extension, L".ndjson"))) R.markdown = 2;
+    if (extension && (!_wcsicmp(extension, L".csv") || !_wcsicmp(extension, L".tsv"))) R.markdown = 3;
+    if (extension && !_wcsicmp(extension, L".ipynb")) R.markdown = 4;
+    if (extension && (!_wcsicmp(extension, L".yaml") || !_wcsicmp(extension, L".yml") || !_wcsicmp(extension, L".toml") || !_wcsicmp(extension, L".ini"))) R.markdown = 5;
+    if (extension && (!_wcsicmp(extension, L".db") || !_wcsicmp(extension, L".db3") || !_wcsicmp(extension, L".sqlite") || !_wcsicmp(extension, L".sqlite3") || !_wcsicmp(extension, L".sqlitedb"))) R.markdown = 6;
+    if (extension && (!_wcsicmp(extension, L".xml") || !_wcsicmp(extension, L".xaml") || !_wcsicmp(extension, L".rss") || !_wcsicmp(extension, L".atom"))) R.markdown = 7;
+    if (extension && (!_wcsicmp(extension, L".xlsx") || !_wcsicmp(extension, L".xlsm"))) R.markdown = 8;
+    if (extension && (!_wcsicmp(extension, L".docx") || !_wcsicmp(extension, L".docm"))) R.markdown = 9;
     if(fpe_wsl_requires_native(path)){R.err=HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);view_changed();return;}
+    if (binary_preview()) {
+        if (R.find) find_close();
+        if (R.path) markdown_mode(1); else R.err = E_OUTOFMEMORY;
+        view_changed();
+        return;
+    }
     if (!R.path || helper_start()) {
         R.err = E_FAIL;
         view_changed();
         return;
     }
+    if (R.markdown) markdown_mode(1);
     R.want_open = 1;
     R.started = GetTickCount64();
     SetTimer(R.hwnd, TIMER_WATCHDOG, 500, NULL);
     request_work();
     view_changed();
 }
+void textview_open(const wchar_t *path, uint64_t bytes, int64_t mtime) { textview_open_impl(path, bytes, mtime, 0,NULL); }
+void textview_open_archive(const wchar_t *path, uint64_t bytes, int64_t mtime) { textview_open_impl(path, bytes, mtime, 1,NULL); }
 void textview_configure(uint32_t limit, int wrap, int lines, uint32_t encoding)
 {
     if (limit < 1)
@@ -1342,14 +1505,16 @@ void textview_configure(uint32_t limit, int wrap, int lines, uint32_t encoding)
     R.wrap = !!wrap;
     R.lines = !!lines;
     if (reload) {
-        wchar_t *path = _wcsdup(R.path);
+        wchar_t *path = _wcsdup(R.path), *identity=R.nav_identity?_wcsdup(R.nav_identity):NULL;
         uint64_t bytes = R.size;
         int64_t mtime = R.mtime;
+        int archived = R.archived;
         if (path) {
             textview_clear();
-            textview_open(path, bytes, mtime);
+            textview_open_impl(path, bytes, mtime, archived,identity);
             free(path);
         }
+        free(identity);
     } else if (R.loaded) {
         R.restore_at = row_at(R.top).start;
         R.want_layout = 1;
@@ -1357,3 +1522,6 @@ void textview_configure(uint32_t limit, int wrap, int lines, uint32_t encoding)
         view_changed();
     }
 }
+
+void textview_open_archive_key(const wchar_t *path,uint64_t bytes,int64_t mtime,const wchar_t *identity){textview_open_impl(path,bytes,mtime,1,identity);}
+void textview_set_bookmark_memory(const wchar_t *reference){free(R.nav_file);R.nav_file=docmarks_location(reference,L"preview-bookmarks.fwb");}

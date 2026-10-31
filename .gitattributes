@@ -5,3 +5,6 @@
 # Preserve verified upstream notices and fixture bytes through Git checkout.
 licenses/** -text
 tests/fixtures/** -text
+
+# The Word preview patch is checksum-pinned.
+tools/word-preview/*.patch -text

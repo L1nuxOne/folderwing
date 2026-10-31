@@ -29,7 +29,7 @@ try{
  $env:ZIG=Join-Path $root 'third_party\zig\zig.exe'
  $files=Get-Content (Join-Path $PSScriptRoot 'release-files.json') -Raw|ConvertFrom-Json
  $build=Join-Path $root 'build\release-candidate'
- $targets=@($files.binaries|Where-Object {$_ -notin @('pdfium.dll','libmpv-2.dll')})+@('cli_tests.exe','workspace_tests.exe','ntfs_model_tests.exe','shell_protocol_tests.exe','branding_host_tests.exe')
+ $targets=@($files.binaries|Where-Object {$_ -notin @('pdfium.dll','libmpv-2.dll')})+@('cli_tests.exe','workspace_tests.exe','ntfs_model_tests.exe','shell_protocol_tests.exe','branding_host_tests.exe','preview_navigation_tests.exe')
  # No silent reduced-feature release if a dependency bootstrap was skipped.
  foreach($path in @('third_party\pdfium\bin\pdfium.dll','third_party\libvterm\include\vterm.h','build\bootstrap-receipt.json')){if(-not(Test-Path (Join-Path $root $path) -PathType Leaf)){throw "Release prerequisite missing: $path"}}
  $sourceBefore=& $Python (Join-Path $PSScriptRoot 'release-build-receipt.py') --source-key

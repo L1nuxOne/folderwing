@@ -113,6 +113,7 @@ void app_image_page_button(int direction); /* normal configurable function dispa
 /* Archive content is a third preview pane; paths here are owned immutable temporary copies. */
 int app_archive_preview_kind(const wchar_t *name);
 void app_archive_preview(const wchar_t *name,const wchar_t *path,uint64_t bytes);
+void app_archive_preview_identity(const wchar_t *name,const wchar_t *path,uint64_t bytes,const wchar_t *identity);
 void app_archive_close(void);
 /* On success, retain owner until this Operations copy reaches a terminal state. */
 int app_stage_archive_copy(const wchar_t *source,const wchar_t *dest,void (*release)(void *),void *owner);

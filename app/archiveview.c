@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "archiveview.h"
+#include "pdfview.h"
 #include "app.h"
 #include "theme.h"
 #include "providerpath.h"
@@ -76,7 +77,11 @@ static void paint(HDC dc){RECT all={0,0,A.w,A.h};HBRUSH bg=CreateSolidBrush(C_BG
 static void result_ready(void){arc_result *r=arc_client_take(A.client);if(!r)return;if(r->generation!=A.generation||!A.path){arc_result_free(r);return;}A.busy=0;A.backend=r->backend;
  if(r->error)set_status(error_text(r->error));
  else if(r->action==ARC_OPEN||r->action==ARC_FOLDER){arc_rows_free(A.rows,A.count);A.rows=r->rows;r->rows=NULL;A.count=r->count;r->count=0;A.cursor=-1;A.top=0;swprintf(A.status,200,L"%u items · %ls · Read-only",A.count,A.backend==1?L"ZIP / miniz":L"libarchive");scroll();}
- else if(r->action==ARC_PREVIEW){arc_row *row=selected();if(row&&r->file){arc_file_release(A.preview);A.preview=r->file;r->file=NULL;app_archive_preview(row->name,A.preview->path,row->size);set_status(L"Preview open · Archive unchanged");}}
+ else if(r->action==ARC_PREVIEW){arc_row *row=selected();if(row&&r->file){arc_file_release(A.preview);A.preview=r->file;r->file=NULL;size_t prefix=wcslen(A.path),member=wcslen(row->path),length=prefix+1+member*4;
+   wchar_t *identity=length<32768?malloc((length+1)*sizeof *identity):NULL;
+   if(identity){memcpy(identity,A.path,prefix*sizeof *identity);identity[prefix]=0x1f;const wchar_t hex[]=L"0123456789ABCDEF";for(size_t i=0;i<member;i++){unsigned value=(uint16_t)row->path[i];for(int j=0;j<4;j++)identity[prefix+1+i*4+j]=hex[(value>>(12-j*4))&15];}identity[length]=0;}
+   app_archive_preview_identity(row->name,A.preview->path,row->size,identity);free(identity);
+   set_status(L"Preview open · Archive unchanged");}}
  else if(r->action==ARC_EXTRACT&&A.destination&&r->file){if(app_stage_archive_copy(r->file->path,A.destination,arc_file_release,r->file)){r->file=NULL;set_status(L"Extraction ready — choose conflicts and Start in Operations");}else set_status(L"Extraction not queued — enable Operations and try again");}
  arc_result_free(r);InvalidateRect(A.hwnd,NULL,FALSE);
 }

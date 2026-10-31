@@ -33,17 +33,21 @@ int text_file_language(const wchar_t *name)
                  {L"zsh", TEXT_SCRIPT},  {L"ps1", TEXT_SCRIPT},
                  {L"psm1", TEXT_SCRIPT}, {L"bat", TEXT_SCRIPT},
                  {L"cmd", TEXT_SCRIPT},  {L"json", TEXT_JSON},
-                 {L"jsonc", TEXT_JSON},  {L"jsonl", TEXT_JSON},
+                 {L"jsonc", TEXT_JSON},  {L"jsonl", TEXT_JSON}, {L"ndjson", TEXT_JSON}, {L"ipynb", TEXT_JSON},
                  {L"ini", TEXT_CONFIG},  {L"cfg", TEXT_CONFIG},
                  {L"conf", TEXT_CONFIG}, {L"config", TEXT_CONFIG},
                  {L"toml", TEXT_CONFIG}, {L"yaml", TEXT_CONFIG},
                  {L"yml", TEXT_CONFIG},  {L"env", TEXT_CONFIG},
-                 {L"xml", TEXT_XML},     {L"html", TEXT_XML},
+                 {L"xml", TEXT_XML},     {L"rss", TEXT_XML}, {L"atom", TEXT_XML}, {L"html", TEXT_XML},
                  {L"htm", TEXT_XML},     {L"svg", TEXT_XML},
                  {L"xaml", TEXT_XML},    {L"css", TEXT_C},
                  {L"scss", TEXT_C},      {L"sql", TEXT_SQL},
                  {L"md", TEXT_MARKDOWN}, {L"markdown", TEXT_MARKDOWN},
-                 {L"rst", TEXT_PLAIN}};
+                 {L"rst", TEXT_PLAIN},   {L"db", TEXT_PLAIN},
+                 {L"db3", TEXT_PLAIN},   {L"sqlite", TEXT_PLAIN},
+                 {L"sqlite3", TEXT_PLAIN}, {L"sqlitedb", TEXT_PLAIN},
+                 {L"xlsx", TEXT_PLAIN}, {L"xlsm", TEXT_PLAIN},
+                 {L"docx", TEXT_PLAIN}, {L"docm", TEXT_PLAIN}};
     for (size_t i = 0; i < sizeof types / sizeof *types; ++i)
         if (eq(ext, types[i].ext))
             return types[i].lang;
